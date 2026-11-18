@@ -25,19 +25,16 @@
     .animate-shrink-2s {
       animation: shrinkBar 2s linear forwards;
     }
-    /* Standard CR80 ID card; A4 portrait print sheet is generated separately. */
-    @page { size: A4 portrait; margin: 10mm; }
-    .ocean-id-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .id-card-qr-large { width: 40mm !important; height: 40mm !important; min-width: 40mm; min-height: 40mm; }
-    .id-card-qr-large canvas, .id-card-qr-large img { width: 40mm !important; height: 40mm !important; display: block; }
+    /* Exact 6cm x 9cm ID Card print sizing */
+    @page { size: 90mm 60mm; margin: 0; }
     .ocean-id-card {
-      width: 85.6mm;
-      height: 54mm;
+      width: 90mm;
+      height: 60mm;
       background: white;
       position: relative;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      border-radius: 2mm;
+      border-radius: 4mm;
       box-sizing: border-box;
       page-break-after: always;
     }
@@ -192,7 +189,7 @@
             </div>
 
             <!-- Scanner Box -->
-            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-square min-h-[340px] max-h-[560px] flex items-center justify-center shadow-inner">
+            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-inner">
               <div id="reader" class="w-full h-full"></div>
               <div id="camera-placeholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-900/90 text-white">
                 <span class="text-4xl mb-2">📷</span>
@@ -309,7 +306,7 @@
         <div class="lg:col-span-7 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
           <div class="border-b border-slate-200 pb-3">
             <h3 class="text-base font-extrabold text-slate-900">Worker Registration &amp; ID Card Generator</h3>
-            <p class="text-xs text-slate-500">Fill worker details to generate an ID card with 3.5 × 4.5 cm photo, 4 × 4 cm QR code and live preview</p>
+            <p class="text-xs text-slate-500">Fill worker details to generate a 6×9cm ID card with QR code and live preview</p>
           </div>
 
           <form id="worker-form" onsubmit="event.preventDefault(); saveWorker();" class="space-y-3.5">
@@ -365,11 +362,6 @@
               </div>
             </div>
 
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Project Location (Printed on ID Card)</label>
-              <input type="text" id="reg-project-location" placeholder="e.g. EY Project, Kochi" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
-            </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Issuing Authority</label>
@@ -381,17 +373,7 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Worker Photo</label>
-                <input type="file" accept="image/*" capture="user" onchange="handlePhotoUpload(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer" />
-                <button type="button" onclick="startPassportCamera()" class="mt-2 w-full px-3 py-2 rounded-lg bg-blue-900 text-white text-xs font-bold">📷 Open Passport Photo Camera</button>
-                <div id="passport-camera-panel" class="hidden mt-2 space-y-2 rounded-lg border bg-slate-50 p-2">
-                  <video id="passport-camera-video" autoplay playsinline class="w-full max-h-64 rounded-lg bg-black object-contain"></video>
-                  <canvas id="passport-camera-canvas" width="350" height="450" class="hidden"></canvas>
-                  <div class="flex gap-2">
-                    <button type="button" onclick="capturePassportPhoto()" class="flex-1 px-3 py-2 rounded-lg bg-emerald-700 text-white text-xs font-bold">Capture 3.5 × 4.5 cm Photo</button>
-                    <button type="button" onclick="stopPassportCamera()" class="px-3 py-2 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">Close</button>
-                  </div>
-                  <p class="text-[10px] text-slate-500">Position the face inside the frame. The saved image is cropped to a 350 × 450 portrait ratio.</p>
-                </div>
+                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer" />
               </div>
             </div>
 
@@ -410,14 +392,14 @@
         <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center space-y-4">
           <div class="w-full flex items-center justify-between">
             <h3 class="text-base font-extrabold text-slate-900">ID Card Live Preview</h3>
-            <button type="button" onclick="printA4IDCard()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow flex items-center gap-1.5">
+            <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow flex items-center gap-1.5">
               <span>🖨️</span> Print / Save PDF
             </button>
           </div>
 
           <div class="space-y-4 w-full flex flex-col items-center">
             
-            <!-- ==================== FRONT OF ID CARD (85.6mm x 54mm) ==================== -->
+            <!-- ==================== FRONT OF ID CARD (90mm x 60mm) ==================== -->
             <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
               <!-- Header -->
               <div class="flex items-center justify-between border-b border-blue-900 pb-[1.5mm]">
@@ -439,7 +421,7 @@
 
               <!-- Project Site Office Banner -->
               <div class="bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5 text-[5pt] text-sky-950 font-semibold text-center leading-tight truncate">
-                Project Location: <span id="badge-project-addr">Project Site Office, Infopark Phase II, Kochi</span>
+                Site: <span id="badge-project-addr">Project Site Office, Infopark Phase II, Kochi</span>
               </div>
 
               <!-- Middle: Photo & Details -->
@@ -482,31 +464,49 @@
                     <span id="badge-auth" class="block text-[4.5pt] font-bold text-slate-700">Project HR</span>
                     <span class="block text-[3.5pt] text-slate-400">Authorized Signatory</span>
                   </div>
-                  <span class="text-[4pt] text-slate-500 font-semibold">Scan QR on reverse</span>
+                  <div id="badge-qr-code" class="w-[11mm] h-[11mm] bg-white border border-slate-300 p-0.5 rounded"></div>
                 </div>
               </div>
             </div>
 
-            <!-- ==================== BACK OF ID CARD (85.6mm x 54mm) ==================== -->
-            <div class="ocean-id-card border border-slate-300 flex items-center gap-[2mm] p-[2mm]">
-              <div class="flex flex-col items-center justify-center shrink-0">
-                <div id="badge-qr-code" class="id-card-qr-large bg-white border border-slate-300 p-0.5"></div>
-                <span class="text-[4pt] font-extrabold text-blue-950 mt-0.5">SCAN FOR ATTENDANCE</span>
+            <!-- ==================== BACK OF ID CARD (90mm x 60mm) ==================== -->
+            <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
+              <div class="space-y-1 text-[6.5pt] leading-tight">
+                <p class="font-bold text-rose-700">
+                  Emergency Contact No. <span id="badge-back-emergency" class="text-slate-900 font-extrabold ml-1">-</span>
+                </p>
+                <p class="font-bold text-slate-900">
+                  Project Manager: <span id="badge-back-pm" class="font-semibold text-slate-800 ml-1">K. Narayanan</span>
+                </p>
+                <p class="font-bold text-slate-900">
+                  Safety Manager: <span id="badge-back-sm" class="font-semibold text-slate-800 ml-1">S. Rajesh</span>
+                </p>
               </div>
-              <div class="flex-1 min-w-0 flex flex-col justify-between h-full text-[4.2pt] leading-tight text-slate-900">
-                <div class="space-y-1">
-                  <p class="font-bold text-rose-700">Emergency: <span id="badge-back-emergency" class="text-slate-900 font-extrabold">-</span></p>
-                  <p class="font-bold">Project Manager: <span id="badge-back-pm" class="font-semibold">K. Narayanan</span></p>
-                  <p class="font-bold">Safety Manager: <span id="badge-back-sm" class="font-semibold">S. Rajesh</span></p>
+
+              <div class="flex items-center justify-between gap-2 my-1">
+                <div class="flex flex-col items-center text-center w-[28mm] shrink-0">
+                  <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="5.5" stroke-linecap="round"/>
+                    <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
+                    <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
+                  </svg>
+                  <span class="text-[8.5pt] font-black text-blue-950 tracking-[0.14em] leading-none mt-0.5">OCEAN<sup class="text-[4.5pt]">®</sup></span>
+                  <span class="text-[4.5pt] font-semibold text-slate-600 tracking-[0.14em] leading-none mt-0.5">DELIVERING DREAMS</span>
                 </div>
-                <div class="border-t border-slate-200 pt-1">
-                  <p class="font-bold">If found, please return to:</p>
-                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">Ocean Lifespaces India Private Limited</p>
+
+                <div class="flex-1 text-[6.2pt] leading-snug text-slate-900">
+                  <p class="font-bold">If found Please return it to:</p>
+                  <p class="font-bold">Company Address:</p>
+                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">
+                    Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032
+                  </p>
                 </div>
-                <div class="border-t border-slate-200 pt-1">
-                  <p class="font-bold text-rose-700 underline">Instructions</p>
-                  <p class="font-semibold">Carry and display this ID card while on duty. Return the card on completion of employment/contract.</p>
-                </div>
+              </div>
+
+              <div class="text-[5.8pt] leading-tight text-slate-900">
+                <p class="font-bold text-rose-700 underline mb-0.5">Instructions:</p>
+                <p class="font-semibold">1. Identity Card Must always be carried and displayed while on duty</p>
+                <p class="font-semibold">2. ID Loss of card must be returned to the authorities on completion of employment /Contract</p>
               </div>
             </div>
 
@@ -553,15 +553,12 @@
             <table class="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
                 <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                  <th class="py-3 px-3 font-bold">S.No</th>
-                  <th class="py-3 px-3 font-bold">QR Code</th>
                   <th class="py-3 px-3 font-bold">Photo</th>
                   <th class="py-3 px-3 font-bold">ID NO</th>
                   <th class="py-3 px-3 font-bold">Full Name</th>
                   <th class="py-3 px-3 font-bold">Designation</th>
                   <th class="py-3 px-3 font-bold">Vendor Agency</th>
                   <th class="py-3 px-3 font-bold">Blood / Ref</th>
-                  <th class="py-3 px-3 font-bold">QR Status</th>
                   <th class="py-3 px-3 font-bold text-right">Actions</th>
                 </tr>
               </thead>
@@ -635,7 +632,6 @@
                     <th class="py-3 px-3 font-bold">OUT Time</th>
                     <th class="py-3 px-3 font-bold">Total Hrs</th>
                     <th class="py-3 px-3 font-bold">Overtime</th>
-                    <th class="py-3 px-3 font-bold">GPS Location</th>
                     <th class="py-3 px-3 font-bold">Verified By</th>
                   </tr>
                 </thead>
@@ -721,7 +717,7 @@
             <!-- Summary Banner -->
             <div id="indiv-summary-banner" class="hidden p-4 rounded-xl bg-sky-50 border border-sky-200 flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-center gap-3">
-                <img id="indiv-card-photo" src="" alt="Worker" class="w-[35mm] h-[45mm] rounded-lg object-cover border border-slate-300 bg-white" /><div id="indiv-card-qr" class="w-16 h-16 bg-white border rounded p-1"></div>
+                <img id="indiv-card-photo" src="" alt="Worker" class="w-12 h-14 rounded-lg object-cover border border-slate-300 bg-white" />
                 <div>
                   <span id="indiv-card-id" class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-blue-900 text-white">ID</span>
                   <h4 id="indiv-card-name" class="text-sm sm:text-base font-black text-slate-900 mt-0.5">Worker Name</h4>
@@ -758,7 +754,6 @@
                     <th class="py-3 px-3 font-bold">OUT Time</th>
                     <th class="py-3 px-3 font-bold">Total Hrs</th>
                     <th class="py-3 px-3 font-bold">Overtime</th>
-                    <th class="py-3 px-3 font-bold">GPS Location</th>
                     <th class="py-3 px-3 font-bold">Verified By</th>
                   </tr>
                 </thead>
@@ -828,7 +823,7 @@
 
         <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 space-y-2">
           <label class="block text-xs font-extrabold text-sky-950 uppercase">Backend API / Google Apps Script Web App URL</label>
-          <input type="url" id="set-backend-url" value={DEFAULT_BACKEND_URL} class="w-full rounded-lg border border-sky-300 bg-white px-3 py-2.5 text-sm font-mono" />
+          <input type="url" id="set-backend-url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" class="w-full rounded-lg border border-sky-300 bg-white px-3 py-2.5 text-sm font-mono" />
           <p class="text-[11px] text-sky-800">Paste your deployed Google Apps Script Web App URL above and click Save Configuration.</p>
         </div>
 
@@ -894,8 +889,7 @@
   </div>
 
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbygbFH7pakf4bZ3BIrez9dY-SDhHiqNYiv79epc98GYqddpUK6CHIJOuMBY6vouHWMC/exec";
-    
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbyfgDkR5U96I86-uTG29AlQYSGs_oY2PkyCmKmSQRWtc5DYRkKuyC0ghNoOG5k1gmdm/exec";
     const STORAGE_KEY_WORKERS = 'ocean_v6_workers';
     const STORAGE_KEY_LOGS = 'ocean_v6_logs';
     const STORAGE_KEY_SETTINGS = 'ocean_v6_settings';
@@ -910,7 +904,6 @@
     let lastScannedCode = "";
     let activeScanMode = "IN";
     let uploadedPhotoDataUrl = "";
-    let passportCameraStream = null;
     let verifyModalTimer = null;
     let cloudPollInterval = null;
 
@@ -1010,35 +1003,22 @@
 
     function formatDisplayTime(timeVal) {
       if (!timeVal) return "";
-      const str = String(timeVal).trim();
-      const match = str.match(/(?:T|\s)?(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-      if (match) return `${String(match[1]).padStart(2, '0')}:${match[2]}:${match[3] || '00'}`;
+      let str = String(timeVal);
+      if (str.includes("GMT")) {
+        try {
+          const d = new Date(str);
+          if (!isNaN(d.getTime())) {
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+          }
+        } catch(e) {}
+      }
       return str;
     }
 
     function getRailwayTime(dateObj = new Date()) {
-      return new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-      }).format(dateObj);
-    }
-
-    function getLocalDateISO(dateObj = new Date()) {
-      const parts = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit'
-      }).formatToParts(dateObj).reduce((o, p) => (o[p.type] = p.value, o), {});
-      return `${parts.year}-${parts.month}-${parts.day}`;
-    }
-
-    function captureAttendanceGPS() {
-      return new Promise(resolve => {
-        if (!navigator.geolocation) return resolve({ gpsStatus: "UNAVAILABLE" });
-        navigator.geolocation.getCurrentPosition(
-          pos => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude,
-            gpsAccuracyM: Math.round(pos.coords.accuracy), gpsCapturedAt: new Date(pos.timestamp).toISOString(), gpsStatus: "CAPTURED" }),
-          err => resolve({ gpsStatus: `DENIED_OR_UNAVAILABLE_${err.code}` }),
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-        );
-      });
+      return String(dateObj.getHours()).padStart(2, '0') + ":" +
+             String(dateObj.getMinutes()).padStart(2, '0') + ":" +
+             String(dateObj.getSeconds()).padStart(2, '0');
     }
 
     function initAppState() {
@@ -1350,7 +1330,6 @@
 
         if (data && Array.isArray(data.workers)) {
           data.workers.forEach(cw => {
-            cw.projectLocation = cw.projectLocation || settings.projectAddress;
             const idx = workers.findIndex(lw => lw.id.toUpperCase() === cw.id.toUpperCase());
             if (idx >= 0) workers[idx] = { ...workers[idx], ...cw };
             else workers.push(cw);
@@ -1520,7 +1499,7 @@
           String(w.qrToken || "") === token &&
           String(w.id || "").toUpperCase() === id
         );
-        return worker && worker.qrActive !== false ? worker.id.toUpperCase() : "";
+        return worker ? worker.id.toUpperCase() : "";
       }
 
       // Backward compatibility for older printed QR cards.
@@ -1551,9 +1530,9 @@
         await html5QrCode.start(
           camId,
           {
-            fps: 15,
-            qrbox: (viewWidth, viewHeight) => { const side = Math.floor(Math.min(viewWidth, viewHeight) * 0.78); return { width: side, height: side }; },
-            aspectRatio: 1.0,
+            fps: 30,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.777778,
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
             experimentalFeatures: { useBarCodeDetectorIfSupported: true }
           },
@@ -1608,22 +1587,15 @@
 
     function executeScannedPunch(workerId) {
       const worker = workers.find(w => String(w.id).toUpperCase() === String(workerId).toUpperCase());
-      if (!worker || worker.qrActive === false) {
+      if (!worker) {
         playBeep("error");
-        showToast("Employee QR is inactive or not registered. Attendance was not recorded.");
+        showToast("Employee is not registered. Attendance was not recorded.");
         return;
       }
       recordAttendance(activeScanMode, worker.id);
     }
 
-    const attendanceInProgress = new Set();
-    async function recordAttendance(direction, workerId) {
-      const workerKey = String(workerId).toUpperCase();
-      if (attendanceInProgress.has(workerKey)) { showToast("Attendance is already being processed for this worker."); return; }
-      attendanceInProgress.add(workerKey);
-      try {
-      // Refresh cloud attendance first so stale browser tabs cannot create another daily IN row.
-      await syncAllDataFromCloud(false);
+    function recordAttendance(direction, workerId) {
       const feedback = document.getElementById('punch-feedback');
       feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-300', 'bg-amber-50', 'text-amber-800', 'border-amber-300', 'bg-rose-50', 'text-rose-800', 'border-rose-300');
 
@@ -1639,22 +1611,18 @@
       }
 
       const workerPhoto = worker.photo || getWorkerPhoto(worker.id, worker.name);
-      const punchDate = new Date();
-      const gps = await captureAttendanceGPS();
-      const todayStr = getLocalDateISO(punchDate);
-      const nowTime = getRailwayTime(punchDate);
-      const nowMs = punchDate.getTime();
-      const recordedAt = punchDate.toISOString();
-      const todaysLogs = logs.filter(l => l.id.toUpperCase() === worker.id.toUpperCase() && l.date === todayStr);
-      const openLog = todaysLogs.find(l => !l.outTime);
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      const nowTime = getRailwayTime(new Date());
+      const nowMs = Date.now();
+      const openLog = logs.find(l => l.id.toUpperCase() === worker.id.toUpperCase() && l.date === todayStr && !l.outTime);
 
       if (direction === 'IN') {
-        if (todaysLogs.length > 0) {
+        if (openLog) {
           playBeep('error');
           speakVoice(`${worker.name} already clocked in`);
           updateScanPanelPhotoPreview(worker, 'IN', `Already IN at ${openLog.inTime}`);
           feedback.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-300');
-          feedback.innerText = `⚠️ ${worker.name} already has an attendance entry today. Duplicate IN punch blocked.`;
+          feedback.innerText = `⚠️ ${worker.name} is ALREADY clocked IN at ${openLog.inTime}.`;
           return;
         }
 
@@ -1667,8 +1635,6 @@
           agency: worker.agency || 'Vendor',
           inTime: nowTime,
           inMs: nowMs,
-          inTimestamp: recordedAt,
-          gpsIn: gps,
           outTime: "",
           totalHrs: "-",
           overtimeHrs: "-",
@@ -1689,19 +1655,38 @@
         const spokenOut = formatVoiceTemplate(settings.voiceOutPhrase || "{name} clock out success", worker);
 
         if (!openLog) {
-          playBeep('error');
-          showToast(`${worker.name} has no IN punch today. OUT punch was blocked to prevent an inaccurate attendance record.`);
-          feedback.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-300');
-          feedback.innerText = `OUT BLOCKED: No valid IN record found for ${worker.name}.`;
+          const directOutEntry = {
+            action: "OUT_DIRECT",
+            date: todayStr,
+            id: worker.id,
+            name: worker.name,
+            designation: worker.designation || 'Site Operative',
+            agency: worker.agency || 'Vendor',
+            inTime: "08:00:00",
+            inMs: nowMs - (8 * 3600 * 1000),
+            outTime: nowTime,
+            totalHrs: "8.00 hrs",
+            overtimeHrs: "0.00 hrs",
+            loggedBy: `${currentRole.toUpperCase()} (Direct Out)`,
+            photo: workerPhoto
+          };
+          logs.unshift(directOutEntry);
+          postToCloudBackend(directOutEntry);
+
+          playBeep('OUT');
+          speakVoice(spokenOut);
+          updateScanPanelPhotoPreview(worker, 'OUT', nowTime);
+          feedback.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300');
+          feedback.innerText = `🚪 CLOCK OUT SUCCESS: ${worker.name} at ${nowTime}`;
+          persistAll();
+          updateKPIs();
+          renderAllViews();
           return;
         }
 
         openLog.outTime = nowTime;
-        openLog.outTimestamp = recordedAt;
-        openLog.gpsOut = gps;
         openLog.photo = openLog.photo || workerPhoto;
-        const inTimeMs = Number(openLog.inMs) || Date.parse(openLog.inTimestamp) || nowMs;
-        const durationHrs = Math.max(0.01, (nowMs - inTimeMs) / (1000 * 60 * 60));
+        const durationHrs = Math.max(0.01, (nowMs - openLog.inMs) / (1000 * 60 * 60));
         const overtime = Math.max(0, durationHrs - settings.shiftHours);
         openLog.totalHrs = `${durationHrs.toFixed(2)} hrs`;
         openLog.overtimeHrs = `${overtime.toFixed(2)} hrs`;
@@ -1716,8 +1701,6 @@
           agency: openLog.agency,
           inTime: openLog.inTime,
           outTime: openLog.outTime,
-          outTimestamp: openLog.outTimestamp,
-          gpsOut: openLog.gpsOut,
           totalHrs: openLog.totalHrs,
           overtimeHrs: openLog.overtimeHrs,
           loggedBy: openLog.loggedBy,
@@ -1734,7 +1717,6 @@
       persistAll();
       updateKPIs();
       renderAllViews();
-      } finally { attendanceInProgress.delete(workerKey); }
     }
 
     function renderGateLookupList() {
@@ -1772,45 +1754,6 @@
     }
 
     // ==================== REGISTRATION & ID CARD ====================
-    async function startPassportCamera() {
-      const panel = document.getElementById('passport-camera-panel');
-      const video = document.getElementById('passport-camera-video');
-      try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('Camera access requires HTTPS and a supported browser.');
-        stopPassportCamera();
-        passportCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
-        video.srcObject = passportCameraStream;
-        panel.classList.remove('hidden');
-        await video.play();
-      } catch (err) { showToast(err.message || 'Unable to open passport photo camera.'); }
-    }
-
-    function stopPassportCamera() {
-      if (passportCameraStream) passportCameraStream.getTracks().forEach(track => track.stop());
-      passportCameraStream = null;
-      const video = document.getElementById('passport-camera-video');
-      if (video) video.srcObject = null;
-      const panel = document.getElementById('passport-camera-panel');
-      if (panel) panel.classList.add('hidden');
-    }
-
-    function capturePassportPhoto() {
-      const video = document.getElementById('passport-camera-video');
-      const canvas = document.getElementById('passport-camera-canvas');
-      if (!video || !video.videoWidth) { showToast('Camera is not ready.'); return; }
-      const ctx = canvas.getContext('2d');
-      const targetRatio = 350 / 450;
-      const sourceRatio = video.videoWidth / video.videoHeight;
-      let sx = 0, sy = 0, sw = video.videoWidth, sh = video.videoHeight;
-      if (sourceRatio > targetRatio) { sw = video.videoHeight * targetRatio; sx = (video.videoWidth - sw) / 2; }
-      else { sh = video.videoWidth / targetRatio; sy = (video.videoHeight - sh) / 2; }
-      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, 350, 450);
-      uploadedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      document.getElementById('badge-photo-box').innerHTML = `<img src="${uploadedPhotoDataUrl}" alt="Passport Photo" class="w-full h-full object-cover" />`;
-      stopPassportCamera();
-      showToast('Passport-size photo captured successfully.');
-    }
-
     function handlePhotoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1819,15 +1762,10 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          canvas.width = 350;
-          canvas.height = 450;
+          canvas.width = 240;
+          canvas.height = 240;
           const ctx = canvas.getContext('2d');
-          const targetRatio = 350 / 450;
-          const sourceRatio = img.width / img.height;
-          let sx = 0, sy = 0, sw = img.width, sh = img.height;
-          if (sourceRatio > targetRatio) { sw = img.height * targetRatio; sx = (img.width - sw) / 2; }
-          else { sh = img.width / targetRatio; sy = (img.height - sh) / 2; }
-          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 350, 450);
+          ctx.drawImage(img, 0, 0, 240, 240);
           uploadedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
           document.getElementById('badge-photo-box').innerHTML = `<img src="${uploadedPhotoDataUrl}" alt="Worker Photo" class="w-full h-full object-cover" />`;
         };
@@ -1848,7 +1786,6 @@
       const valid = document.getElementById('reg-valid').value.trim() || "-";
       const auth = document.getElementById('reg-auth').value.trim() || "Project HR";
       const emergency = document.getElementById('reg-emergency').value.trim() || "-";
-      const projectLocation = document.getElementById('reg-project-location').value.trim() || settings.projectAddress;
 
       document.getElementById('badge-id-no').innerText = id;
       document.getElementById('badge-name').innerText = name;
@@ -1861,7 +1798,6 @@
       document.getElementById('badge-valid').innerText = valid;
       document.getElementById('badge-auth').innerText = auth;
       document.getElementById('badge-back-emergency').innerText = emergency;
-      document.getElementById('badge-project-addr').innerText = projectLocation;
     }
 
     function saveWorker() {
@@ -1877,7 +1813,6 @@
       const eohs = document.getElementById('reg-eohs').value.trim() || "-";
       const auth = document.getElementById('reg-auth').value.trim() || "Project HR";
       const emergency = document.getElementById('reg-emergency').value.trim() || "-";
-      const projectLocation = document.getElementById('reg-project-location').value.trim() || settings.projectAddress;
 
       if (!id || !name || !agency || !designation) {
         showToast("Please fill all required fields (*).");
@@ -1890,10 +1825,9 @@
 
       const previousWorker = existingIdx >= 0 ? workers[existingIdx] : null;
       const workerRecord = {
-        id, name, agency, designation, dob, blood, aadhar, issue, valid, eohs, auth, emergency, projectLocation,
+        id, name, agency, designation, dob, blood, aadhar, issue, valid, eohs, auth, emergency,
         photo: photoFinal,
-        qrToken: (previousWorker && previousWorker.qrToken) || createEmployeeQrToken(),
-        qrActive: previousWorker ? previousWorker.qrActive !== false : true
+        qrToken: (previousWorker && previousWorker.qrToken) || createEmployeeQrToken()
       };
 
       if (existingIdx >= 0) workers[existingIdx] = workerRecord;
@@ -1910,8 +1844,6 @@
     }
 
     function clearRegistrationForm() {
-      stopPassportCamera();
-      uploadedPhotoDataUrl = "";
       document.getElementById('worker-form').reset();
       uploadedPhotoDataUrl = "";
       renderBlankIDCardPreview();
@@ -1938,7 +1870,7 @@
       document.getElementById('badge-auth').innerText = "Project HR";
       document.getElementById('badge-back-emergency').innerText = "-";
 
-      document.getElementById('badge-project-addr').innerText = worker.projectLocation || settings.projectAddress;
+      document.getElementById('badge-project-addr').innerText = settings.projectAddress;
       document.getElementById('badge-back-return-addr').innerText = settings.returnAddress;
       document.getElementById('badge-back-pm').innerText = settings.projectManager;
       document.getElementById('badge-back-sm').innerText = settings.safetyManager;
@@ -1946,31 +1878,7 @@
 
       const qrBox = document.getElementById('badge-qr-code');
       qrBox.innerHTML = "";
-      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 320, height: 320, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
-    }
-
-    function printA4IDCard() {
-      const cards = Array.from(document.querySelectorAll('#tab-register .ocean-id-card'));
-      if (cards.length < 2) { showToast('ID card preview is not ready. Please select a worker first.'); return; }
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) { showToast('Please allow pop-ups to print the ID card.'); return; }
-      const cardMarkup = cards.map(card => card.outerHTML).join('');
-      printWindow.document.open();
-      printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Ocean Lifespaces ID Card</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-          @page { size: A4 portrait; margin: 10mm; }
-          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { margin:0; font-family:Arial,sans-serif; background:#fff; color:#0f172a; }
-          .print-sheet { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center; gap:8mm; padding:2mm; }
-          .ocean-id-card { width:85.6mm !important; height:54mm !important; flex:0 0 85.6mm; overflow:hidden; border:0.3mm solid #cbd5e1; border-radius:2mm; box-shadow:none !important; page-break-inside:avoid; }
-          .id-card-qr-large { width:40mm !important; height:40mm !important; min-width:40mm; min-height:40mm; }
-          .id-card-qr-large canvas,.id-card-qr-large img { width:40mm !important;height:40mm !important;display:block; }
-          @media print { .print-sheet { gap:8mm; } }
-        </style></head><body><main class="print-sheet">${cardMarkup}</main>
-        <script>window.addEventListener('load',()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.decode?i.decode().catch(()=>{}):Promise.resolve())).then(()=>setTimeout(()=>window.print(),350));});<\/script>
-        </body></html>`);
-      printWindow.document.close();
+      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 44, height: 44, colorDark: "#0f172a", colorLight: "#ffffff" });
     }
 
     function renderIDCardPreview(worker) {
@@ -1986,7 +1894,7 @@
       document.getElementById('badge-auth').innerText = worker.auth;
       document.getElementById('badge-back-emergency').innerText = worker.emergency;
 
-      document.getElementById('badge-project-addr').innerText = worker.projectLocation || settings.projectAddress;
+      document.getElementById('badge-project-addr').innerText = settings.projectAddress;
       document.getElementById('badge-back-return-addr').innerText = settings.returnAddress;
       document.getElementById('badge-back-pm').innerText = settings.projectManager;
       document.getElementById('badge-back-sm').innerText = settings.safetyManager;
@@ -2002,7 +1910,7 @@
         persistAll();
       }
       const qrPayload = `OCEANQR|${worker.qrToken}|${worker.id}`;
-      new QRCode(qrBox, { text: qrPayload, width: 320, height: 320, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+      new QRCode(qrBox, { text: qrPayload, width: 44, height: 44, colorDark: "#0f172a", colorLight: "#ffffff" });
     }
 
     async function printAllWorkerQRCodesA4() {
@@ -2128,50 +2036,40 @@
       renderDirectoryTable();
     }
 
-    function toggleWorkerQR(workerId) {
-      const w = workers.find(x => x.id.toUpperCase() === String(workerId).toUpperCase());
-      if (!w) return;
-      w.qrActive = w.qrActive === false;
-      persistAll();
-      postToCloudBackend({ type: "UPDATE_WORKER_QR", id: w.id, qrActive: w.qrActive });
-      renderDirectoryTable();
-      showToast(`QR code ${w.qrActive ? "activated" : "deactivated"} for ${w.name}.`);
-    }
-
     function renderDirectoryTable() {
       const tbody = document.getElementById('staff-directory-body');
       const q = (document.getElementById('dir-search-input')?.value || "").trim().toLowerCase();
       const vendorF = document.getElementById('dir-filter-vendor')?.value || "";
       const desigF = document.getElementById('dir-filter-desig')?.value || "";
+
       const filtered = workers.filter(w => {
-        const matchQ = [w.id,w.name,w.agency,w.blood,w.aadhar].some(v => String(v||"").toLowerCase().includes(q));
-        return matchQ && (!vendorF || w.agency === vendorF) && (!desigF || w.designation === desigF);
+        const matchQ = !q || w.id.toLowerCase().includes(q) || w.name.toLowerCase().includes(q) || w.agency.toLowerCase().includes(q);
+        const matchV = !vendorF || w.agency === vendorF;
+        const matchD = !desigF || w.designation === desigF;
+        return matchQ && matchV && matchD;
       });
+
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-slate-400 text-xs font-medium">No matching workers found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 text-xs font-medium">No matching workers found.</td></tr>`;
         return;
       }
-      tbody.innerHTML = filtered.map((w, idx) => `
+
+      tbody.innerHTML = filtered.map(w => `
         <tr class="hover:bg-slate-50">
-          <td class="py-2.5 px-3 font-bold">${idx + 1}</td>
-          <td class="py-2.5 px-3"><div id="directory-qr-${idx}" class="w-16 h-16 bg-white p-1 border rounded"></div></td>
-          <td class="py-2.5 px-3"><img src="${w.photo || ''}" alt="${escapeHtml(w.name)}" class="w-[35mm] h-[45mm] max-w-[72px] max-h-[92px] rounded object-cover border border-slate-300" onerror="this.src='https://placehold.co/350x450/1e3a8a/ffffff?text=Photo'" /></td>
-          <td class="py-2.5 px-3 font-extrabold text-sky-900">${escapeHtml(w.id)}</td>
-          <td class="py-2.5 px-3 font-semibold text-slate-900">${escapeHtml(w.name)}</td>
-          <td class="py-2.5 px-3 text-slate-700">${escapeHtml(w.designation)}</td>
-          <td class="py-2.5 px-3 text-slate-700">${escapeHtml(w.agency)}</td>
-          <td class="py-2.5 px-3 text-xs text-slate-600">${escapeHtml(w.blood || '-')} &bull; ${escapeHtml(w.aadhar || '-')}</td>
-          <td class="py-2.5 px-3"><span class="px-2 py-1 rounded text-[11px] font-bold ${w.qrActive === false ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">${w.qrActive === false ? 'DEACTIVATED' : 'ACTIVE'}</span></td>
-          <td class="py-2.5 px-3 text-right space-x-1.5 whitespace-nowrap">
-            <button type="button" onclick='renderIDCardPreview(${JSON.stringify(w).replace(/'/g, "&#39;")})' class="px-2.5 py-1 rounded bg-sky-100 text-sky-900 text-xs font-bold">Load ID</button>
-            <button type="button" onclick="toggleWorkerQR('${String(w.id).replace(/'/g,"\'")}')" class="px-2.5 py-1 rounded ${w.qrActive === false ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} text-xs font-bold">${w.qrActive === false ? 'Activate QR' : 'Deactivate QR'}</button>
-            <button type="button" onclick="deleteWorker('${String(w.id).replace(/'/g,"\'")}')" class="px-2.5 py-1 rounded bg-rose-100 text-rose-800 text-xs font-bold">Delete</button>
+          <td class="py-2.5 px-3">
+            <img src="${w.photo}" alt="${w.name}" class="w-9 h-10 rounded object-cover border border-slate-300" onerror="this.src='https://placehold.co/80x100/1e3a8a/ffffff?text=ID'" />
           </td>
-        </tr>`).join('');
-      filtered.forEach((w, idx) => {
-        const host = document.getElementById(`directory-qr-${idx}`);
-        if (host && window.QRCode) new QRCode(host, { text: `OCEANQR|${w.qrToken || ''}|${w.id}`, width: 64, height: 64 });
-      });
+          <td class="py-2.5 px-3 font-extrabold text-sky-900">${w.id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900">${w.name}</td>
+          <td class="py-2.5 px-3 text-slate-700">${w.designation}</td>
+          <td class="py-2.5 px-3 text-slate-700">${w.agency}</td>
+          <td class="py-2.5 px-3 text-xs text-slate-600">${w.blood} &bull; ${w.aadhar}</td>
+          <td class="py-2.5 px-3 text-right space-x-1.5 whitespace-nowrap">
+            <button type="button" onclick='renderIDCardPreview(${JSON.stringify(w).replace(/'/g, "&#39;")})' class="px-2.5 py-1 rounded bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-bold">Load ID</button>
+            <button type="button" onclick="deleteWorker('${w.id}')" class="px-2.5 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold">Delete</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
     function updateKPIs() {
@@ -2206,22 +2104,12 @@
       renderDailyReport();
     }
 
-    function gpsReportLink(log, which) {
-      const gps = which === 'IN' ? (log.gpsIn || {}) : (log.gpsOut || {});
-      const lat = gps.latitude ?? (which === 'IN' ? log.inLatitude : log.outLatitude);
-      const lon = gps.longitude ?? (which === 'IN' ? log.inLongitude : log.outLongitude);
-      if (lat === undefined || lat === '' || lon === undefined || lon === '') return '<span class="text-slate-400">N/A</span>';
-      const acc = gps.gpsAccuracyM ?? (which === 'IN' ? log.inAccuracyM : log.outAccuracyM);
-      const url = `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lon)}`;
-      return `<a href="${url}" target="_blank" rel="noopener" class="text-sky-700 underline font-semibold">${which} GPS${acc ? ` (${escapeHtml(acc)}m)` : ''}</a>`;
-    }
-
     function renderDailyReport() {
       const tbody = document.getElementById('daily-report-body');
       const filtered = getFilteredDailyLogs();
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" class="py-6 text-center text-slate-400 text-xs font-medium">No daily records match your filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-slate-400 text-xs font-medium">No daily records match your filters.</td></tr>`;
         return;
       }
 
@@ -2238,7 +2126,6 @@
           <td class="py-2.5 px-3 font-bold whitespace-nowrap ${l.outTime ? 'text-amber-700' : 'text-sky-600'}">${l.outTime ? formatDisplayTime(l.outTime) : "On-Site"}</td>
           <td class="py-2.5 px-3 font-semibold whitespace-nowrap">${l.totalHrs}</td>
           <td class="py-2.5 px-3 font-semibold text-rose-700 whitespace-nowrap">${l.overtimeHrs}</td>
-          <td class="py-2.5 px-3 text-xs whitespace-nowrap">${gpsReportLink(l,'IN')}<br>${gpsReportLink(l,'OUT')}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-slate-500">${l.loggedBy}</td>
         </tr>
       `).join('');
@@ -2356,9 +2243,6 @@
         if (wObj) {
           banner.classList.remove('hidden');
           document.getElementById('indiv-card-photo').src = wObj.photo || getWorkerPhoto(wObj.id, wObj.name);
-          const indivQr = document.getElementById('indiv-card-qr');
-          indivQr.innerHTML = '';
-          if (window.QRCode) new QRCode(indivQr, { text: `OCEANQR|${wObj.qrToken || ''}|${wObj.id}`, width: 64, height: 64 });
           document.getElementById('indiv-card-id').innerText = wObj.id;
           document.getElementById('indiv-card-name').innerText = wObj.name;
           document.getElementById('indiv-card-meta').innerText = `${wObj.designation} • ${wObj.agency}`;
@@ -2376,7 +2260,7 @@
       }
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-slate-400 text-xs font-medium">No individual records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-slate-400 text-xs font-medium">No individual records found.</td></tr>`;
         return;
       }
 
@@ -2392,7 +2276,6 @@
           <td class="py-2.5 px-3 font-bold whitespace-nowrap ${l.outTime ? 'text-amber-700' : 'text-sky-600'}">${l.outTime ? formatDisplayTime(l.outTime) : "On-Site"}</td>
           <td class="py-2.5 px-3 font-semibold whitespace-nowrap">${l.totalHrs}</td>
           <td class="py-2.5 px-3 font-semibold text-rose-700 whitespace-nowrap">${l.overtimeHrs}</td>
-          <td class="py-2.5 px-3 text-xs whitespace-nowrap">${gpsReportLink(l,'IN')}<br>${gpsReportLink(l,'OUT')}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-slate-500">${l.loggedBy}</td>
         </tr>
       `).join('');
