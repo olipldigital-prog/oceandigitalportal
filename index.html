@@ -28,8 +28,8 @@
     /* ID card dimensions; print sheets use A4 portrait */
     @page { size: A4 portrait; margin: 8mm; }
     @media print {
-      .ocean-id-card { box-shadow:none !important; border-radius:0 !important; }
-      .id-print-sheet { display:grid !important; grid-template-columns:repeat(2, 90mm); gap:5mm; justify-content:center; }
+      .ocean-id-card { box-shadow:none !important; border-radius:0 !important; break-inside:avoid; page-break-inside:avoid; }
+      .id-print-sheet { display:grid !important; grid-template-columns:repeat(2, 90mm); grid-auto-rows:60mm; gap:5mm; justify-content:center; align-content:start; }
     }
     .id-print-sheet { display:flex; flex-wrap:wrap; gap:5mm; justify-content:center; }
     .ocean-id-card {
@@ -41,7 +41,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       border-radius: 4mm;
       box-sizing: border-box;
-      page-break-after: always;
+      page-break-after: auto;
     }
   </style>
 </head>
@@ -477,7 +477,7 @@
                     <span id="badge-auth" class="block text-[4.5pt] font-bold text-slate-700">Project HR</span>
                     <span class="block text-[3.5pt] text-slate-400">Authorized Signatory</span>
                   </div>
-                  <div id="badge-qr-code" class="w-[30mm] h-[30mm] bg-white border border-slate-300 p-0.5 rounded shrink-0"></div>
+                  <div id="badge-qr-code" class="w-[25mm] h-[25mm] bg-white border border-slate-300 p-0.5 rounded shrink-0"></div>
                 </div>
               </div>
             </div>
@@ -1025,27 +1025,33 @@
 
     function formatDisplayTime(timeVal) {
       if (!timeVal) return "";
-      let str = String(timeVal);
-      if (str.includes("GMT")) {
-        try {
-          const d = new Date(str);
-          if (!isNaN(d.getTime())) {
-            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-          }
-        } catch(e) {}
+      const str = String(timeVal).trim();
+      const timeMatch = str.match(/(?:T|\s)?(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if (timeMatch && !str.includes("GMT")) {
+        return `${String(timeMatch[1]).padStart(2, '0')}:${timeMatch[2]}:${timeMatch[3] || '00'}`;
+      }
+      if (str.includes("GMT") || !timeMatch) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) return getRailwayTime(d);
       }
       return str;
     }
 
+    function indiaDateParts(dateObj = new Date()) {
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      }).formatToParts(dateObj);
+      const o = {}; parts.forEach(p => { if (p.type !== 'literal') o[p.type] = p.value; });
+      return o;
+    }
     function getRailwayTime(dateObj = new Date()) {
-      return String(dateObj.getHours()).padStart(2, '0') + ":" +
-             String(dateObj.getMinutes()).padStart(2, '0') + ":" +
-             String(dateObj.getSeconds()).padStart(2, '0');
+      const p = indiaDateParts(dateObj);
+      return `${p.hour}:${p.minute}:${p.second}`;
     }
     function getPreciseTimestamp(dateObj = new Date()) {
-      return dateObj.getFullYear() + "-" + String(dateObj.getMonth()+1).padStart(2,"0") + "-" +
-        String(dateObj.getDate()).padStart(2,"0") + "T" + getRailwayTime(dateObj) + "." +
-        String(dateObj.getMilliseconds()).padStart(3,"0");
+      const p = indiaDateParts(dateObj);
+      return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}.${String(dateObj.getMilliseconds()).padStart(3,"0")}`;
     }
 
     function initAppState() {
@@ -1515,29 +1521,29 @@
     }
 
     function parseScannedPayload(rawText) {
-      const clean = String(rawText || "").trim();
+      const clean = String(rawText || "").trim().replace(/[\r\n\t]/g, "");
+      const upper = clean.toUpperCase();
 
-      // New secure format: OCEANQR|unique-token|employee-id
-      if (clean.startsWith("OCEANQR|")) {
+      // Current/previous Ocean QR format: OCEANQR|token|employee-id.
+      // Employee ID is checked against the registered directory below; QR
+      // activation is checked again by executeScannedPunch before attendance.
+      if (upper.startsWith("OCEANQR|")) {
         const parts = clean.split("|");
-        const token = (parts[1] || "").trim();
-        const id = (parts[2] || "").trim().toUpperCase();
-        const worker = workers.find(w =>
-          w.qrActive !== false &&
-          String(w.qrToken || "") === token &&
-          String(w.id || "").toUpperCase() === id
-        );
+        const id = String(parts[2] || "").trim().toUpperCase();
+        const worker = workers.find(w => String(w.id || "").trim().toUpperCase() === id);
         return worker ? worker.id.toUpperCase() : "";
       }
 
-      // Backward compatibility for older printed QR cards.
-      if (clean.startsWith("OCEAN|")) {
-        const parts = clean.split("|");
-        return (parts[1] || "").trim().toUpperCase();
+      // Legacy Ocean QR format: OCEAN|employee-id.
+      if (upper.startsWith("OCEAN|")) {
+        const id = String(clean.split("|")[1] || "").trim().toUpperCase();
+        const worker = workers.find(w => String(w.id || "").trim().toUpperCase() === id);
+        return worker ? worker.id.toUpperCase() : "";
       }
 
-      // Also allow a plain employee ID QR for legacy badges.
-      return clean.toUpperCase();
+      // Plain employee ID QR: accept only an exact registered ID.
+      const worker = workers.find(w => String(w.id || "").trim().toUpperCase() === upper);
+      return worker ? worker.id.toUpperCase() : "";
     }
 
     async function startScanner() {
@@ -1558,9 +1564,9 @@
         await html5QrCode.start(
           camId,
           {
-            fps: 15,
+            fps: 20,
             qrbox: (viewWidth, viewHeight) => {
-              const side = Math.floor(Math.min(viewWidth, viewHeight) * 0.78);
+              const side = Math.floor(Math.min(viewWidth, viewHeight) * 0.86);
               return { width: side, height: side };
             },
             aspectRatio: 1.333333,
@@ -1964,7 +1970,7 @@
         workers[savedWorkerIndex].qrToken = worker.qrToken;
         persistAll();
       }
-      const qrPayload = `OCEANQR|${worker.qrToken}|${worker.id}`;
+      const qrPayload = `OCEAN|${worker.id}`;
       new QRCode(qrBox, { text: qrPayload, width: 240, height: 240, colorDark: "#0f172a", colorLight: "#ffffff" });
       if (worker.qrActive === false) qrBox.style.opacity = "0.25"; else qrBox.style.opacity = "1";
     }
@@ -1976,9 +1982,9 @@
       const cardHtml = Array.from(cards).map(card => card.outerHTML).join("");
       printWindow.document.open();
       printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Ocean Lifespaces ID Card</title>
-        <style>@page{size:A4 portrait;margin:10mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0}
-        .sheet{display:flex;flex-wrap:wrap;gap:8mm;justify-content:center;align-items:flex-start}
-        .ocean-id-card{width:90mm;height:60mm;min-width:90mm;min-height:60mm;box-shadow:none!important;border-radius:0!important;page-break-inside:avoid}
+        <style>@page{size:A4 portrait;margin:8mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0}
+        .sheet{display:grid;grid-template-columns:repeat(2,90mm);grid-auto-rows:60mm;gap:5mm;justify-content:center;align-content:start}
+        .ocean-id-card{width:90mm;height:60mm;min-width:90mm;min-height:60mm;box-shadow:none!important;border-radius:0!important;break-inside:avoid;page-break-inside:avoid;page-break-after:auto}
         </style></head><body><main class="sheet">${cardHtml}</main><script>window.onload=()=>setTimeout(()=>window.print(),400);<\/script></body></html>`);
       printWindow.document.close();
     }
