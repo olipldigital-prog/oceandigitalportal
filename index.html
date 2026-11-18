@@ -25,13 +25,11 @@
     .animate-shrink-2s {
       animation: shrinkBar 2s linear forwards;
     }
-    /* Exact 6cm x 9cm ID Card print sizing */
+    /* Standard CR80 ID card; A4 portrait print sheet is generated separately. */
     @page { size: A4 portrait; margin: 10mm; }
-    @media print {
-      body.printing-id-card * { visibility: hidden !important; }
-      body.printing-id-card .ocean-id-card, body.printing-id-card .ocean-id-card * { visibility: visible !important; }
-      body.printing-id-card .ocean-id-card { position: relative; margin: 0 auto; box-shadow: none; }
-    }
+    .ocean-id-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .id-card-qr-large { width: 40mm !important; height: 40mm !important; min-width: 40mm; min-height: 40mm; }
+    .id-card-qr-large canvas, .id-card-qr-large img { width: 40mm !important; height: 40mm !important; display: block; }
     .ocean-id-card {
       width: 85.6mm;
       height: 54mm;
@@ -311,7 +309,7 @@
         <div class="lg:col-span-7 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
           <div class="border-b border-slate-200 pb-3">
             <h3 class="text-base font-extrabold text-slate-900">Worker Registration &amp; ID Card Generator</h3>
-            <p class="text-xs text-slate-500">Fill worker details to generate a 6×9cm ID card with QR code and live preview</p>
+            <p class="text-xs text-slate-500">Fill worker details to generate an ID card with 3.5 × 4.5 cm photo, 4 × 4 cm QR code and live preview</p>
           </div>
 
           <form id="worker-form" onsubmit="event.preventDefault(); saveWorker();" class="space-y-3.5">
@@ -367,6 +365,11 @@
               </div>
             </div>
 
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Project Location (Printed on ID Card)</label>
+              <input type="text" id="reg-project-location" placeholder="e.g. EY Project, Kochi" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Issuing Authority</label>
@@ -414,7 +417,7 @@
 
           <div class="space-y-4 w-full flex flex-col items-center">
             
-            <!-- ==================== FRONT OF ID CARD (90mm x 60mm) ==================== -->
+            <!-- ==================== FRONT OF ID CARD (85.6mm x 54mm) ==================== -->
             <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
               <!-- Header -->
               <div class="flex items-center justify-between border-b border-blue-900 pb-[1.5mm]">
@@ -436,7 +439,7 @@
 
               <!-- Project Site Office Banner -->
               <div class="bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5 text-[5pt] text-sky-950 font-semibold text-center leading-tight truncate">
-                Site: <span id="badge-project-addr">Project Site Office, Infopark Phase II, Kochi</span>
+                Project Location: <span id="badge-project-addr">Project Site Office, Infopark Phase II, Kochi</span>
               </div>
 
               <!-- Middle: Photo & Details -->
@@ -479,49 +482,31 @@
                     <span id="badge-auth" class="block text-[4.5pt] font-bold text-slate-700">Project HR</span>
                     <span class="block text-[3.5pt] text-slate-400">Authorized Signatory</span>
                   </div>
-                  <div id="badge-qr-code" class="w-[11mm] h-[11mm] bg-white border border-slate-300 p-0.5 rounded"></div>
+                  <span class="text-[4pt] text-slate-500 font-semibold">Scan QR on reverse</span>
                 </div>
               </div>
             </div>
 
-            <!-- ==================== BACK OF ID CARD (90mm x 60mm) ==================== -->
-            <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
-              <div class="space-y-1 text-[6.5pt] leading-tight">
-                <p class="font-bold text-rose-700">
-                  Emergency Contact No. <span id="badge-back-emergency" class="text-slate-900 font-extrabold ml-1">-</span>
-                </p>
-                <p class="font-bold text-slate-900">
-                  Project Manager: <span id="badge-back-pm" class="font-semibold text-slate-800 ml-1">K. Narayanan</span>
-                </p>
-                <p class="font-bold text-slate-900">
-                  Safety Manager: <span id="badge-back-sm" class="font-semibold text-slate-800 ml-1">S. Rajesh</span>
-                </p>
+            <!-- ==================== BACK OF ID CARD (85.6mm x 54mm) ==================== -->
+            <div class="ocean-id-card border border-slate-300 flex items-center gap-[2mm] p-[2mm]">
+              <div class="flex flex-col items-center justify-center shrink-0">
+                <div id="badge-qr-code" class="id-card-qr-large bg-white border border-slate-300 p-0.5"></div>
+                <span class="text-[4pt] font-extrabold text-blue-950 mt-0.5">SCAN FOR ATTENDANCE</span>
               </div>
-
-              <div class="flex items-center justify-between gap-2 my-1">
-                <div class="flex flex-col items-center text-center w-[28mm] shrink-0">
-                  <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="5.5" stroke-linecap="round"/>
-                    <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
-                    <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
-                  </svg>
-                  <span class="text-[8.5pt] font-black text-blue-950 tracking-[0.14em] leading-none mt-0.5">OCEAN<sup class="text-[4.5pt]">®</sup></span>
-                  <span class="text-[4.5pt] font-semibold text-slate-600 tracking-[0.14em] leading-none mt-0.5">DELIVERING DREAMS</span>
+              <div class="flex-1 min-w-0 flex flex-col justify-between h-full text-[4.2pt] leading-tight text-slate-900">
+                <div class="space-y-1">
+                  <p class="font-bold text-rose-700">Emergency: <span id="badge-back-emergency" class="text-slate-900 font-extrabold">-</span></p>
+                  <p class="font-bold">Project Manager: <span id="badge-back-pm" class="font-semibold">K. Narayanan</span></p>
+                  <p class="font-bold">Safety Manager: <span id="badge-back-sm" class="font-semibold">S. Rajesh</span></p>
                 </div>
-
-                <div class="flex-1 text-[6.2pt] leading-snug text-slate-900">
-                  <p class="font-bold">If found Please return it to:</p>
-                  <p class="font-bold">Company Address:</p>
-                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">
-                    Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032
-                  </p>
+                <div class="border-t border-slate-200 pt-1">
+                  <p class="font-bold">If found, please return to:</p>
+                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">Ocean Lifespaces India Private Limited</p>
                 </div>
-              </div>
-
-              <div class="text-[5.8pt] leading-tight text-slate-900">
-                <p class="font-bold text-rose-700 underline mb-0.5">Instructions:</p>
-                <p class="font-semibold">1. Identity Card Must always be carried and displayed while on duty</p>
-                <p class="font-semibold">2. ID Loss of card must be returned to the authorities on completion of employment /Contract</p>
+                <div class="border-t border-slate-200 pt-1">
+                  <p class="font-bold text-rose-700 underline">Instructions</p>
+                  <p class="font-semibold">Carry and display this ID card while on duty. Return the card on completion of employment/contract.</p>
+                </div>
               </div>
             </div>
 
@@ -843,7 +828,7 @@
 
         <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 space-y-2">
           <label class="block text-xs font-extrabold text-sky-950 uppercase">Backend API / Google Apps Script Web App URL</label>
-          <input type="url" id="set-backend-url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" class="w-full rounded-lg border border-sky-300 bg-white px-3 py-2.5 text-sm font-mono" />
+          <input type="url" id="set-backend-url" value={DEFAULT_BACKEND_URL} class="w-full rounded-lg border border-sky-300 bg-white px-3 py-2.5 text-sm font-mono" />
           <p class="text-[11px] text-sky-800">Paste your deployed Google Apps Script Web App URL above and click Save Configuration.</p>
         </div>
 
@@ -909,7 +894,8 @@
   </div>
 
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbyFtunzhbthBV4XISD9yAEV8k4JlcFogl8r8waXYCh9edPS3T-A6pWjKW-whovBtd27NQ/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbygbFH7pakf4bZ3BIrez9dY-SDhHiqNYiv79epc98GYqddpUK6CHIJOuMBY6vouHWMC/exec";
+    
     const STORAGE_KEY_WORKERS = 'ocean_v6_workers';
     const STORAGE_KEY_LOGS = 'ocean_v6_logs';
     const STORAGE_KEY_SETTINGS = 'ocean_v6_settings';
@@ -1024,26 +1010,23 @@
 
     function formatDisplayTime(timeVal) {
       if (!timeVal) return "";
-      let str = String(timeVal);
-      if (str.includes("T") || str.includes("GMT")) {
-        try {
-          const d = new Date(str);
-          if (!isNaN(d.getTime())) {
-            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-          }
-        } catch(e) {}
-      }
+      const str = String(timeVal).trim();
+      const match = str.match(/(?:T|\s)?(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if (match) return `${String(match[1]).padStart(2, '0')}:${match[2]}:${match[3] || '00'}`;
       return str;
     }
 
     function getRailwayTime(dateObj = new Date()) {
-      return String(dateObj.getHours()).padStart(2, '0') + ":" +
-             String(dateObj.getMinutes()).padStart(2, '0') + ":" +
-             String(dateObj.getSeconds()).padStart(2, '0');
+      return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      }).format(dateObj);
     }
 
     function getLocalDateISO(dateObj = new Date()) {
-      return `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(dateObj).reduce((o, p) => (o[p.type] = p.value, o), {});
+      return `${parts.year}-${parts.month}-${parts.day}`;
     }
 
     function captureAttendanceGPS() {
@@ -1367,6 +1350,7 @@
 
         if (data && Array.isArray(data.workers)) {
           data.workers.forEach(cw => {
+            cw.projectLocation = cw.projectLocation || settings.projectAddress;
             const idx = workers.findIndex(lw => lw.id.toUpperCase() === cw.id.toUpperCase());
             if (idx >= 0) workers[idx] = { ...workers[idx], ...cw };
             else workers.push(cw);
@@ -1638,6 +1622,8 @@
       if (attendanceInProgress.has(workerKey)) { showToast("Attendance is already being processed for this worker."); return; }
       attendanceInProgress.add(workerKey);
       try {
+      // Refresh cloud attendance first so stale browser tabs cannot create another daily IN row.
+      await syncAllDataFromCloud(false);
       const feedback = document.getElementById('punch-feedback');
       feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-300', 'bg-amber-50', 'text-amber-800', 'border-amber-300', 'bg-rose-50', 'text-rose-800', 'border-rose-300');
 
@@ -1714,7 +1700,8 @@
         openLog.outTimestamp = recordedAt;
         openLog.gpsOut = gps;
         openLog.photo = openLog.photo || workerPhoto;
-        const durationHrs = Math.max(0.01, (nowMs - openLog.inMs) / (1000 * 60 * 60));
+        const inTimeMs = Number(openLog.inMs) || Date.parse(openLog.inTimestamp) || nowMs;
+        const durationHrs = Math.max(0.01, (nowMs - inTimeMs) / (1000 * 60 * 60));
         const overtime = Math.max(0, durationHrs - settings.shiftHours);
         openLog.totalHrs = `${durationHrs.toFixed(2)} hrs`;
         openLog.overtimeHrs = `${overtime.toFixed(2)} hrs`;
@@ -1861,6 +1848,7 @@
       const valid = document.getElementById('reg-valid').value.trim() || "-";
       const auth = document.getElementById('reg-auth').value.trim() || "Project HR";
       const emergency = document.getElementById('reg-emergency').value.trim() || "-";
+      const projectLocation = document.getElementById('reg-project-location').value.trim() || settings.projectAddress;
 
       document.getElementById('badge-id-no').innerText = id;
       document.getElementById('badge-name').innerText = name;
@@ -1873,6 +1861,7 @@
       document.getElementById('badge-valid').innerText = valid;
       document.getElementById('badge-auth').innerText = auth;
       document.getElementById('badge-back-emergency').innerText = emergency;
+      document.getElementById('badge-project-addr').innerText = projectLocation;
     }
 
     function saveWorker() {
@@ -1888,6 +1877,7 @@
       const eohs = document.getElementById('reg-eohs').value.trim() || "-";
       const auth = document.getElementById('reg-auth').value.trim() || "Project HR";
       const emergency = document.getElementById('reg-emergency').value.trim() || "-";
+      const projectLocation = document.getElementById('reg-project-location').value.trim() || settings.projectAddress;
 
       if (!id || !name || !agency || !designation) {
         showToast("Please fill all required fields (*).");
@@ -1900,7 +1890,7 @@
 
       const previousWorker = existingIdx >= 0 ? workers[existingIdx] : null;
       const workerRecord = {
-        id, name, agency, designation, dob, blood, aadhar, issue, valid, eohs, auth, emergency,
+        id, name, agency, designation, dob, blood, aadhar, issue, valid, eohs, auth, emergency, projectLocation,
         photo: photoFinal,
         qrToken: (previousWorker && previousWorker.qrToken) || createEmployeeQrToken(),
         qrActive: previousWorker ? previousWorker.qrActive !== false : true
@@ -1948,7 +1938,7 @@
       document.getElementById('badge-auth').innerText = "Project HR";
       document.getElementById('badge-back-emergency').innerText = "-";
 
-      document.getElementById('badge-project-addr').innerText = settings.projectAddress;
+      document.getElementById('badge-project-addr').innerText = worker.projectLocation || settings.projectAddress;
       document.getElementById('badge-back-return-addr').innerText = settings.returnAddress;
       document.getElementById('badge-back-pm').innerText = settings.projectManager;
       document.getElementById('badge-back-sm').innerText = settings.safetyManager;
@@ -1956,13 +1946,31 @@
 
       const qrBox = document.getElementById('badge-qr-code');
       qrBox.innerHTML = "";
-      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 44, height: 44, colorDark: "#0f172a", colorLight: "#ffffff" });
+      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 320, height: 320, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
     }
 
     function printA4IDCard() {
-      document.body.classList.add('printing-id-card');
-      window.print();
-      setTimeout(() => document.body.classList.remove('printing-id-card'), 800);
+      const cards = Array.from(document.querySelectorAll('#tab-register .ocean-id-card'));
+      if (cards.length < 2) { showToast('ID card preview is not ready. Please select a worker first.'); return; }
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) { showToast('Please allow pop-ups to print the ID card.'); return; }
+      const cardMarkup = cards.map(card => card.outerHTML).join('');
+      printWindow.document.open();
+      printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Ocean Lifespaces ID Card</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+          @page { size: A4 portrait; margin: 10mm; }
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { margin:0; font-family:Arial,sans-serif; background:#fff; color:#0f172a; }
+          .print-sheet { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center; gap:8mm; padding:2mm; }
+          .ocean-id-card { width:85.6mm !important; height:54mm !important; flex:0 0 85.6mm; overflow:hidden; border:0.3mm solid #cbd5e1; border-radius:2mm; box-shadow:none !important; page-break-inside:avoid; }
+          .id-card-qr-large { width:40mm !important; height:40mm !important; min-width:40mm; min-height:40mm; }
+          .id-card-qr-large canvas,.id-card-qr-large img { width:40mm !important;height:40mm !important;display:block; }
+          @media print { .print-sheet { gap:8mm; } }
+        </style></head><body><main class="print-sheet">${cardMarkup}</main>
+        <script>window.addEventListener('load',()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.decode?i.decode().catch(()=>{}):Promise.resolve())).then(()=>setTimeout(()=>window.print(),350));});<\/script>
+        </body></html>`);
+      printWindow.document.close();
     }
 
     function renderIDCardPreview(worker) {
@@ -1978,7 +1986,7 @@
       document.getElementById('badge-auth').innerText = worker.auth;
       document.getElementById('badge-back-emergency').innerText = worker.emergency;
 
-      document.getElementById('badge-project-addr').innerText = settings.projectAddress;
+      document.getElementById('badge-project-addr').innerText = worker.projectLocation || settings.projectAddress;
       document.getElementById('badge-back-return-addr').innerText = settings.returnAddress;
       document.getElementById('badge-back-pm').innerText = settings.projectManager;
       document.getElementById('badge-back-sm').innerText = settings.safetyManager;
@@ -1994,7 +2002,7 @@
         persistAll();
       }
       const qrPayload = `OCEANQR|${worker.qrToken}|${worker.id}`;
-      new QRCode(qrBox, { text: qrPayload, width: 44, height: 44, colorDark: "#0f172a", colorLight: "#ffffff" });
+      new QRCode(qrBox, { text: qrPayload, width: 320, height: 320, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
     }
 
     async function printAllWorkerQRCodesA4() {
