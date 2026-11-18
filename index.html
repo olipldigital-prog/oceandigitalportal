@@ -1,935 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ocean Lifespaces — Attendance & ID Portal</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    :root {
-      --ocean-blue: #004b8d;
-      --ocean-dark: #0b2545;
-      --ocean-cyan: #0095d9;
-      --ocean-green: #8cc63f;
-      --ocean-orange: #f7941d;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --border: #cbd5e1;
-      --text: #0f172a;
-    }
-    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-    /* HEADER */
-    header {
-      background: var(--ocean-dark); color: #fff; border-bottom: 3px solid var(--ocean-green);
-      padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-    }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .brand-logo-wrap { background: #fff; border-radius: 6px; padding: 4px 10px; display: flex; align-items: center; justify-content: center; }
-    .brand-logo-wrap img { height: 44px; object-fit: contain; }
-    .brand h1 { margin: 0; font-size: 1.15rem; letter-spacing: 0.4px; }
-    .brand p { margin: 2px 0 0; font-size: 0.78rem; color: #bae6fd; }
-    .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.8rem; }
-    .badge-status { padding: 4px 10px; border-radius: 999px; font-weight: 700; background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(252,211,77,0.4); }
-    .badge-status.connected { background: rgba(16,185,129,0.2); color: #6ee7b7; border-color: rgba(110,231,183,0.4); }
-    .badge-role { padding: 4px 10px; border-radius: 6px; font-weight: 700; background: #059669; color: #fff; }
-
-    /* BUTTONS & INPUTS */
-    .btn { padding: 9px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.92; }
-    .btn-primary { background: var(--ocean-blue); color: #fff; }
-    .btn-success { background: #16a34a; color: #fff; }
-    .btn-danger { background: #dc2626; color: #fff; }
-    .btn-dark { background: #1e293b; color: #fff; }
-    .btn-outline { background: #fff; border: 1px solid var(--ocean-blue); color: var(--ocean-blue); }
-    .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
-
-    label { display: block; font-size: 0.8rem; font-weight: 600; margin: 8px 0 4px; color: #334155; }
-    input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.88rem; background: #fff; }
-
-    /* LOGIN SCREEN */
-    .login-card {
-      max-width: 420px; margin: 48px auto; background: #fff; padding: 26px;
-      border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid var(--border);
-    }
-    .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
-
-    /* LAYOUT & NAVIGATION */
-    .container { max-width: 1280px; margin: 20px auto; padding: 0 16px; }
-    nav.portal-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-    nav.portal-nav button { background: #fff; border: 1px solid var(--border); color: #334155; padding: 9px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.88rem; }
-    nav.portal-nav button.active { background: var(--ocean-dark); color: #fff; border-color: var(--ocean-dark); }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .grid-12 { display: grid; grid-template-columns: 7fr 5fr; gap: 18px; }
-    @media (max-width: 960px) { .grid-2, .grid-3, .grid-12 { grid-template-columns: 1fr; } }
-
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-    .stat-box { background: #fff; border: 1px solid var(--border); border-left: 5px solid var(--ocean-blue); padding: 14px 18px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .stat-box h3 { margin: 4px 0 0; font-size: 1.75rem; color: var(--ocean-blue); }
-
-    /* EXACT OCEAN LIFESPACES ID CARD TEMPLATE (90mm x 60mm Landscape) */
-    .id-cards-wrapper { display: flex; flex-direction: column; gap: 16px; align-items: center; }
-    .ocean-id-card {
-      width: 90mm; height: 60mm; background: #fff; border: 1.2px solid #64748b;
-      position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      padding: 2.5mm 3mm; display: flex; flex-direction: column; justify-content: space-between;
-      color: #0f2942;
-    }
-    .id-front-top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-    .id-front-logo { height: 11mm; max-width: 22mm; object-fit: contain; }
-    .id-front-title { font-size: 8.4pt; font-weight: 800; color: #004b8d; letter-spacing: 0.2px; text-align: center; }
-    .id-no-box {
-      border: 1.2px solid #334155; background: #e2e8f0; padding: 1.2mm 2.2mm;
-      font-size: 7.4pt; font-weight: 700; min-width: 22mm; color: #004b8d;
-    }
-    .id-mid-row { display: flex; gap: 2.5mm; margin-top: 1.2mm; height: 13mm; }
-    .id-project-box { flex: 1; background: #e2e8f0; padding: 1.4mm 2mm; font-size: 6.8pt; }
-    .id-project-box strong { text-decoration: underline; display: block; margin-bottom: 1px; }
-    .id-photo-box {
-      width: 14.5mm; height: 14.5mm; border: 1px solid #cbd5e1; background: #f8fafc;
-      display: flex; align-items: center; justify-content: center; font-size: 6.5pt; color: #dc2626; overflow: hidden;
-    }
-    .id-photo-box img { width: 100%; height: 100%; object-fit: cover; }
-    .id-table { width: 100%; border-collapse: collapse; margin-top: 1.2mm; font-size: 6.3pt; }
-    .id-table td { border: 0.6px solid #64748b; padding: 0.42mm 1.5mm; line-height: 1.15; }
-    .id-vendor-row td { background: #8cc63f; font-weight: 700; color: #0f2942; font-size: 6.7pt; }
-    .id-violations {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 6.1pt; font-weight: 700; margin-top: 0.8mm;
-    }
-    .oval { display: inline-block; width: 7.5mm; height: 2.7mm; border-radius: 50%; vertical-align: middle; margin-left: 2px; }
-    .oval-1 { background: #facc15; }
-    .oval-2 { background: #16a34a; }
-    .oval-3 { background: #ef4444; }
-
-    /* BACK OF ID CARD */
-    .id-back-top { font-size: 6.8pt; line-height: 1.42; font-weight: 700; }
-    .id-back-emergency { color: #b91c1c; }
-    .id-back-mid { display: flex; align-items: center; gap: 3mm; margin: 1.2mm 0; }
-    .id-back-logo { width: 20mm; object-fit: contain; }
-    .id-back-addr { font-size: 6.1pt; line-height: 1.22; flex: 1; }
-    .id-back-qr { width: 14.5mm; height: 14.5mm; display: flex; align-items: center; justify-content: center; }
-    .id-back-inst { font-size: 5.7pt; line-height: 1.18; border-top: 0.5px dashed #94a3b8; padding-top: 1mm; }
-    .id-back-inst strong { color: #b45309; display: block; }
-
-    /* SCANNER & TABLES */
-    #reader { width: 100%; min-height: 240px; background: #0f172a; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.82rem; }
-    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-top: 10px; }
-    table.data-table th, table.data-table td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
-    table.data-table th { background: #e2e8f0; color: #0f172a; font-weight: 700; }
-    .pill-in { background: #dcfce7; color: #166534; padding: 3px 9px; border-radius: 999px; font-weight: 700; font-size: 0.74rem; }
-    .pill-out { background: #dbeafe; color: #1e40af; padding: 3px 9px; border-radius: 999px; font-weight: 700; font-size: 0.74rem; }
-    .hidden { display: none !important; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #printable-id-area, #printable-id-area * { visibility: visible; }
-      #printable-id-area { position: fixed; left: 5mm; top: 5mm; display: flex; flex-direction: row; gap: 6mm; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#092b4c">
+<title>Ocean Lifespaces | Attendance & Digital ID</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--navy:#092b4c;--blue:#07599b;--cyan:#08a4d6;--green:#16834b;--red:#c93636;--amber:#b7791f;--bg:#f3f6fa;--surface:#fff;--line:#dce4ed;--ink:#172638;--muted:#65758a;--shadow:0 8px 24px rgba(16,42,67,.07)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:disabled{opacity:.55;cursor:not-allowed}
+.topbar{background:linear-gradient(110deg,var(--navy),#064c7c);color:#fff;padding:14px clamp(14px,3vw,30px);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:4px solid #8cc63f}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}.brand img{width:58px;height:48px;object-fit:contain;background:#fff;border-radius:9px;padding:4px}.brand h1{font-size:clamp(15px,2vw,20px);margin:0;letter-spacing:.2px}.brand p{margin:2px 0 0;color:#c9e8fa;font-size:12px}.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status{font-size:12px;border:1px solid #8bb4d1;border-radius:99px;padding:6px 10px}.status.ok{background:#145b42;border-color:#4ba77f}.status.bad{background:#75451b;border-color:#c58c45}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:650;min-height:42px;background:#e8eef5;color:var(--ink)}.btn.primary{background:var(--blue);color:#fff}.btn.success{background:var(--green);color:#fff}.btn.danger{background:var(--red);color:#fff}.btn.dark{background:#18354f;color:#fff}.btn.outline{background:#fff;border:1px solid #b9c9d8;color:var(--blue)}.btn.small{padding:7px 10px;min-height:35px;font-size:13px}.btn.block{width:100%}
+.wrap{width:min(1500px,100%);margin:0 auto;padding:clamp(12px,2vw,24px)}.login{max-width:440px;margin:clamp(28px,8vh,80px) auto;background:var(--surface);padding:26px;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.login-logo{display:block;width:150px;height:60px;object-fit:contain;margin:0 auto 12px}.login h2{text-align:center;margin:0;color:var(--navy)}.sub{text-align:center;color:var(--muted);font-size:13px;margin:5px 0 18px}.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+label{display:block;font-weight:650;font-size:13px;margin:12px 0 5px;color:#35465a}input,select{width:100%;min-height:43px;border:1px solid #cbd6e2;border-radius:9px;padding:9px 11px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #08a4d61c}input[type=file]{padding:8px}input[type=checkbox]{width:auto;min-height:auto}
+.hidden{display:none!important}
+.app{display:block}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}.stat small{color:var(--muted);font-weight:650}.stat strong{display:block;font-size:clamp(24px,3vw,34px);color:var(--blue);margin-top:4px}
+.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 13px;margin-bottom:14px;scrollbar-width:thin}.nav button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;font-weight:650;color:#43546a}.nav button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:clamp(14px,2vw,22px);box-shadow:var(--shadow);min-width:0}.panel h2,.panel h3{margin:0 0 14px;color:var(--navy)}.layout-3{display:grid;grid-template-columns:1.05fr .9fr 1fr;gap:14px}.layout-2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.span-2{grid-column:1/-1}.button-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.button-row>*{flex:1}
+.reader{min-height:240px;background:#10283e;color:#cbd5e1;border-radius:12px;overflow:hidden;display:grid;place-items:center;text-align:center;padding:12px}.reader video{max-width:100%!important;object-fit:cover}
+.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.verify{text-align:center;background:#f6f9fc;border:1px solid var(--line);border-radius:13px;padding:18px}.verify img{width:100px;height:100px;border-radius:50%;object-fit:cover;background:#e2e8f0;border:3px solid #d5e0ea}.pill{display:inline-block;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:750;background:#e7edf4}.pill.in{background:#dcfce7;color:#166534}.pill.out{background:#dbeafe;color:#1e40af}.quick-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;margin-top:10px}.quick-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f9fbfd}.quick-item strong{display:block}.quick-item small{color:var(--muted)}
+.table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:10px;margin-top:12px}table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{background:#edf3f8;color:#263d54;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f8fbfd}.filters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;background:#f7f9fc;padding:12px;border:1px solid var(--line);border-radius:12px;margin:14px 0}
+.id-preview{display:flex;gap:16px;align-items:flex-start;overflow:auto;padding:8px 2px 14px}.id-card{flex:0 0 90mm;width:90mm;height:60mm;min-width:90mm;background:#fff;color:#142c43;border:1px solid #64748b;padding:2.4mm 2.8mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;box-shadow:0 3px 10px #0002;font-family:Arial,sans-serif}
+.id-head{display:flex;align-items:center;justify-content:space-between;gap:3px}.id-head img{width:19mm;height:9mm;object-fit:contain}.id-company{font-size:7.5pt;font-weight:800;color:#07599b;text-align:center}.id-number{font-size:6.5pt;border:1px solid #334155;padding:1mm}.id-mid{display:flex;gap:2mm;align-items:center;min-height:13mm}.id-site{background:#e8eef4;padding:1.2mm;font-size:6pt;flex:1}.id-photo{width:14mm;height:16mm;border:1px solid #cbd5e1;object-fit:cover}.id-details{border-collapse:collapse;width:100%;min-width:0;font-size:5.8pt}.id-details td{white-space:normal;border:1px solid #64748b;padding:.55mm 1mm;line-height:1.1}.id-details .vendor{background:#8cc63f;font-weight:bold}.id-qr{width:14mm;height:14mm;display:grid;place-items:center}.id-qr img{max-width:100%}.back-copy{font-size:6.3pt;line-height:1.35;font-weight:bold}.back-mid{display:flex;align-items:center;gap:2mm}.back-mid img{width:19mm;object-fit:contain}.back-address{font-size:5.8pt;line-height:1.25;flex:1}.instructions{font-size:5.5pt;border-top:1px dashed #94a3b8;padding-top:1mm}
+.notice{padding:10px 12px;border-radius:10px;background:#fff8e8;color:#79520d;border:1px solid #f0d9a5;font-size:13px;margin:10px 0}.toast{position:fixed;right:16px;bottom:16px;z-index:20;max-width:min(420px,calc(100vw - 32px));padding:13px 16px;background:#173b58;color:white;border-radius:11px;box-shadow:var(--shadow)}.muted{color:var(--muted);font-size:13px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+@media(max-width:1050px){.layout-3{grid-template-columns:1fr 1fr}.layout-3>.panel:last-child{grid-column:1/-1}.layout-2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.topbar{align-items:flex-start}.brand{width:100%}.top-actions{width:100%;justify-content:space-between}.wrap{padding:12px}.stats{gap:8px}.stat{padding:12px}.layout-3{grid-template-columns:1fr}.layout-3>.panel:last-child{grid-column:auto}.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.filters{grid-template-columns:1fr 1fr}.button-row>*{min-width:130px}.panel{border-radius:12px}.id-preview{padding-bottom:18px}}
+@media(max-width:390px){.filters{grid-template-columns:1fr}.role-grid{grid-template-columns:1fr}}
+@media print{body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:absolute;left:0;top:0;width:auto;display:flex;gap:5mm;padding:0}.id-card{box-shadow:none;break-inside:avoid}@page{size:auto;margin:5mm}}
+</style>
 </head>
 <body>
-
-  <!-- TOP HEADER -->
-  <header>
-    <div class="brand">
-      <div class="brand-logo-wrap">
-        <img id="header-logo" class="sync-logo" src="" alt="OCEAN" />
-      </div>
-      <div>
-        <h1>OCEAN LIFESPACES INDIA PVT LTD</h1>
-        <p>Digital ID Card & Fast QR Attendance Register System</p>
-      </div>
+<header class="topbar">
+ <div class="brand"><img id="headerLogo" alt="Ocean logo"><div><h1>OCEAN LIFESPACES INDIA PRIVATE LIMITED</h1><p>Digital Workforce ID & Attendance Management</p></div></div>
+ <div class="top-actions"><span id="connection" class="status bad">Connecting…</span><span id="roleTag" class="status hidden"></span><button id="logoutBtn" class="btn danger small hidden" onclick="logout()">Sign out</button></div>
+</header>
+<main class="wrap">
+<section id="loginView" class="login">
+ <img id="loginLogo" class="login-logo" alt="Ocean Lifespaces">
+ <h2>Portal Login</h2><p class="sub">Select your access type and sign in</p>
+ <div class="role-grid"><button id="adminRole" class="btn dark" onclick="chooseRole('ADMIN')">Admin Portal</button><button id="gateRole" class="btn outline" onclick="chooseRole('GATE')">Security Gate</button></div>
+ <form id="loginForm"><label>User ID</label><input id="loginUser" autocomplete="username" required><label>Password</label><input id="loginPass" type="password" autocomplete="current-password" required><button class="btn primary block" style="margin-top:16px">Sign in</button></form>
+ <p class="muted">Initial credentials are configured by the administrator during backend setup. Change them immediately after first login.</p>
+</section>
+<section id="appView" class="app hidden">
+ <div class="stats">
+  <div class="stat"><small>Registered workforce</small><strong id="statTotal">0</strong></div>
+  <div class="stat"><small>Currently on site</small><strong id="statIn">0</strong></div>
+  <div class="stat"><small>Clocked out today</small><strong id="statOut">0</strong></div>
+  <div class="stat"><small>Attendance records today</small><strong id="statRecords">0</strong></div>
+ </div>
+ <nav class="nav" id="mainNav">
+  <button data-tab="scanner" class="active" onclick="tab('scanner')">QR Gate Scanner</button>
+  <button data-tab="register" class="admin-only" onclick="tab('register')">Worker & ID Cards</button>
+  <button data-tab="registers" class="admin-only" onclick="tab('registers')">Workforce Register</button>
+  <button data-tab="reports" class="admin-only" onclick="tab('reports')">Attendance Reports</button>
+  <button data-tab="settings" class="admin-only" onclick="tab('settings')">Settings</button>
+ </nav>
+ <section id="tab-scanner" class="tab">
+  <div class="layout-3">
+   <div class="panel"><h3>Gate QR Scanner</h3><div class="mode-row"><button id="inMode" class="btn success" onclick="setMode('IN')">Clock IN</button><button id="outMode" class="btn outline" onclick="setMode('OUT')">Clock OUT</button></div><div id="reader" class="reader">Camera is stopped</div><div class="button-row"><button class="btn primary" onclick="startScanner()">Start camera</button><button class="btn dark" onclick="stopScanner()">Stop camera</button></div><p id="scanHint" class="muted">Allow camera access. HTTPS or the Apps Script web app URL is required.</p></div>
+   <div class="panel"><h3>Latest verification</h3><div class="verify"><img id="verifyPhoto" alt="Worker photo"><div style="margin:9px"><span id="verifyBadge" class="pill">READY TO SCAN</span></div><h3 id="verifyName">Scan a worker QR code</h3><div id="verifyId" class="muted">Worker ID</div><p id="verifyMeta" class="muted">Designation · Vendor</p><strong id="verifyTime">--:--:--</strong></div></div>
+   <div class="panel"><h3>Manual gate punch</h3><input id="quickSearch" placeholder="Search worker name or ID" oninput="renderQuick()"><div id="quickList" class="quick-list"></div></div>
+  </div>
+ </section>
+ <section id="tab-register" class="tab hidden">
+  <div class="layout-2">
+   <form id="workerForm" class="panel"><div class="section-head"><h3>Worker registration</h3><button type="button" class="btn outline small" onclick="clearWorkerForm()">New worker</button></div>
+    <div class="form-grid">
+     <div><label>Worker ID *</label><input id="wId" required placeholder="OLS-001"></div><div><label>Pass number *</label><input id="wPass" required></div>
+     <div><label>Full name *</label><input id="wName" required></div><div><label>Vendor / Contractor *</label><input id="wVendor" required></div>
+     <div><label>Designation *</label><input id="wDesignation" required></div><div><label>DOB / Age / Sex</label><input id="wDob"></div>
+     <div><label>Blood group</label><input id="wBlood" placeholder="O+"></div><div><label>Aadhaar / Reference (masked)</label><input id="wAadhaar" placeholder="XXXX-XXXX-1234" maxlength="19"></div>
+     <div><label>Date of issue</label><input id="wIssue" type="date"></div><div><label>Valid up to</label><input id="wValid" type="date"></div>
+     <div><label>EOHS inducted on</label><input id="wEohs" type="date"></div><div><label>Emergency contact</label><input id="wPhone" inputmode="tel"></div>
+     <div class="span-2"><label>Worker photo</label><input id="wPhoto" type="file" accept="image/*" capture="user"><p class="muted">Use a clear front-facing photo. Image is resized before upload.</p></div>
     </div>
-    <div class="header-actions">
-      <span id="sync-badge" class="badge-status">🟡 Local Mode</span>
-      <button onclick="toggleVoice()" id="voice-btn" class="btn btn-primary btn-sm">🔊 Voice ON</button>
-      <span id="role-badge" class="badge-role hidden">ROLE: ADMIN</span>
-      <button id="logout-btn" onclick="logout()" class="btn btn-danger btn-sm hidden">Sign Out</button>
+    <div class="button-row"><button class="btn success" type="submit">Save worker</button><button class="btn primary" type="button" onclick="printId()">Print ID card</button></div>
+   </form>
+   <div class="panel"><h3>ID card preview · 90 × 60 mm</h3><div id="printArea" class="id-preview">
+    <div class="id-card">
+     <div class="id-head"><img class="logo" alt="Logo"><div class="id-company">OCEAN LIFESPACES INDIA PVT LTD</div><div class="id-number">ID: <b id="cId">OLS-001</b></div></div>
+     <div class="id-mid"><div class="id-site"><b>Project Address</b><br><span id="cSite"></span></div><img id="cPhoto" class="id-photo" alt="Photo"></div>
+     <table class="id-details"><tr class="vendor"><td colspan="2">Vendor: <span id="cVendor"></span></td></tr><tr><td colspan="2">Pass No: <span id="cPass"></span></td></tr><tr><td colspan="2">Name: <b id="cName"></b></td></tr><tr><td colspan="2">Designation: <span id="cDesignation"></span></td></tr><tr><td colspan="2">DOB / Age / Sex: <span id="cDob"></span></td></tr><tr><td>Blood: <span id="cBlood"></span></td><td>Aadhaar: <span id="cAadhaar"></span></td></tr><tr><td colspan="2">Issue: <span id="cIssue"></span> · Valid: <span id="cValid"></span></td></tr><tr><td colspan="2">EOHS: <span id="cEohs"></span></td></tr><tr><td colspan="2">Issuing Authority Signature:</td></tr></table>
+     <div style="font-size:5.5pt;font-weight:bold">SAFETY VIOLATIONS: 🟡 1ST　🟢 2ND　🔴 3RD</div>
     </div>
-  </header>
-
-  <!-- LOGIN SCREEN -->
-  <main id="login-screen" class="login-card">
-    <div style="text-align:center;">
-      <img id="login-logo" class="sync-logo" src="" alt="Ocean Lifespaces" style="height:54px;object-fit:contain;margin-bottom:8px;" />
-      <h2 style="margin:0;font-size:1.25rem;color:var(--ocean-dark);">Portal Login</h2>
-      <p style="margin:4px 0 0;font-size:0.8rem;color:#64748b;">Select your role and enter credentials</p>
+    <div class="id-card">
+     <div class="back-copy"><div style="color:#b91c1c">Emergency Contact: <span id="cPhone"></span></div><div>Project Manager: <span id="cPm"></span></div><div>Safety Manager: <span id="cSm"></span></div></div>
+     <div class="back-mid"><img class="logo" alt="Logo"><div class="back-address"><b>If found, please return to:</b><br><span id="cAddress"></span></div><div id="cardQr" class="id-qr"></div></div>
+     <div class="instructions"><b>Instructions</b><br>1. Identity card must be carried and displayed while on duty.<br>2. Return the card to the authorities on completion of employment / contract.</div>
     </div>
-
-    <div class="role-switch">
-      <button type="button" id="btn-role-admin" onclick="selectLoginRole('ADMIN')" class="btn btn-dark">🛡 Admin Portal</button>
-      <button type="button" id="btn-role-gate" onclick="selectLoginRole('GATE')" class="btn btn-outline">🚨 Security Gate</button>
-    </div>
-
-    <form onsubmit="handleLogin(event)">
-      <label>User ID *</label>
-      <input type="text" id="login-user" required placeholder="admin or gate" />
-      <label>Password *</label>
-      <input type="password" id="login-pass" required placeholder="Enter password" />
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:14px;">Sign In to Portal</button>
-      <p style="font-size:0.74rem;text-align:center;color:#64748b;margin-top:10px;">
-        Default Admin: <b>admin</b> / <b>admin123</b> &nbsp;|&nbsp; Gate: <b>gate</b> / <b>gate123</b>
-      </p>
-    </form>
-  </main>
-
-  <!-- MAIN PORTAL -->
-  <section id="portal-app" class="container hidden">
-    <!-- KPI CARDS -->
-    <div class="grid-3" style="margin-bottom:18px;">
-      <div class="stat-box">
-        <div><div style="font-size:0.8rem;color:#64748b;font-weight:600;">Registered Workforce</div><h3 id="stat-total">0</h3></div>
-        <span style="font-size:1.8rem;">👷</span>
-      </div>
-      <div class="stat-box" style="border-left-color:#16a34a;">
-        <div><div style="font-size:0.8rem;color:#64748b;font-weight:600;">Currently On-Site (IN)</div><h3 id="stat-in" style="color:#16a34a;">0</h3></div>
-        <span style="font-size:1.8rem;">✅</span>
-      </div>
-      <div class="stat-box" style="border-left-color:#0284c7;">
-        <div><div style="font-size:0.8rem;color:#64748b;font-weight:600;">Completed Shift (OUT)</div><h3 id="stat-out" style="color:#0284c7;">0</h3></div>
-        <span style="font-size:1.8rem;">🚪</span>
-      </div>
-    </div>
-
-    <!-- NAVIGATION -->
-    <nav class="portal-nav">
-      <button onclick="switchTab('tab-scanner')" class="tab-btn active" data-tab="tab-scanner">📷 Fast QR Scanner & Gate</button>
-      <button onclick="switchTab('tab-register')" class="tab-btn admin-only" data-tab="tab-register">🆔 Register & ID Card</button>
-      <button onclick="switchTab('tab-reports')" class="tab-btn admin-only" data-tab="tab-reports">📊 Attendance Reports</button>
-      <button onclick="switchTab('tab-settings')" class="tab-btn admin-only" data-tab="tab-settings">⚙ Logo, Cloud & Passwords</button>
-    </nav>
-
-    <!-- TAB 1: FAST QR SCANNER -->
-    <div id="tab-scanner" class="tab-content grid-3">
-      <div class="panel">
-        <h3 style="margin-top:0;color:var(--ocean-dark);">Gate Fast QR Code Scanner</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-          <button id="mode-in-btn" onclick="setPunchMode('IN')" class="btn btn-success btn-sm">🟢 Clock-In Mode</button>
-          <button id="mode-out-btn" onclick="setPunchMode('OUT')" class="btn btn-outline btn-sm">🔴 Clock-Out Mode</button>
-        </div>
-        <div id="reader">Camera Standby</div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <button onclick="startFastScanner()" class="btn btn-primary" style="flex:1;">▶ Start Fast Camera</button>
-          <button onclick="stopFastScanner()" class="btn btn-dark" style="flex:1;">⏹ Stop Camera</button>
-        </div>
-        <p id="scanner-tip" style="font-size:0.75rem;color:#64748b;margin-top:8px;">25 FPS hardware barcode engine enabled.</p>
-      </div>
-
-      <div class="panel" style="text-align:center;">
-        <h3 style="margin-top:0;text-align:left;color:var(--ocean-dark);">Live Verification Status</h3>
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:16px;">
-          <img id="verify-photo" src="" alt="Worker" style="width:92px;height:92px;border-radius:50%;object-fit:cover;border:2px solid #cbd5e1;background:#e2e8f0;margin-bottom:10px;" />
-          <div><span id="verify-badge" class="pill-in">READY TO SCAN</span></div>
-          <h4 id="verify-name" style="margin:8px 0 2px;font-size:1.1rem;">Scan Worker QR Code</h4>
-          <div id="verify-id" style="font-family:monospace;font-size:0.82rem;color:#64748b;">ID-000</div>
-          <div id="verify-meta" style="font-size:0.82rem;color:#475569;margin-top:4px;">Designation • Vendor</div>
-          <div id="verify-time" style="font-size:0.82rem;font-weight:700;color:var(--ocean-blue);margin-top:8px;">Timestamp: --:--:--</div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3 style="margin-top:0;color:var(--ocean-dark);">Manual Gate Quick Punch</h3>
-        <input type="text" id="quick-search" onkeyup="renderQuickPunchList()" placeholder="Search ID or Worker Name..." style="margin-bottom:10px;" />
-        <div id="quick-punch-list" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
-          <p style="text-align:center;color:#94a3b8;font-size:0.82rem;padding:20px 0;">No registered workers yet.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 2: REGISTER & OCEAN LIFESPACES ID CARD -->
-    <div id="tab-register" class="tab-content hidden">
-      <div class="grid-12">
-        <form onsubmit="saveWorker(event)" class="panel">
-          <h3 style="margin-top:0;color:var(--ocean-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">Worker Registration & ID Card Generator</h3>
-          <div class="grid-2">
-            <div><label>ID NO *</label><input id="w-id" required placeholder="OLS-001" oninput="updateCardPreview()" /></div>
-            <div><label>Pass Number *</label><input id="w-pass" required placeholder="PASS-101" oninput="updateCardPreview()" /></div>
-            <div><label>Full Name *</label><input id="w-name" required placeholder="Worker Full Name" oninput="updateCardPreview()" /></div>
-            <div><label>Name of Vendor *</label><input id="w-vendor" required placeholder="Agency / Contractor" oninput="updateCardPreview()" /></div>
-            <div><label>Designation *</label><input id="w-desig" required placeholder="Electrician / Safety" oninput="updateCardPreview()" /></div>
-            <div><label>DOB - Age - Sex</label><input id="w-dob" placeholder="12-05-1992 / 34 / M" oninput="updateCardPreview()" /></div>
-            <div><label>Blood Group</label><input id="w-blood" placeholder="O+ve" oninput="updateCardPreview()" /></div>
-            <div><label>Aadhar No</label><input id="w-aadhar" placeholder="XXXX-XXXX-1234" oninput="updateCardPreview()" /></div>
-            <div><label>Date of Issue</label><input type="date" id="w-issue" oninput="updateCardPreview()" /></div>
-            <div><label>Validity up to</label><input type="date" id="w-valid" oninput="updateCardPreview()" /></div>
-            <div><label>EOHS Inducted on</label><input type="date" id="w-eohs" oninput="updateCardPreview()" /></div>
-            <div><label>Emergency Contact No.</label><input id="w-phone" placeholder="+91 9876543210" oninput="updateCardPreview()" /></div>
-          </div>
-          <label>Worker Photo</label>
-          <input type="file" accept="image/*" onchange="handleWorkerPhoto(event)" />
-          <div style="display:flex;gap:10px;margin-top:14px;">
-            <button type="submit" class="btn btn-success" style="flex:1;">💾 Save Worker & Sync</button>
-            <button type="button" onclick="window.print()" class="btn btn-primary">🖨 Print ID Card</button>
-          </div>
-        </form>
-
-        <div class="panel">
-          <h3 style="margin-top:0;color:var(--ocean-dark);">ID Card Live Preview (Front & Back)</h3>
-          <div id="printable-id-area" class="id-cards-wrapper">
-            <!-- FRONT CARD -->
-            <div class="ocean-id-card">
-              <div class="id-front-top">
-                <img class="id-front-logo sync-logo" src="" alt="Ocean" />
-                <div class="id-front-title">OCEAN LIFESPACES INDIA PVT LTD</div>
-                <div class="id-no-box">ID NO: <span id="card-id">OLS-001</span></div>
-              </div>
-              <div class="id-mid-row">
-                <div class="id-project-box">
-                  <strong>Project Address:</strong>
-                  <span id="card-site">Project Site Office, Infopark Phase II, Kochi</span>
-                </div>
-                <div class="id-photo-box" id="card-photo-box">Photo</div>
-              </div>
-              <table class="id-table">
-                <tr class="id-vendor-row"><td colspan="2">Name of Vendor: <span id="card-vendor"></span></td></tr>
-                <tr><td colspan="2">Pass Number : <span id="card-pass"></span></td></tr>
-                <tr><td colspan="2">Name : <strong id="card-name"></strong></td></tr>
-                <tr><td colspan="2">Designation: <span id="card-desig"></span></td></tr>
-                <tr><td colspan="2">DOB -Age- Sex : <span id="card-dob"></span></td></tr>
-                <tr>
-                  <td style="width:45%;">Blood Group: <span id="card-blood"></span></td>
-                  <td>Aadhar No: <span id="card-aadhar"></span></td>
-                </tr>
-                <tr><td colspan="2">Date of Issue: <span id="card-issue"></span></td></tr>
-                <tr><td colspan="2">Validity up to : <span id="card-valid"></span></td></tr>
-                <tr><td colspan="2">EOHS Inducted on : <span id="card-eohs"></span></td></tr>
-                <tr><td colspan="2">Signature of Issuing Authority :</td></tr>
-              </table>
-              <div class="id-violations">
-                <span>SAFETY VIOLATIONS:</span>
-                <span>1ST <span class="oval oval-1"></span></span>
-                <span>2ND <span class="oval oval-2"></span></span>
-                <span>3RD <span class="oval oval-3"></span></span>
-              </div>
-            </div>
-
-            <!-- BACK CARD -->
-            <div class="ocean-id-card">
-              <div class="id-back-top">
-                <div class="id-back-emergency">Emergency Contact No. <span id="card-phone"></span></div>
-                <div>Project Manager: <span id="card-pm">K. Narayanan</span></div>
-                <div>Safety Manager: <span id="card-sm">S. Rajesh</span></div>
-              </div>
-              <div class="id-back-mid">
-                <img class="id-back-logo sync-logo" src="" alt="Ocean" />
-                <div class="id-back-addr">
-                  <strong>If found Please return it to:<br/>Company Address:</strong><br/>
-                  <span id="card-return">Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032</span>
-                </div>
-                <div id="card-qrcode" class="id-back-qr"></div>
-              </div>
-              <div class="id-back-inst">
-                <strong>Instructions:</strong>
-                1. Identity Card Must always be carried and displayed while on duty<br/>
-                2. ID Loss of card must be returned to the authorities on completion of employment /Contract
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3 style="margin-top:0;color:var(--ocean-dark);">Registered Workforce Directory</h3>
-        <div style="overflow-x:auto;">
-          <table class="data-table">
-            <thead>
-              <tr><th>ID NO</th><th>Pass No</th><th>Name</th><th>Designation</th><th>Vendor</th><th>Blood / Phone</th><th>Action</th></tr>
-            </thead>
-            <tbody id="workers-table-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: REPORTS -->
-    <div id="tab-reports" class="tab-content hidden panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--border);padding-bottom:12px;">
-        <div>
-          <h3 style="margin:0;color:var(--ocean-dark);">Attendance Reports & Analytics Center</h3>
-          <p style="margin:2px 0 0;font-size:0.78rem;color:#64748b;">Syncs directly with your Google Sheets backend</p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button onclick="syncFromCloud()" class="btn btn-primary btn-sm">🔄 Sync Cloud Logs</button>
-          <button onclick="exportReportExcel()" class="btn btn-success btn-sm">📊 Export Excel (.xlsx)</button>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
-        <button onclick="switchReportView('daily')" id="rep-btn-daily" class="btn btn-dark btn-sm">📅 1. Daily Report</button>
-        <button onclick="switchReportView('monthly')" id="rep-btn-monthly" class="btn btn-outline btn-sm">📆 2. Monthly Summary</button>
-        <button onclick="switchReportView('individual')" id="rep-btn-individual" class="btn btn-outline btn-sm">👷 3. Individual Worker Report</button>
-      </div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border);">
-        <input type="date" id="filter-date" onchange="renderReports()" style="max-width:180px;" />
-        <input type="month" id="filter-month" onchange="renderReports()" class="hidden" style="max-width:180px;" />
-        <select id="filter-worker" onchange="renderReports()" class="hidden" style="max-width:230px;"></select>
-        <input type="text" id="filter-search" onkeyup="renderReports()" placeholder="Search Name / ID / Vendor..." style="max-width:240px;" />
-      </div>
-
-      <div style="overflow-x:auto;">
-        <table id="report-table" class="data-table">
-          <thead id="report-thead"></thead>
-          <tbody id="report-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 4: SETTINGS -->
-    <div id="tab-settings" class="tab-content hidden grid-2">
-      <div class="panel">
-        <h3 style="margin-top:0;color:var(--ocean-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">Company Logo & Site Details (Reflects All Pages)</h3>
-        <label>Upload Company Logo (PNG/JPG)</label>
-        <input type="file" accept="image/*" onchange="uploadCompanyLogo(event)" />
-        <label>Google Apps Script Web App URL</label>
-        <input type="url" id="cfg-api-url" placeholder="https://script.google.com/macros/s/..." />
-        <label>Project Site Address (ID Front)</label>
-        <input type="text" id="cfg-site" />
-        <div class="grid-2">
-          <div><label>Project Manager</label><input type="text" id="cfg-pm" /></div>
-          <div><label>Safety Manager</label><input type="text" id="cfg-sm" /></div>
-        </div>
-        <label>Return Company Address (ID Back)</label>
-        <input type="text" id="cfg-return" />
-        <label>Standard Shift Hours (Before Overtime)</label>
-        <input type="number" id="cfg-shift-hrs" value="8" />
-        <button onclick="saveSettings()" class="btn btn-primary" style="width:100%;margin-top:14px;">Save Configuration & Sync</button>
-      </div>
-
-      <div class="panel">
-        <h3 style="margin-top:0;color:var(--ocean-dark);border-bottom:1px solid var(--border);padding-bottom:8px;">Portal Login Credentials</h3>
-        <label>Admin User ID</label>
-        <input type="text" id="cfg-admin-id" />
-        <label>Admin Password</label>
-        <input type="text" id="cfg-admin-pass" />
-        <hr style="margin:14px 0;border:none;border-top:1px solid var(--border);" />
-        <label>Security Gate User ID</label>
-        <input type="text" id="cfg-gate-id" />
-        <label>Security Gate Password</label>
-        <input type="text" id="cfg-gate-pass" />
-        <button onclick="saveCredentials()" class="btn btn-dark" style="width:100%;margin-top:14px;">Update Credentials</button>
-      </div>
-    </div>
-  </section>
-
+   </div><p class="muted">Print using actual size / 100% scale. Disable browser headers and footers in print settings.</p></div>
+  </div>
+ </section>
+ <section id="tab-registers" class="tab hidden">
+  <div class="panel"><div class="section-head"><h3>Registered workforce directory</h3><input id="workerSearch" style="max-width:300px" placeholder="Search ID, name, vendor…" oninput="renderWorkers()"></div><div class="table-wrap"><table><thead><tr><th>Worker ID</th><th>Pass No</th><th>Name</th><th>Designation</th><th>Vendor</th><th>Blood</th><th>Contact</th><th>Action</th></tr></thead><tbody id="workerRows"></tbody></table></div></div>
+ </section>
+ <section id="tab-reports" class="tab hidden">
+  <div class="panel"><div class="section-head"><div><h3>Attendance reports & analytics</h3><p class="muted">Records are stored in the connected Google Sheets database.</p></div><div class="button-row" style="margin:0"><button class="btn outline small" onclick="refreshData()">Refresh</button><button class="btn success small" onclick="exportExcel()">Export Excel</button></div></div>
+   <div class="mode-row" style="max-width:520px"><button id="dailyBtn" class="btn dark" onclick="reportMode('daily')">Daily</button><button id="monthlyBtn" class="btn outline" onclick="reportMode('monthly')">Monthly</button></div>
+   <div class="filters"><div><label>Date</label><input id="rDate" type="date" onchange="renderReports()"></div><div><label>Month</label><input id="rMonth" type="month" onchange="renderReports()"></div><div><label>Vendor</label><select id="rVendor" onchange="renderReports()"><option value="">All vendors</option></select></div><div><label>Search worker / ID</label><input id="rSearch" oninput="renderReports()" placeholder="Search…"></div></div>
+   <div class="table-wrap"><table id="reportTable"><thead id="reportHead"></thead><tbody id="reportRows"></tbody></table></div>
+  </div>
+ </section>
+ <section id="tab-settings" class="tab hidden">
+  <div class="layout-2">
+   <div class="panel"><h3>Company & project settings</h3><label>Company logo</label><input id="logoFile" type="file" accept="image/*"><label>Project site address</label><input id="sSite"><label>Project manager</label><input id="sPm"><label>Safety manager</label><input id="sSm"><label>Company return address</label><input id="sAddress"><label>Standard shift hours</label><input id="sShift" type="number" min="1" max="24" step=".5"><button class="btn primary block" style="margin-top:16px" onclick="saveSettings()">Save settings</button></div>
+   <div class="panel"><h3>Account security</h3><div class="notice">Login credentials are validated on the Apps Script backend. Do not store passwords in the browser or share the deployment URL publicly.</div><label>Current password</label><input id="oldPassword" type="password" autocomplete="current-password"><label>New password</label><input id="newPassword" type="password" autocomplete="new-password"><label>Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password"><button class="btn dark block" style="margin-top:16px" onclick="changePassword()">Change my password</button></div>
+  </div>
+ </section>
+</section>
+</main>
+<div id="toast" class="toast hidden" role="status"></div>
 <script>
-   const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzb6xhEUWx2IGexBDR4JXIP058-sfAF_m7WzKAcn6g8jXvKSWRjlgIFo8EOAeIDiLYPgQ/exec";
-
-  const DEFAULT_LOGO_SVG = "data:image/svg+xml;utf8," + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="220" height="70" viewBox="0 0 220 70">
-      <rect width="220" height="70" fill="white"/>
-      <circle cx="38" cy="30" r="18" fill="none" stroke="#f7941d" stroke-width="3" stroke-dasharray="45 30"/>
-      <circle cx="38" cy="32" r="13" fill="none" stroke="#004b8d" stroke-width="4"/>
-      <circle cx="40" cy="31" r="8" fill="none" stroke="#0095d9" stroke-width="3"/>
-      <circle cx="41" cy="30" r="4" fill="none" stroke="#8cc63f" stroke-width="2.5"/>
-      <text x="66" y="36" font-family="Arial, sans-serif" font-weight="900" font-size="24" fill="#004b8d" letter-spacing="2">OCEAN</text>
-      <text x="67" y="48" font-family="Arial, sans-serif" font-size="8.5" fill="#475569" letter-spacing="2.2">DELIVERING DREAMS</text>
-      <text x="14" y="62" font-family="Arial, sans-serif" font-weight="700" font-size="7.5" fill="#004b8d">CIVIL CONSTRUCTION | INFRA | TURNKEY FITOUT</text>
-    </svg>
-  `);
-
-  let workers = JSON.parse(localStorage.getItem("ols_workers") || "[]");
-  let logs = JSON.parse(localStorage.getItem("ols_logs") || "[]");
-  let config = JSON.parse(localStorage.getItem("ols_config") || JSON.stringify({
-    apiUrl: "",
-    logo: "",
-    site: "Project Site Office, Infopark Phase II, Kochi",
-    pm: "K. Narayanan",
-    sm: "S. Rajesh",
-    returnAddr: "Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032",
-    shiftHrs: 8,
-    adminId: "admin", adminPass: "admin123",
-    gateId: "gate", gatePass: "gate123"
-  }));
-
-  let loginRole = "ADMIN";
-  let currentUserRole = null;
-  let punchMode = "IN";
-  let voiceEnabled = true;
-  let currentReportView = "daily";
-  let tempWorkerPhoto = "";
-  let html5QrCode = null;
-  let isScanning = false;
-  let lastScan = { id: "", time: 0 };
-
-  window.onload = () => {
-    document.getElementById("filter-date").value = new Date().toISOString().split("T")[0];
-    document.getElementById("filter-month").value = new Date().toISOString().slice(0, 7);
-    applyConfigToUI();
-    generateQRPreview("OLS-001");
-    refreshAllUI();
-    if (config.apiUrl) syncFromCloud();
-  };
-
-  function applyConfigToUI() {
-    const logoSrc = config.logo || DEFAULT_LOGO_SVG;
-    document.querySelectorAll(".sync-logo").forEach(img => { img.src = logoSrc; });
-
-    document.getElementById("cfg-api-url").value = config.apiUrl || "";
-    document.getElementById("cfg-site").value = config.site;
-    document.getElementById("cfg-pm").value = config.pm;
-    document.getElementById("cfg-sm").value = config.sm;
-    document.getElementById("cfg-return").value = config.returnAddr || "";
-    document.getElementById("cfg-shift-hrs").value = config.shiftHrs;
-    document.getElementById("cfg-admin-id").value = config.adminId;
-    document.getElementById("cfg-admin-pass").value = config.adminPass;
-    document.getElementById("cfg-gate-id").value = config.gateId;
-    document.getElementById("cfg-gate-pass").value = config.gatePass;
-
-    document.getElementById("card-site").innerText = config.site;
-    document.getElementById("card-pm").innerText = config.pm;
-    document.getElementById("card-sm").innerText = config.sm;
-    document.getElementById("card-return").innerText = config.returnAddr || "";
-
-    const badge = document.getElementById("sync-badge");
-    if (config.apiUrl) {
-      badge.innerText = "🟢 Cloud Connected";
-      badge.classList.add("connected");
-    } else {
-      badge.innerText = "🟡 Local Mode";
-      badge.classList.remove("connected");
-    }
-  }
-
-  function selectLoginRole(role) {
-    loginRole = role;
-    document.getElementById("btn-role-admin").className = role === "ADMIN" ? "btn btn-dark" : "btn btn-outline";
-    document.getElementById("btn-role-gate").className = role === "GATE" ? "btn btn-dark" : "btn btn-outline";
-  }
-
-  function handleLogin(e) {
-    e.preventDefault();
-    const u = document.getElementById("login-user").value.trim();
-    const p = document.getElementById("login-pass").value.trim();
-
-    if (loginRole === "ADMIN" && u === config.adminId && p === config.adminPass) {
-      currentUserRole = "ADMIN";
-    } else if (loginRole === "GATE" && u === config.gateId && p === config.gatePass) {
-      currentUserRole = "GATE";
-    } else {
-      alert("Invalid credentials!");
-      return;
-    }
-
-    document.getElementById("login-screen").classList.add("hidden");
-    document.getElementById("portal-app").classList.remove("hidden");
-    document.getElementById("role-badge").classList.remove("hidden");
-    document.getElementById("logout-btn").classList.remove("hidden");
-    document.getElementById("role-badge").innerText = "ROLE: " + currentUserRole;
-
-    document.querySelectorAll(".admin-only").forEach(el => {
-      el.style.display = currentUserRole === "ADMIN" ? "inline-block" : "none";
-    });
-  }
-
-  function logout() {
-    stopFastScanner();
-    location.reload();
-  }
-
-  function switchTab(tabId) {
-    document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
-    document.getElementById(tabId).classList.remove("hidden");
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.tab === tabId);
-    });
-    if (tabId === "tab-reports") renderReports();
-  }
-
-  function setPunchMode(mode) {
-    punchMode = mode;
-    document.getElementById("mode-in-btn").className = mode === "IN" ? "btn btn-success btn-sm" : "btn btn-outline btn-sm";
-    document.getElementById("mode-out-btn").className = mode === "OUT" ? "btn btn-danger btn-sm" : "btn btn-outline btn-sm";
-  }
-
-  async function startFastScanner() {
-    if (isScanning) return;
-    html5QrCode = new Html5Qrcode("reader", {
-      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-      verbose: false
-    });
-    try {
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 25, qrbox: { width: 220, height: 220 } },
-        (decodedText) => {
-          const now = Date.now();
-          if (decodedText === lastScan.id && now - lastScan.time < 3000) return;
-          lastScan = { id: decodedText, time: now };
-          processPunch(decodedText.trim());
-        },
-        () => {}
-      );
-      isScanning = true;
-      document.getElementById("scanner-tip").innerText = "🟢 Fast Scanner Active — Hold ID Card QR in front of camera.";
-    } catch (err) {
-      alert("Camera failed to start. Make sure you are on HTTPS and gave camera permission.\n" + err);
-    }
-  }
-
-  async function stopFastScanner() {
-    if (html5QrCode && isScanning) {
-      await html5QrCode.stop();
-      isScanning = false;
-      document.getElementById("scanner-tip").innerText = "Camera stopped.";
-    }
-  }
-
-  function processPunch(workerId) {
-    const worker = workers.find(w => w.id.toLowerCase() === workerId.toLowerCase());
-    if (!worker) {
-      speak("Unknown worker ID");
-      alert("Worker ID not found: " + workerId);
-      return;
-    }
-
-    const today = new Date().toISOString().split("T")[0];
-    const nowTime = new Date().toTimeString().split(" ")[0];
-    let existingLog = logs.find(l => l.date === today && l.id === worker.id && !l.outTime);
-
-    if (punchMode === "IN") {
-      if (existingLog) {
-        alert(worker.name + " is already clocked IN!");
-        return;
-      }
-      const newEntry = {
-        date: today, id: worker.id, name: worker.name, designation: worker.designation,
-        vendor: worker.vendor, mode: "IN", inTime: nowTime, outTime: "",
-        totalHrs: "0.00", overtime: "0.00", verifiedBy: currentUserRole || "Gate"
-      };
-      logs.unshift(newEntry);
-      pushToCloud({ action: "recordPunch", punch: newEntry });
-      speak(`Clock in recorded for ${worker.name}`);
-    } else {
-      if (!existingLog) {
-        alert("No active Clock-In found today for " + worker.name);
-        return;
-      }
-      existingLog.outTime = nowTime;
-      existingLog.mode = "OUT";
-      const hrs = calculateHours(existingLog.inTime, nowTime);
-      existingLog.totalHrs = hrs.toFixed(2);
-      existingLog.overtime = Math.max(0, hrs - Number(config.shiftHrs || 8)).toFixed(2);
-      pushToCloud({ action: "recordPunch", punch: existingLog });
-      speak(`Clock out recorded for ${worker.name}`);
-    }
-
-    localStorage.setItem("ols_logs", JSON.stringify(logs));
-    updateVerificationPanel(worker, nowTime);
-    refreshAllUI();
-  }
-
-  function calculateHours(inStr, outStr) {
-    const [h1, m1, s1] = inStr.split(":").map(Number);
-    const [h2, m2, s2] = outStr.split(":").map(Number);
-    const diffSec = (h2 * 3600 + m2 * 60 + s2) - (h1 * 3600 + m1 * 60 + s1);
-    return Math.max(0, diffSec / 3600);
-  }
-
-  function updateVerificationPanel(worker, timeStr) {
-    document.getElementById("verify-photo").src = worker.photo || DEFAULT_LOGO_SVG;
-    document.getElementById("verify-badge").innerText = punchMode === "IN" ? "✅ CLOCK IN SUCCESS" : "🚪 CLOCK OUT SUCCESS";
-    document.getElementById("verify-badge").className = punchMode === "IN" ? "pill-in" : "pill-out";
-    document.getElementById("verify-name").innerText = worker.name;
-    document.getElementById("verify-id").innerText = worker.id;
-    document.getElementById("verify-meta").innerText = `${worker.designation} • ${worker.vendor}`;
-    document.getElementById("verify-time").innerText = "Timestamp: " + timeStr;
-  }
-
-  function toggleVoice() {
-    voiceEnabled = !voiceEnabled;
-    document.getElementById("voice-btn").innerText = voiceEnabled ? "🔊 Voice ON" : "🔇 Voice OFF";
-  }
-
-  function speak(text) {
-    if (!voiceEnabled || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-  }
-
-  function handleWorkerPhoto(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      tempWorkerPhoto = reader.result;
-      document.getElementById("card-photo-box").innerHTML = `<img src="${tempWorkerPhoto}" alt="Photo" />`;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function updateCardPreview() {
-    const id = document.getElementById("w-id").value || "OLS-001";
-    document.getElementById("card-id").innerText = id;
-    document.getElementById("card-pass").innerText = document.getElementById("w-pass").value;
-    document.getElementById("card-name").innerText = document.getElementById("w-name").value;
-    document.getElementById("card-desig").innerText = document.getElementById("w-desig").value;
-    document.getElementById("card-vendor").innerText = document.getElementById("w-vendor").value;
-    document.getElementById("card-dob").innerText = document.getElementById("w-dob").value;
-    document.getElementById("card-blood").innerText = document.getElementById("w-blood").value;
-    document.getElementById("card-aadhar").innerText = document.getElementById("w-aadhar").value;
-    document.getElementById("card-issue").innerText = document.getElementById("w-issue").value;
-    document.getElementById("card-valid").innerText = document.getElementById("w-valid").value;
-    document.getElementById("card-eohs").innerText = document.getElementById("w-eohs").value;
-    document.getElementById("card-phone").innerText = document.getElementById("w-phone").value;
-    generateQRPreview(id);
-  }
-
-  function generateQRPreview(text) {
-    const box = document.getElementById("card-qrcode");
-    box.innerHTML = "";
-    new QRCode(box, { text: text, width: 52, height: 52 });
-  }
-
-  function saveWorker(e) {
-    e.preventDefault();
-    const worker = {
-      id: document.getElementById("w-id").value.trim(),
-      passNo: document.getElementById("w-pass").value.trim(),
-      name: document.getElementById("w-name").value.trim(),
-      vendor: document.getElementById("w-vendor").value.trim(),
-      designation: document.getElementById("w-desig").value.trim(),
-      dob: document.getElementById("w-dob").value.trim(),
-      bloodGroup: document.getElementById("w-blood").value.trim(),
-      aadhar: document.getElementById("w-aadhar").value.trim(),
-      issueDate: document.getElementById("w-issue").value,
-      validUpto: document.getElementById("w-valid").value,
-      eohsDate: document.getElementById("w-eohs").value,
-      emergencyContact: document.getElementById("w-phone").value.trim(),
-      photo: tempWorkerPhoto
-    };
-
-    const idx = workers.findIndex(w => w.id === worker.id);
-    if (idx >= 0) workers[idx] = worker;
-    else workers.push(worker);
-
-    localStorage.setItem("ols_workers", JSON.stringify(workers));
-    pushToCloud({ action: "registerWorker", worker });
-    refreshAllUI();
-    alert("Worker Saved & Synced!");
-  }
-
-  function switchReportView(view) {
-    currentReportView = view;
-    ["daily", "monthly", "individual"].forEach(v => {
-      document.getElementById("rep-btn-" + v).className = v === view ? "btn btn-dark btn-sm" : "btn btn-outline btn-sm";
-    });
-    document.getElementById("filter-date").classList.toggle("hidden", view !== "daily");
-    document.getElementById("filter-month").classList.toggle("hidden", view !== "monthly");
-    document.getElementById("filter-worker").classList.toggle("hidden", view !== "individual");
-    renderReports();
-  }
-
-  function renderReports() {
-    const thead = document.getElementById("report-thead");
-    const tbody = document.getElementById("report-tbody");
-    const search = document.getElementById("filter-search").value.toLowerCase();
-    tbody.innerHTML = "";
-
-    if (currentReportView === "daily") {
-      const selDate = document.getElementById("filter-date").value;
-      thead.innerHTML = `<tr><th>Date</th><th>ID NO</th><th>Name</th><th>Designation</th><th>Vendor</th><th>IN Time</th><th>OUT Time</th><th>Total Hrs</th><th>Overtime</th></tr>`;
-      const filtered = logs.filter(l => (!selDate || l.date === selDate) && (l.name.toLowerCase().includes(search) || l.id.toLowerCase().includes(search) || l.vendor.toLowerCase().includes(search)));
-      filtered.forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.date}</td><td style="font-family:monospace;">${l.id}</td><td><b>${l.name}</b></td><td>${l.designation || "-"}</td><td>${l.vendor}</td><td style="color:#15803d;">${l.inTime}</td><td style="color:#1d4ed8;">${l.outTime || "On-Site"}</td><td>${l.totalHrs}</td><td style="color:#d97706;font-weight:700;">${l.overtime}</td></tr>`;
-      });
-    } else if (currentReportView === "monthly") {
-      const selMonth = document.getElementById("filter-month").value;
-      thead.innerHTML = `<tr><th>Month</th><th>ID NO</th><th>Worker Name</th><th>Vendor</th><th>Present Days</th><th>Total Hours</th><th>Overtime Hrs</th></tr>`;
-      workers.filter(w => w.name.toLowerCase().includes(search) || w.id.toLowerCase().includes(search) || w.vendor.toLowerCase().includes(search)).forEach(w => {
-        const wLogs = logs.filter(l => l.id === w.id && (!selMonth || l.date.startsWith(selMonth)));
-        const days = new Set(wLogs.map(l => l.date)).size;
-        const hrs = wLogs.reduce((sum, l) => sum + parseFloat(l.totalHrs || 0), 0);
-        const ot = wLogs.reduce((sum, l) => sum + parseFloat(l.overtime || 0), 0);
-        tbody.innerHTML += `<tr><td>${selMonth}</td><td style="font-family:monospace;">${w.id}</td><td><b>${w.name}</b></td><td>${w.vendor}</td><td><b>${days}</b></td><td>${hrs.toFixed(2)}</td><td style="color:#d97706;font-weight:700;">${ot.toFixed(2)}</td></tr>`;
-      });
-    } else {
-      const selWorker = document.getElementById("filter-worker").value;
-      thead.innerHTML = `<tr><th>Date</th><th>ID NO</th><th>Name</th><th>IN</th><th>OUT</th><th>Hours</th><th>OT</th></tr>`;
-      logs.filter(l => (!selWorker || l.id === selWorker)).forEach(l => {
-        tbody.innerHTML += `<tr><td>${l.date}</td><td>${l.id}</td><td>${l.name}</td><td>${l.inTime}</td><td>${l.outTime || "-"}</td><td>${l.totalHrs}</td><td>${l.overtime}</td></tr>`;
-      });
-    }
-  }
-
-  function exportReportExcel() {
-    const table = document.getElementById("report-table");
-    const wb = XLSX.utils.table_to_book(table, { sheet: "AttendanceReport" });
-    XLSX.writeFile(wb, `OceanLifespaces_${currentReportView}_Report.xlsx`);
-  }
-
-  async function pushToCloud(payload) {
-    if (!config.apiUrl) return;
-    try {
-      await fetch(config.apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-    } catch (err) {
-      console.error("Cloud push failed:", err);
-    }
-  }
-
-  async function syncFromCloud() {
-    if (!config.apiUrl) {
-      alert("Please paste your Google Apps Script URL in Settings first.");
-      return;
-    }
-    try {
-      const res = await fetch(config.apiUrl + "?action=syncAll");
-      const data = await res.json();
-      if (data.status === "success") {
-        if (data.workers && data.workers.length) {
-          workers = data.workers.map(w => ({
-            id: String(w.id || w["ID NO"] || ""),
-            passNo: w.passNo || "",
-            name: w.name || w["Full Name"] || "",
-            vendor: w.vendor || w["Vendor Agency"] || "",
-            designation: w.designation || w["Designation"] || "",
-            dob: w.dob || w["DOB/Age/Sex"] || "",
-            bloodGroup: w.bloodGroup || w["Blood Group"] || "",
-            aadhar: w.aadhar || w["Aadhar/Ref"] || "",
-            issueDate: w.issueDate || w["Date of Issue"] || "",
-            validUpto: w.validUpto || w["Validity Up To"] || "",
-            eohsDate: w.eohsDate || "",
-            emergencyContact: w.emergencyContact || w["Emergency Contact"] || ""
-          }));
-          localStorage.setItem("ols_workers", JSON.stringify(workers));
-        }
-        if (data.logs && data.logs.length) {
-          logs = data.logs.map(l => ({
-            date: String(l.date || l["Date"] || "").split("T")[0],
-            id: String(l.id || l["ID NO"] || ""),
-            name: l.name || l["Worker Name"] || "",
-            designation: l.designation || l["Designation"] || "",
-            vendor: l.vendor || l["Vendor Agency"] || "",
-            inTime: l.inTime || l["IN Time"] || "",
-            outTime: l.outTime || l["OUT Time"] || "",
-            totalHrs: l.totalHrs || l["Total Hrs"] || "0.00",
-            overtime: l.overtime || l["Overtime"] || "0.00"
-          })).reverse();
-          localStorage.setItem("ols_logs", JSON.stringify(logs));
-        }
-        refreshAllUI();
-        alert("Cloud Sync Complete!");
-      }
-    } catch (err) {
-      alert("Cloud sync error: " + err);
-    }
-  }
-
-  function uploadCompanyLogo(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      config.logo = reader.result;
-      localStorage.setItem("ols_config", JSON.stringify(config));
-      applyConfigToUI();
-      alert("Company Logo updated across all pages and ID cards!");
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function saveSettings() {
-    config.apiUrl = document.getElementById("cfg-api-url").value.trim();
-    config.site = document.getElementById("cfg-site").value.trim();
-    config.pm = document.getElementById("cfg-pm").value.trim();
-    config.sm = document.getElementById("cfg-sm").value.trim();
-    config.returnAddr = document.getElementById("cfg-return").value.trim();
-    config.shiftHrs = document.getElementById("cfg-shift-hrs").value;
-    localStorage.setItem("ols_config", JSON.stringify(config));
-    applyConfigToUI();
-    if (config.apiUrl) syncFromCloud();
-    else alert("Settings saved locally!");
-  }
-
-  function saveCredentials() {
-    config.adminId = document.getElementById("cfg-admin-id").value.trim();
-    config.adminPass = document.getElementById("cfg-admin-pass").value.trim();
-    config.gateId = document.getElementById("cfg-gate-id").value.trim();
-    config.gatePass = document.getElementById("cfg-gate-pass").value.trim();
-    localStorage.setItem("ols_config", JSON.stringify(config));
-    alert("Login credentials updated!");
-  }
-
-  function refreshAllUI() {
-    const today = new Date().toISOString().split("T")[0];
-    const todayLogs = logs.filter(l => l.date === today);
-    document.getElementById("stat-total").innerText = workers.length;
-    document.getElementById("stat-in").innerText = todayLogs.filter(l => !l.outTime).length;
-    document.getElementById("stat-out").innerText = todayLogs.filter(l => l.outTime).length;
-
-    renderQuickPunchList();
-    renderWorkersTable();
-    renderReports();
-
-    const sel = document.getElementById("filter-worker");
-    sel.innerHTML = `<option value="">-- All Workers --</option>` + workers.map(w => `<option value="${w.id}">${w.id} - ${w.name}</option>`).join("");
-  }
-
-  function renderQuickPunchList() {
-    const q = document.getElementById("quick-search").value.toLowerCase();
-    const list = document.getElementById("quick-punch-list");
-    const filtered = workers.filter(w => w.name.toLowerCase().includes(q) || w.id.toLowerCase().includes(q));
-    if (!filtered.length) {
-      list.innerHTML = `<p style="text-align:center;color:#94a3b8;font-size:0.82rem;padding:16px 0;">No matching workers.</p>`;
-      return;
-    }
-    list.innerHTML = filtered.map(w => `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#f8fafc;">
-        <div>
-          <div style="font-weight:700;font-size:0.84rem;">${w.name} <span style="color:var(--ocean-blue);font-family:monospace;">(${w.id})</span></div>
-          <div style="font-size:0.74rem;color:#64748b;">${w.designation} • ${w.vendor}</div>
-        </div>
-        <button onclick="processPunch('${w.id}')" class="btn btn-primary btn-sm">Punch</button>
-      </div>
-    `).join("");
-  }
-
-  function renderWorkersTable() {
-    const tbody = document.getElementById("workers-table-body");
-    tbody.innerHTML = workers.map(w => `
-      <tr>
-        <td style="font-family:monospace;font-weight:700;">${w.id}</td>
-        <td>${w.passNo || "-"}</td>
-        <td>${w.name}</td>
-        <td>${w.designation}</td>
-        <td>${w.vendor}</td>
-        <td>${w.bloodGroup || "-"} / ${w.emergencyContact || "-"}</td>
-        <td><button onclick="loadWorkerToCard('${w.id}')" class="btn btn-outline btn-sm">Preview ID</button></td>
-      </tr>
-    `).join("");
-  }
-
-  function loadWorkerToCard(id) {
-    const w = workers.find(x => x.id === id);
-    if (!w) return;
-    document.getElementById("w-id").value = w.id;
-    document.getElementById("w-pass").value = w.passNo || "";
-    document.getElementById("w-name").value = w.name;
-    document.getElementById("w-vendor").value = w.vendor;
-    document.getElementById("w-desig").value = w.designation;
-    document.getElementById("w-dob").value = w.dob || "";
-    document.getElementById("w-blood").value = w.bloodGroup || "";
-    document.getElementById("w-aadhar").value = w.aadhar || "";
-    document.getElementById("w-issue").value = w.issueDate || "";
-    document.getElementById("w-valid").value = w.validUpto || "";
-    document.getElementById("w-eohs").value = w.eohsDate || "";
-    document.getElementById("w-phone").value = w.emergencyContact || "";
-    if (w.photo) {
-      tempWorkerPhoto = w.photo;
-      document.getElementById("card-photo-box").innerHTML = `<img src="${w.photo}" alt="Photo" />`;
-    }
-    updateCardPreview();
-  }
+  const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzb6xhEUWx2IGexBDR4JXIP058-sfAF_m7WzKAcn6g8jXvKSWRjlgIFo8EOAeIDiLYPgQ/exec";
+const $=id=>document.getElementById(id);
+const DEFAULT_LOGO='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="240" height="80" fill="white"/><circle cx="35" cy="35" r="22" fill="none" stroke="#07599b" stroke-width="6"/><circle cx="35" cy="35" r="13" fill="none" stroke="#8cc63f" stroke-width="4"/><text x="70" y="42" font-family="Arial" font-size="29" font-weight="bold" fill="#07599b">OCEAN</text><text x="72" y="58" font-family="Arial" font-size="9" fill="#475569">DELIVERING DREAMS</text></svg>');
+let token='',role='ADMIN',mode='IN',workers=[],logs=[],settings={},scanner=null,scanning=false,reportType='daily',photoData='',lastScan={id:'',at:0},toastTimer;
+function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),3500)}
+function setConnection(ok,msg){$('connection').textContent=msg;$('connection').className='status '+(ok?'ok':'bad')}
+function callServer(fn,...args){return new Promise((resolve,reject)=>{if(typeof google==='undefined'||!google.script||!google.script.run){reject(new Error('Open this portal using the deployed Google Apps Script web app URL.'));return}google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e.message||String(e))))[fn](...args)})}
+function chooseRole(r){role=r;$('adminRole').className=r==='ADMIN'?'btn dark':'btn outline';$('gateRole').className=r==='GATE'?'btn dark':'btn outline'}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{const res=await callServer('apiLogin',$('loginUser').value.trim(),$('loginPass').value,role);if(!res.ok)throw Error(res.message||'Login failed');token=res.token;role=res.role;$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('roleTag').textContent='ROLE: '+role;$('roleTag').classList.remove('hidden');$('logoutBtn').classList.remove('hidden');document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',role!=='ADMIN'));setConnection(true,'Cloud connected');await refreshData();tab('scanner')}catch(err){toast(err.message)}});
+async function logout(){await stopScanner();token='';location.reload()}
+function tab(name){document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));$('tab-'+name).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));if(name==='reports')renderReports()}
+function setMode(m){mode=m;$('inMode').className=m==='IN'?'btn success':'btn outline';$('outMode').className=m==='OUT'?'btn danger':'btn outline'}
+async function refreshData(){try{const d=await callServer('apiBootstrap',token);if(!d.ok)throw Error(d.message||'Could not load data');workers=d.workers||[];logs=d.logs||[];settings=d.settings||{};applySettings();renderAll();setConnection(true,'Cloud connected')}catch(e){setConnection(false,'Cloud error');toast(e.message)}}
+function applySettings(){const logo=settings.logoData||DEFAULT_LOGO;document.querySelectorAll('#headerLogo,#loginLogo,.logo').forEach(i=>i.src=logo);$('sSite').value=settings.site||'';$('sPm').value=settings.pm||'';$('sSm').value=settings.sm||'';$('sAddress').value=settings.returnAddress||'';$('sShift').value=settings.shiftHours||8;$('cSite').textContent=settings.site||'';$('cPm').textContent=settings.pm||'';$('cSm').textContent=settings.sm||'';$('cAddress').textContent=settings.returnAddress||'';updateCardPreview()}
+function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function renderAll(){const todays=logs.filter(l=>l.date===today());$('statTotal').textContent=workers.length;$('statIn').textContent=todays.filter(l=>!l.outTime).length;$('statOut').textContent=todays.filter(l=>l.outTime).length;$('statRecords').textContent=todays.length;renderQuick();renderWorkers();populateVendors();renderReports()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderQuick(){const q=$('quickSearch').value.toLowerCase();const arr=workers.filter(w=>(w.name+' '+w.id+' '+w.vendor).toLowerCase().includes(q)).slice(0,100);$('quickList').innerHTML=arr.map(w=>`<div class="quick-item"><div><strong>${esc(w.name)} <small>${esc(w.id)}</small></strong><small>${esc(w.designation)} · ${esc(w.vendor)}</small></div><button class="btn primary small" onclick="punch('${esc(w.id)}')">Punch ${mode}</button></div>`).join('')||'<p class="muted">No matching workers found.</p>'}
+async function punch(id){try{const res=await callServer('apiPunch',token,id,mode);if(!res.ok)throw Error(res.message);if(res.log){const i=logs.findIndex(l=>l.id===res.log.id&&l.date===res.log.date);if(i>=0)logs[i]=res.log;else logs.unshift(res.log)}const w=workers.find(x=>x.id===id);if(w&&w.photoFileId){try{const ph=await callServer('apiGetPhoto',token,id);if(ph.ok)w.photoData='data:'+ph.mimeType+';base64,'+ph.data}catch(e){}}showVerification(w,res.log,mode);renderAll();toast(res.message)}catch(e){toast(e.message)}}
+function showVerification(w,l,m){if(!w)return;$('verifyPhoto').src=w.photoData||DEFAULT_LOGO;$('verifyName').textContent=w.name;$('verifyId').textContent=w.id;$('verifyMeta').textContent=(w.designation||'')+' · '+(w.vendor||'');$('verifyBadge').textContent=m==='IN'?'CLOCK IN SUCCESS':'CLOCK OUT SUCCESS';$('verifyBadge').className='pill '+(m==='IN'?'in':'out');$('verifyTime').textContent=(m==='IN'?l.inTime:l.outTime)+' · '+l.date}
+async function startScanner(){if(scanning)return;if(!window.Html5Qrcode){toast('Scanner library failed to load.');return}try{scanner=new Html5Qrcode('reader',{verbose:false});await scanner.start({facingMode:'environment'},{fps:12,qrbox:(vw,vh)=>({width:Math.min(240,vw*.78),height:Math.min(240,vh*.78)}),aspectRatio:1},text=>{const now=Date.now();if(text===lastScan.id&&now-lastScan.at<2500)return;lastScan={id:text,at:now};punch(text.trim())},()=>{});scanning=true;$('scanHint').textContent='Camera active. Hold the worker QR code inside the frame.'}catch(e){toast('Camera could not start: '+e);$('scanHint').textContent='Check camera permission and use HTTPS.'}}
+async function stopScanner(){if(scanner&&scanning){try{await scanner.stop();await scanner.clear()}catch(e){}scanning=false}$('reader').textContent='Camera is stopped'}
+$('workerForm').addEventListener('input',updateCardPreview);
+$('wPhoto').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')){toast('Please choose an image file.');return}try{photoData=await resizeImage(f);$('cPhoto').src=photoData;toast('Photo ready to upload')}catch(err){toast('Could not read photo')}});
+function resizeImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const max=640,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.78))};im.src=reader.result};reader.readAsDataURL(file)})}
+const fields={id:'wId',passNo:'wPass',name:'wName',vendor:'wVendor',designation:'wDesignation',dob:'wDob',bloodGroup:'wBlood',aadhaar:'wAadhaar',issueDate:'wIssue',validUpto:'wValid',eohsDate:'wEohs',emergencyContact:'wPhone'};
+function updateCardPreview(){const map={id:'cId',passNo:'cPass',name:'cName',vendor:'cVendor',designation:'cDesignation',dob:'cDob',bloodGroup:'cBlood',aadhaar:'cAadhaar',issueDate:'cIssue',validUpto:'cValid',eohsDate:'cEohs',emergencyContact:'cPhone'};Object.entries(fields).forEach(([k,id])=>$(map[k]).textContent=$(id).value);$('cPhoto').src=photoData||DEFAULT_LOGO;const q=$('cardQr');q.innerHTML='';if(window.QRCode)new QRCode(q,{text:$('wId').value||'OLS-001',width:100,height:100,correctLevel:QRCode.CorrectLevel.M})}
+async function saveWorker(e){e.preventDefault();const w={};Object.entries(fields).forEach(([k,id])=>w[k]=$(id).value.trim());w.photoData=photoData;try{const r=await callServer('apiSaveWorker',token,w);if(!r.ok)throw Error(r.message);toast(r.message||'Worker saved');clearWorkerForm();await refreshData()}catch(err){toast(err.message)}}
+function clearWorkerForm(){ $('workerForm').reset();photoData='';updateCardPreview()}
+function renderWorkers(){const q=$('workerSearch').value.toLowerCase();$('workerRows').innerHTML=workers.filter(w=>(w.id+' '+w.name+' '+w.vendor+' '+w.designation).toLowerCase().includes(q)).map(w=>`<tr><td>${esc(w.id)}</td><td>${esc(w.passNo)}</td><td>${esc(w.name)}</td><td>${esc(w.designation)}</td><td>${esc(w.vendor)}</td><td>${esc(w.bloodGroup)}</td><td>${esc(w.emergencyContact)}</td><td><button class="btn outline small" onclick="editWorker('${esc(w.id)}')">Edit / ID</button></td></tr>`).join('')}
+async function editWorker(id){const w=workers.find(x=>x.id===id);if(!w)return;Object.entries(fields).forEach(([k,f])=>$(f).value=w[k]||'');photoData='';$('cPhoto').src=DEFAULT_LOGO;if(w.photoFileId){try{const ph=await callServer('apiGetPhoto',token,id);if(ph.ok){photoData='data:'+ph.mimeType+';base64,'+ph.data;$('cPhoto').src=photoData}}catch(e){toast('Photo could not be loaded: '+e.message)}}updateCardPreview();tab('register');toast('Worker details loaded.') }
+function printId(){updateCardPreview();window.print()}
+function populateVendors(){const old=$('rVendor').value;const vs=[...new Set(workers.map(w=>w.vendor).filter(Boolean))].sort();$('rVendor').innerHTML='<option value="">All vendors</option>'+vs.map(v=>`<option>${esc(v)}</option>`).join('');$('rVendor').value=old}
+function reportMode(m){reportType=m;$('dailyBtn').className=m==='daily'?'btn dark':'btn outline';$('monthlyBtn').className=m==='monthly'?'btn dark':'btn outline';$('rDate').disabled=m!=='daily';$('rMonth').disabled=m!=='monthly';renderReports()}
+function renderReports(){if(!$('reportRows'))return;const q=$('rSearch').value.toLowerCase(),vendor=$('rVendor').value;let rows=[];if(reportType==='daily'){const d=$('rDate').value||today();rows=logs.filter(l=>l.date===d&&(!vendor||l.vendor===vendor)&&(l.name+' '+l.id).toLowerCase().includes(q));$('reportHead').innerHTML='<tr><th>Date</th><th>ID</th><th>Name</th><th>Designation</th><th>Vendor</th><th>IN</th><th>OUT</th><th>Hours</th><th>OT</th></tr>';$('reportRows').innerHTML=rows.map(l=>`<tr><td>${esc(l.date)}</td><td>${esc(l.id)}</td><td>${esc(l.name)}</td><td>${esc(l.designation)}</td><td>${esc(l.vendor)}</td><td>${esc(l.inTime)}</td><td>${esc(l.outTime||'On site')}</td><td>${esc(l.totalHrs||'0.00')}</td><td>${esc(l.overtime||'0.00')}</td></tr>`).join('')}else{const m=$('rMonth').value||today().slice(0,7);const arr=workers.filter(w=>(!vendor||w.vendor===vendor)&&(w.name+' '+w.id).toLowerCase().includes(q));$('reportHead').innerHTML='<tr><th>Month</th><th>ID</th><th>Name</th><th>Vendor</th><th>Present days</th><th>Total hours</th><th>Overtime</th></tr>';$('reportRows').innerHTML=arr.map(w=>{const a=logs.filter(l=>l.id===w.id&&l.date.startsWith(m));return `<tr><td>${m}</td><td>${esc(w.id)}</td><td>${esc(w.name)}</td><td>${esc(w.vendor)}</td><td>${new Set(a.map(x=>x.date)).size}</td><td>${a.reduce((s,x)=>s+Number(x.totalHrs||0),0).toFixed(2)}</td><td>${a.reduce((s,x)=>s+Number(x.overtime||0),0).toFixed(2)}</td></tr>`}).join('')}}
+function exportExcel(){if(!window.XLSX){toast('Excel export library unavailable');return}const table=$('reportTable');const wb=XLSX.utils.table_to_book(table,{sheet:'Attendance'});XLSX.writeFile(wb,`Ocean_Attendance_${reportType}_${today()}.xlsx`)}
+async function saveSettings(){const s={site:$('sSite').value,pm:$('sPm').value,sm:$('sSm').value,returnAddress:$('sAddress').value,shiftHours:Number($('sShift').value)};const f=$('logoFile').files[0];if(f)s.logoData=await resizeImage(f);try{const r=await callServer('apiSaveSettings',token,s);if(!r.ok)throw Error(r.message);await refreshData();toast('Settings saved')}catch(e){toast(e.message)}}
+async function changePassword(){const a=$('oldPassword').value,b=$('newPassword').value,c=$('confirmPassword').value;if(!a||b.length<10||b!==c){toast('Enter current password and a matching new password (at least 10 characters).');return}try{const r=await callServer('apiChangePassword',token,a,b);if(!r.ok)throw Error(r.message);$('oldPassword').value=$('newPassword').value=$('confirmPassword').value='';toast('Password changed')}catch(e){toast(e.message)}}
+$('rDate').value=today();$('rMonth').value=today().slice(0,7);chooseRole('ADMIN');setMode('IN');$('cSite').textContent='';$('headerLogo').src=DEFAULT_LOGO;$('loginLogo').src=DEFAULT_LOGO;
+callServer('apiHealth').then(()=>setConnection(true,'Backend ready')).catch(()=>setConnection(false,'Open deployed Apps Script URL'));
 </script>
 </body>
 </html>
