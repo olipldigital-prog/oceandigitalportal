@@ -1,160 +1,2387 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#092b4c">
-<title>Ocean Lifespaces | Attendance & Digital ID</title>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<style>
-:root{--navy:#092b4c;--blue:#07599b;--cyan:#08a4d6;--green:#16834b;--red:#c93636;--amber:#b7791f;--bg:#f3f6fa;--surface:#fff;--line:#dce4ed;--ink:#172638;--muted:#65758a;--shadow:0 8px 24px rgba(16,42,67,.07)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:disabled{opacity:.55;cursor:not-allowed}
-.topbar{background:linear-gradient(110deg,var(--navy),#064c7c);color:#fff;padding:14px clamp(14px,3vw,30px);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:4px solid #8cc63f}
-.brand{display:flex;align-items:center;gap:12px;min-width:0}.brand img{width:58px;height:48px;object-fit:contain;background:#fff;border-radius:9px;padding:4px}.brand h1{font-size:clamp(15px,2vw,20px);margin:0;letter-spacing:.2px}.brand p{margin:2px 0 0;color:#c9e8fa;font-size:12px}.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status{font-size:12px;border:1px solid #8bb4d1;border-radius:99px;padding:6px 10px}.status.ok{background:#145b42;border-color:#4ba77f}.status.bad{background:#75451b;border-color:#c58c45}
-.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:650;min-height:42px;background:#e8eef5;color:var(--ink)}.btn.primary{background:var(--blue);color:#fff}.btn.success{background:var(--green);color:#fff}.btn.danger{background:var(--red);color:#fff}.btn.dark{background:#18354f;color:#fff}.btn.outline{background:#fff;border:1px solid #b9c9d8;color:var(--blue)}.btn.small{padding:7px 10px;min-height:35px;font-size:13px}.btn.block{width:100%}
-.wrap{width:min(1500px,100%);margin:0 auto;padding:clamp(12px,2vw,24px)}.login{max-width:440px;margin:clamp(28px,8vh,80px) auto;background:var(--surface);padding:26px;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.login-logo{display:block;width:150px;height:60px;object-fit:contain;margin:0 auto 12px}.login h2{text-align:center;margin:0;color:var(--navy)}.sub{text-align:center;color:var(--muted);font-size:13px;margin:5px 0 18px}.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
-label{display:block;font-weight:650;font-size:13px;margin:12px 0 5px;color:#35465a}input,select{width:100%;min-height:43px;border:1px solid #cbd6e2;border-radius:9px;padding:9px 11px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #08a4d61c}input[type=file]{padding:8px}input[type=checkbox]{width:auto;min-height:auto}
-.hidden{display:none!important}
-.app{display:block}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}.stat small{color:var(--muted);font-weight:650}.stat strong{display:block;font-size:clamp(24px,3vw,34px);color:var(--blue);margin-top:4px}
-.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 1px 13px;margin-bottom:14px;scrollbar-width:thin}.nav button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;font-weight:650;color:#43546a}.nav button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:clamp(14px,2vw,22px);box-shadow:var(--shadow);min-width:0}.panel h2,.panel h3{margin:0 0 14px;color:var(--navy)}.layout-3{display:grid;grid-template-columns:1.05fr .9fr 1fr;gap:14px}.layout-2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.span-2{grid-column:1/-1}.button-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.button-row>*{flex:1}
-.reader{min-height:240px;background:#10283e;color:#cbd5e1;border-radius:12px;overflow:hidden;display:grid;place-items:center;text-align:center;padding:12px}.reader video{max-width:100%!important;object-fit:cover}
-.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.verify{text-align:center;background:#f6f9fc;border:1px solid var(--line);border-radius:13px;padding:18px}.verify img{width:100px;height:100px;border-radius:50%;object-fit:cover;background:#e2e8f0;border:3px solid #d5e0ea}.pill{display:inline-block;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:750;background:#e7edf4}.pill.in{background:#dcfce7;color:#166534}.pill.out{background:#dbeafe;color:#1e40af}.quick-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;margin-top:10px}.quick-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f9fbfd}.quick-item strong{display:block}.quick-item small{color:var(--muted)}
-.table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:10px;margin-top:12px}table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{background:#edf3f8;color:#263d54;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f8fbfd}.filters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;background:#f7f9fc;padding:12px;border:1px solid var(--line);border-radius:12px;margin:14px 0}
-.id-preview{display:flex;gap:16px;align-items:flex-start;overflow:auto;padding:8px 2px 14px}.id-card{flex:0 0 90mm;width:90mm;height:60mm;min-width:90mm;background:#fff;color:#142c43;border:1px solid #64748b;padding:2.4mm 2.8mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;box-shadow:0 3px 10px #0002;font-family:Arial,sans-serif}
-.id-head{display:flex;align-items:center;justify-content:space-between;gap:3px}.id-head img{width:19mm;height:9mm;object-fit:contain}.id-company{font-size:7.5pt;font-weight:800;color:#07599b;text-align:center}.id-number{font-size:6.5pt;border:1px solid #334155;padding:1mm}.id-mid{display:flex;gap:2mm;align-items:center;min-height:13mm}.id-site{background:#e8eef4;padding:1.2mm;font-size:6pt;flex:1}.id-photo{width:14mm;height:16mm;border:1px solid #cbd5e1;object-fit:cover}.id-details{border-collapse:collapse;width:100%;min-width:0;font-size:5.8pt}.id-details td{white-space:normal;border:1px solid #64748b;padding:.55mm 1mm;line-height:1.1}.id-details .vendor{background:#8cc63f;font-weight:bold}.id-qr{width:14mm;height:14mm;display:grid;place-items:center}.id-qr img{max-width:100%}.back-copy{font-size:6.3pt;line-height:1.35;font-weight:bold}.back-mid{display:flex;align-items:center;gap:2mm}.back-mid img{width:19mm;object-fit:contain}.back-address{font-size:5.8pt;line-height:1.25;flex:1}.instructions{font-size:5.5pt;border-top:1px dashed #94a3b8;padding-top:1mm}
-.notice{padding:10px 12px;border-radius:10px;background:#fff8e8;color:#79520d;border:1px solid #f0d9a5;font-size:13px;margin:10px 0}.toast{position:fixed;right:16px;bottom:16px;z-index:20;max-width:min(420px,calc(100vw - 32px));padding:13px 16px;background:#173b58;color:white;border-radius:11px;box-shadow:var(--shadow)}.muted{color:var(--muted);font-size:13px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-@media(max-width:1050px){.layout-3{grid-template-columns:1fr 1fr}.layout-3>.panel:last-child{grid-column:1/-1}.layout-2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){.topbar{align-items:flex-start}.brand{width:100%}.top-actions{width:100%;justify-content:space-between}.wrap{padding:12px}.stats{gap:8px}.stat{padding:12px}.layout-3{grid-template-columns:1fr}.layout-3>.panel:last-child{grid-column:auto}.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.filters{grid-template-columns:1fr 1fr}.button-row>*{min-width:130px}.panel{border-radius:12px}.id-preview{padding-bottom:18px}}
-@media(max-width:390px){.filters{grid-template-columns:1fr}.role-grid{grid-template-columns:1fr}}
-@media print{body *{visibility:hidden!important}#printArea,#printArea *{visibility:visible!important}#printArea{position:absolute;left:0;top:0;width:auto;display:flex;gap:5mm;padding:0}.id-card{box-shadow:none;break-inside:avoid}@page{size:auto;margin:5mm}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ocean Lifespaces — Attendance &amp; ID Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- QR Code Scanner & Generator Libraries -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; -webkit-print-color-adjust: exact; }
+    }
+    @keyframes shrinkBar {
+      0% { width: 100%; }
+      100% { width: 0%; }
+    }
+    .animate-shrink-2s {
+      animation: shrinkBar 2s linear forwards;
+    }
+    /* Exact 6cm x 9cm ID Card print sizing */
+    @page { size: 90mm 60mm; margin: 0; }
+    .ocean-id-card {
+      width: 90mm;
+      height: 60mm;
+      background: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 4mm;
+      box-sizing: border-box;
+      page-break-after: always;
+    }
+  </style>
 </head>
-<body>
-<header class="topbar">
- <div class="brand"><img id="headerLogo" alt="Ocean logo"><div><h1>OCEAN LIFESPACES INDIA PRIVATE LIMITED</h1><p>Digital Workforce ID & Attendance Management</p></div></div>
- <div class="top-actions"><span id="connection" class="status bad">Connecting…</span><span id="roleTag" class="status hidden"></span><button id="logoutBtn" class="btn danger small hidden" onclick="logout()">Sign out</button></div>
-</header>
-<main class="wrap">
-<section id="loginView" class="login">
- <img id="loginLogo" class="login-logo" alt="Ocean Lifespaces">
- <h2>Portal Login</h2><p class="sub">Select your access type and sign in</p>
- <div class="role-grid"><button id="adminRole" class="btn dark" onclick="chooseRole('ADMIN')">Admin Portal</button><button id="gateRole" class="btn outline" onclick="chooseRole('GATE')">Security Gate</button></div>
- <form id="loginForm"><label>User ID</label><input id="loginUser" autocomplete="username" required><label>Password</label><input id="loginPass" type="password" autocomplete="current-password" required><button class="btn primary block" style="margin-top:16px">Sign in</button></form>
- <p class="muted">Initial credentials are configured by the administrator during backend setup. Change them immediately after first login.</p>
-</section>
-<section id="appView" class="app hidden">
- <div class="stats">
-  <div class="stat"><small>Registered workforce</small><strong id="statTotal">0</strong></div>
-  <div class="stat"><small>Currently on site</small><strong id="statIn">0</strong></div>
-  <div class="stat"><small>Clocked out today</small><strong id="statOut">0</strong></div>
-  <div class="stat"><small>Attendance records today</small><strong id="statRecords">0</strong></div>
- </div>
- <nav class="nav" id="mainNav">
-  <button data-tab="scanner" class="active" onclick="tab('scanner')">QR Gate Scanner</button>
-  <button data-tab="register" class="admin-only" onclick="tab('register')">Worker & ID Cards</button>
-  <button data-tab="registers" class="admin-only" onclick="tab('registers')">Workforce Register</button>
-  <button data-tab="reports" class="admin-only" onclick="tab('reports')">Attendance Reports</button>
-  <button data-tab="settings" class="admin-only" onclick="tab('settings')">Settings</button>
- </nav>
- <section id="tab-scanner" class="tab">
-  <div class="layout-3">
-   <div class="panel"><h3>Gate QR Scanner</h3><div class="mode-row"><button id="inMode" class="btn success" onclick="setMode('IN')">Clock IN</button><button id="outMode" class="btn outline" onclick="setMode('OUT')">Clock OUT</button></div><div id="reader" class="reader">Camera is stopped</div><div class="button-row"><button class="btn primary" onclick="startScanner()">Start camera</button><button class="btn dark" onclick="stopScanner()">Stop camera</button></div><p id="scanHint" class="muted">Allow camera access. HTTPS or the Apps Script web app URL is required.</p></div>
-   <div class="panel"><h3>Latest verification</h3><div class="verify"><img id="verifyPhoto" alt="Worker photo"><div style="margin:9px"><span id="verifyBadge" class="pill">READY TO SCAN</span></div><h3 id="verifyName">Scan a worker QR code</h3><div id="verifyId" class="muted">Worker ID</div><p id="verifyMeta" class="muted">Designation · Vendor</p><strong id="verifyTime">--:--:--</strong></div></div>
-   <div class="panel"><h3>Manual gate punch</h3><input id="quickSearch" placeholder="Search worker name or ID" oninput="renderQuick()"><div id="quickList" class="quick-list"></div></div>
-  </div>
- </section>
- <section id="tab-register" class="tab hidden">
-  <div class="layout-2">
-   <form id="workerForm" class="panel"><div class="section-head"><h3>Worker registration</h3><button type="button" class="btn outline small" onclick="clearWorkerForm()">New worker</button></div>
-    <div class="form-grid">
-     <div><label>Worker ID *</label><input id="wId" required placeholder="OLS-001"></div><div><label>Pass number *</label><input id="wPass" required></div>
-     <div><label>Full name *</label><input id="wName" required></div><div><label>Vendor / Contractor *</label><input id="wVendor" required></div>
-     <div><label>Designation *</label><input id="wDesignation" required></div><div><label>DOB / Age / Sex</label><input id="wDob"></div>
-     <div><label>Blood group</label><input id="wBlood" placeholder="O+"></div><div><label>Aadhaar / Reference (masked)</label><input id="wAadhaar" placeholder="XXXX-XXXX-1234" maxlength="19"></div>
-     <div><label>Date of issue</label><input id="wIssue" type="date"></div><div><label>Valid up to</label><input id="wValid" type="date"></div>
-     <div><label>EOHS inducted on</label><input id="wEohs" type="date"></div><div><label>Emergency contact</label><input id="wPhone" inputmode="tel"></div>
-     <div class="span-2"><label>Worker photo</label><input id="wPhoto" type="file" accept="image/*" capture="user"><p class="muted">Use a clear front-facing photo. Image is resized before upload.</p></div>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- TOP HEADER -->
+  <header class="bg-blue-950 text-white shadow-md sticky top-0 z-40 no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow">
+          <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
+            <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
+            <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
+            <path d="M42 52 C 44 43, 55 41, 61 48 C 66 53, 64 62, 58 66 C 61 60, 60 52, 54 49 C 49 47, 45 49, 42 52 Z" fill="#15803d"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-black tracking-wide leading-tight">OCEAN LIFESPACES INDIA PVT LTD</h1>
+          <p class="text-[11px] text-blue-200 font-medium">Digital ID Card &amp; Attendance Register System</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="backend-status-pill" class="hidden lg:inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-amber-300 border border-slate-700">
+          🟡 Local Mode
+        </span>
+        <button type="button" id="voice-toggle-btn" onclick="toggleVoiceAudio()" class="px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold border border-blue-800 flex items-center gap-1.5 shadow-xs">
+          <span>🔊</span><span class="hidden sm:inline">Voice ON</span>
+        </button>
+        <div id="live-header-timestamp" class="text-xs font-mono font-bold text-sky-200 hidden sm:block"></div>
+      </div>
     </div>
-    <div class="button-row"><button class="btn success" type="submit">Save worker</button><button class="btn primary" type="button" onclick="printId()">Print ID card</button></div>
-   </form>
-   <div class="panel"><h3>ID card preview · 90 × 60 mm</h3><div id="printArea" class="id-preview">
-    <div class="id-card">
-     <div class="id-head"><img class="logo" alt="Logo"><div class="id-company">OCEAN LIFESPACES INDIA PVT LTD</div><div class="id-number">ID: <b id="cId">OLS-001</b></div></div>
-     <div class="id-mid"><div class="id-site"><b>Project Address</b><br><span id="cSite"></span></div><img id="cPhoto" class="id-photo" alt="Photo"></div>
-     <table class="id-details"><tr class="vendor"><td colspan="2">Vendor: <span id="cVendor"></span></td></tr><tr><td colspan="2">Pass No: <span id="cPass"></span></td></tr><tr><td colspan="2">Name: <b id="cName"></b></td></tr><tr><td colspan="2">Designation: <span id="cDesignation"></span></td></tr><tr><td colspan="2">DOB / Age / Sex: <span id="cDob"></span></td></tr><tr><td>Blood: <span id="cBlood"></span></td><td>Aadhaar: <span id="cAadhaar"></span></td></tr><tr><td colspan="2">Issue: <span id="cIssue"></span> · Valid: <span id="cValid"></span></td></tr><tr><td colspan="2">EOHS: <span id="cEohs"></span></td></tr><tr><td colspan="2">Issuing Authority Signature:</td></tr></table>
-     <div style="font-size:5.5pt;font-weight:bold">SAFETY VIOLATIONS: 🟡 1ST　🟢 2ND　🔴 3RD</div>
+  </header>
+
+  <!-- LOGIN VIEW -->
+  <main id="login-view" class="flex-1 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-200 p-8 space-y-6">
+      <div class="text-center space-y-2">
+        <h2 class="text-2xl font-black text-slate-900">Portal Login</h2>
+        <p class="text-xs text-slate-500">Select your role and enter credentials to access the portal</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="login-btn-admin" onclick="selectLoginRole('admin')" class="py-3 px-4 rounded-xl border-2 font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 bg-blue-900 text-white border-blue-900 shadow-sm">
+          <span>🛡️</span> Admin Portal
+        </button>
+        <button type="button" id="login-btn-security" onclick="selectLoginRole('security')" class="py-3 px-4 rounded-xl border-2 font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200">
+          <span>🚨</span> Security Gate
+        </button>
+      </div>
+      <input type="hidden" id="login-role" value="admin" />
+
+      <form onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User ID *</label>
+          <input type="text" id="login-user" required placeholder="Enter User ID" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold focus:bg-white focus:border-blue-900 outline-none transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
+          <input type="password" id="login-pass" required placeholder="Enter Password" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold focus:bg-white focus:border-blue-900 outline-none transition" />
+        </div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-extrabold text-sm shadow-md transition">
+          Sign In to Portal
+        </button>
+      </form>
     </div>
-    <div class="id-card">
-     <div class="back-copy"><div style="color:#b91c1c">Emergency Contact: <span id="cPhone"></span></div><div>Project Manager: <span id="cPm"></span></div><div>Safety Manager: <span id="cSm"></span></div></div>
-     <div class="back-mid"><img class="logo" alt="Logo"><div class="back-address"><b>If found, please return to:</b><br><span id="cAddress"></span></div><div id="cardQr" class="id-qr"></div></div>
-     <div class="instructions"><b>Instructions</b><br>1. Identity card must be carried and displayed while on duty.<br>2. Return the card to the authorities on completion of employment / contract.</div>
-    </div>
-   </div><p class="muted">Print using actual size / 100% scale. Disable browser headers and footers in print settings.</p></div>
+  </main>
+
+  <!-- MAIN APP VIEW -->
+  <main id="app-view" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-white rounded-2xl p-2 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-2 no-print">
+      <div id="app-nav-tabs" class="flex flex-wrap items-center gap-1.5 overflow-x-auto">
+        <button type="button" id="btn-tab-scanner" onclick="switchTab('scanner')" class="tab-btn px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-blue-900 text-white transition">
+          📷 QR Scanner &amp; Gate
+        </button>
+        <button type="button" id="btn-tab-register" onclick="switchTab('register')" class="tab-btn admin-only px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          🆔 Register &amp; ID Card
+        </button>
+        <button type="button" id="btn-tab-reports" onclick="switchTab('reports')" class="tab-btn px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          📊 Reports &amp; Analytics
+        </button>
+        <button type="button" id="btn-tab-admin-auth" onclick="switchTab('admin-auth')" class="tab-btn admin-only px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          🔑 Admin &amp; Security Passwords
+        </button>
+        <button type="button" id="btn-tab-settings" onclick="switchTab('settings')" class="tab-btn admin-only px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+          ⚙️ Cloud &amp; Settings
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="role-badge" class="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900">ROLE: ADMIN</span>
+        <button type="button" onclick="logout()" class="px-3 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold transition">
+          Sign Out
+        </button>
+      </div>
+    </nav>
+
+    <!-- SECTION CONTAINER -->
+    <section class="space-y-6">
+
+      <!-- ==================== TAB 1: QR SCANNER & GATE ATTENDANCE ==================== -->
+      <div id="tab-scanner" class="space-y-6">
+        
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-500 uppercase">Registered Workforce</p>
+              <h3 id="stat-total" class="text-2xl font-black text-slate-900 mt-1">0</h3>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center text-lg font-bold">👷</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-500 uppercase">Currently On-Site (IN)</p>
+              <h3 id="stat-in" class="text-2xl font-black text-emerald-700 mt-1">0</h3>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg font-bold">✅</div>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-500 uppercase">Completed Shift (OUT)</p>
+              <h3 id="stat-out" class="text-2xl font-black text-amber-700 mt-1">0</h3>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-bold">🚪</div>
+          </div>
+        </div>
+
+        <!-- Camera Scanner & Live Photo Verification Panel -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Left: Camera Viewfinder & Punch Mode Selector -->
+          <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-extrabold text-slate-900">Gate QR Code Scanner</h3>
+                <p id="scanner-live-clock" class="text-xs font-mono font-bold text-slate-500"></p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="handlePunchButtonClick('IN')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-sm flex items-center gap-1.5">
+                  <span>🟢</span> Clock-In Mode
+                </button>
+                <button type="button" onclick="handlePunchButtonClick('OUT')" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs shadow-sm flex items-center gap-1.5">
+                  <span>🔴</span> Clock-Out Mode
+                </button>
+              </div>
+            </div>
+
+            <!-- Scanner Box -->
+            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-video flex items-center justify-center shadow-inner">
+              <div id="reader" class="w-full h-full"></div>
+              <div id="camera-placeholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-900/90 text-white">
+                <span class="text-4xl mb-2">📷</span>
+                <p class="text-sm font-bold">Camera scanner is currently on standby</p>
+                <p class="text-xs text-slate-400 mt-1">Click below to activate camera scanning or use manual worker lookup</p>
+                <button type="button" onclick="startScanner()" class="mt-4 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow">
+                  Start Camera Scan
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <div class="flex items-center gap-2">
+                <span id="camera-status" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Camera Standby</span>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" onclick="startScanner()" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+                  Start Camera
+                </button>
+                <button type="button" onclick="stopScanner()" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+                  Stop Camera
+                </button>
+              </div>
+            </div>
+
+            <div id="camera-diag" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900"></div>
+          </div>
+
+          <!-- Right: Persistent Scan Panel Photo Verification Card -->
+          <div class="lg:col-span-5 flex flex-col space-y-4">
+            <div id="scan-panel-preview-card" class="bg-white rounded-2xl p-5 shadow-sm border-2 border-slate-200 flex flex-col justify-between h-full transition-all">
+              <div>
+                <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-4">
+                  <h4 class="text-xs font-black uppercase text-slate-500 tracking-wider">Photo Verification Panel</h4>
+                  <span id="scan-panel-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700">Ready</span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <div class="w-24 h-28 rounded-xl bg-slate-100 overflow-hidden border-2 border-slate-300 shrink-0 shadow-inner">
+                    <img id="scan-panel-photo" src="https://placehold.co/240x300/1e3a8a/ffffff?text=SCAN" alt="Worker Photo" class="w-full h-full object-cover" />
+                  </div>
+                  <div class="space-y-1.5 min-w-0">
+                    <span id="scan-panel-id" class="inline-block text-[11px] font-mono font-black px-2 py-0.5 rounded bg-blue-900 text-white">ID-000</span>
+                    <h5 id="scan-panel-name" class="text-base font-black text-slate-900 truncate">Scan Worker QR Code</h5>
+                    <p id="scan-panel-desig" class="text-xs text-slate-600 font-medium truncate">Designation • -</p>
+                    <p id="scan-panel-agency" class="text-xs text-slate-600 font-medium truncate">Vendor • -</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 mt-4 border-t border-slate-100">
+                <p id="scan-panel-time" class="text-xs font-mono font-bold text-slate-500">Timestamp: --:--:--</p>
+              </div>
+            </div>
+
+            <div id="punch-feedback" class="hidden p-4 rounded-xl border text-xs font-bold"></div>
+          </div>
+
+        </div>
+
+        <!-- Manual Gate Directory Lookup for Quick Check-In / Check-Out -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900">Manual Gate Quick Punch Panel</h3>
+              <p class="text-xs text-slate-500">Search any registered worker and instantly record Clock-In or Clock-Out</p>
+            </div>
+            <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+              <input type="text" id="gate-search-input" oninput="renderGateLookupList()" placeholder="🔍 Search ID, Name, Agency..." class="rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-semibold w-full sm:w-64" />
+              <select id="gate-filter-vendor" onchange="renderGateLookupList()" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white">
+                <option value="">All Vendors</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-slate-50/50" id="gate-lookup-list">
+            <div class="p-6 text-center text-xs text-slate-400 font-medium">No registered workers found. Add workers in Tab 2.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FULL SCREEN 2-SECOND PHOTO VERIFICATION MODAL -->
+      <div id="verify-photo-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div id="verify-modal-card" class="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border-4 border-emerald-500 transform transition-all scale-100">
+          <div id="verify-banner" class="bg-emerald-600 text-white px-4 py-3 text-center">
+            <h3 id="verify-status-text" class="text-base font-black tracking-wider uppercase">✅ CLOCK IN SUCCESS</h3>
+          </div>
+          <div class="p-6 space-y-4 text-center">
+            <div class="w-32 h-40 mx-auto rounded-2xl overflow-hidden border-2 border-slate-300 shadow-md bg-slate-100">
+              <img id="verify-worker-photo" src="" alt="Worker" class="w-full h-full object-cover" />
+            </div>
+            <div>
+              <span id="verify-worker-id" class="text-xs font-mono font-extrabold px-2.5 py-0.5 rounded bg-blue-900 text-white">ID</span>
+              <h4 id="verify-worker-name" class="text-lg font-black text-slate-900 mt-1">Worker Name</h4>
+              <p id="verify-worker-desig" class="text-xs text-slate-600 font-semibold mt-0.5">Designation</p>
+              <p id="verify-worker-agency" class="text-xs text-slate-500 font-medium">Vendor Agency</p>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-100 border border-slate-200">
+              <span class="block text-[10px] font-bold text-slate-500 uppercase">Recorded Time</span>
+              <span id="verify-time-text" class="text-sm font-mono font-black text-slate-900">00:00:00</span>
+            </div>
+          </div>
+          <div class="h-1.5 bg-slate-200 w-full overflow-hidden">
+            <div id="verify-progress-bar" class="bg-emerald-600 h-full w-full animate-shrink-2s"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: WORKER REGISTRATION & 6x9cm ID CARD ==================== -->
+      <div id="tab-register" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
+        
+        <!-- Registration Form -->
+        <div class="lg:col-span-7 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+          <div class="border-b border-slate-200 pb-3">
+            <h3 class="text-base font-extrabold text-slate-900">Worker Registration &amp; ID Card Generator</h3>
+            <p class="text-xs text-slate-500">Fill worker details to generate a 6×9cm ID card with QR code and live preview</p>
+          </div>
+
+          <form id="worker-form" onsubmit="event.preventDefault(); saveWorker();" class="space-y-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Worker ID NO *</label>
+                <input type="text" id="reg-id" required placeholder="e.g. OCEAN-2026-001" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold uppercase" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                <input type="text" id="reg-name" required placeholder="e.g. Ramesh Kumar" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Vendor / Agency Name *</label>
+                <input type="text" id="reg-agency" required placeholder="e.g. Sterling Infrastructure" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Designation *</label>
+                <input type="text" id="reg-desig" required placeholder="e.g. Senior Electrician" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">DOB / Age / Sex</label>
+                <input type="text" id="reg-dob" placeholder="15-06-1992 / 34 / M" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Blood Group</label>
+                <input type="text" id="reg-blood" placeholder="O+ Positive" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">ID Ref No / Aadhar</label>
+                <input type="text" id="reg-aadhar" placeholder="4321-8888-9999" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date of Issue</label>
+                <input type="date" id="reg-issue" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Validity Up To</label>
+                <input type="date" id="reg-valid" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">EOHS Inducted On</label>
+                <input type="date" id="reg-eohs" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Issuing Authority</label>
+                <input type="text" id="reg-auth" value="Project HR" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Emergency Contact No.</label>
+                <input type="text" id="reg-emergency" placeholder="+91 98765 43210" oninput="liveUpdatePreview()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Worker Photo</label>
+                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer" />
+              </div>
+            </div>
+
+            <div class="pt-3 flex items-center gap-3">
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-extrabold text-xs shadow transition">
+                💾 Save Worker &amp; Generate ID Card
+              </button>
+              <button type="button" onclick="clearRegistrationForm()" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition">
+                Reset Form
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ID Card Live Preview (6cm x 9cm Layout) -->
+        <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center space-y-4">
+          <div class="w-full flex items-center justify-between">
+            <h3 class="text-base font-extrabold text-slate-900">ID Card Live Preview</h3>
+            <button type="button" onclick="window.print()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow flex items-center gap-1.5">
+              <span>🖨️</span> Print / Save PDF
+            </button>
+          </div>
+
+          <div class="space-y-4 w-full flex flex-col items-center">
+            
+            <!-- ==================== FRONT OF ID CARD (90mm x 60mm) ==================== -->
+            <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
+              <!-- Header -->
+              <div class="flex items-center justify-between border-b border-blue-900 pb-[1.5mm]">
+                <div class="flex items-center gap-1.5">
+                  <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
+                    <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
+                  </svg>
+                  <div>
+                    <h2 class="text-[7pt] font-black text-blue-950 tracking-tight leading-none">OCEAN LIFESPACES</h2>
+                    <p class="text-[4pt] font-semibold text-slate-500 tracking-tighter leading-none mt-0.5">INDIA PRIVATE LIMITED</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-[5pt] font-extrabold px-1.5 py-0.5 rounded bg-blue-950 text-white">ID PASS</span>
+                </div>
+              </div>
+
+              <!-- Project Site Office Banner -->
+              <div class="bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5 text-[5pt] text-sky-950 font-semibold text-center leading-tight truncate">
+                Site: <span id="badge-project-addr">Project Site Office, Infopark Phase II, Kochi</span>
+              </div>
+
+              <!-- Middle: Photo & Details -->
+              <div class="grid grid-cols-12 gap-2 items-center my-auto">
+                <div class="col-span-4 flex flex-col items-center">
+                  <div id="badge-photo-box" class="w-[20mm] h-[24mm] rounded bg-slate-100 border border-slate-300 overflow-hidden flex items-center justify-center shadow-2xs">
+                    <span class="text-[6pt] font-semibold text-rose-400">Photo</span>
+                  </div>
+                  <span id="badge-id-no" class="text-[5.5pt] font-mono font-black text-blue-950 mt-0.5">NEW-001</span>
+                </div>
+
+                <div class="col-span-8 space-y-0.5 text-[6.5pt] leading-tight">
+                  <div>
+                    <p class="text-[4.5pt] font-bold text-slate-500 uppercase leading-none">Worker Name</p>
+                    <p id="badge-name" class="font-black text-slate-900 truncate text-[7.5pt]">-</p>
+                  </div>
+                  <div>
+                    <p class="text-[4.5pt] font-bold text-slate-500 uppercase leading-none">Vendor Agency</p>
+                    <p id="badge-vendor" class="font-bold text-slate-800 truncate">-</p>
+                  </div>
+                  <div>
+                    <p class="text-[4.5pt] font-bold text-slate-500 uppercase leading-none">Designation</p>
+                    <p id="badge-desig" class="font-bold text-blue-900 truncate">-</p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-1 pt-0.5 border-t border-slate-100 text-[5.5pt]">
+                    <div><span class="text-slate-400">DOB:</span> <span id="badge-dob" class="font-semibold">-</span></div>
+                    <div><span class="text-slate-400">Blood:</span> <span id="badge-blood" class="font-bold text-rose-600">-</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Footer with QR Code -->
+              <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                <div class="space-y-0.5 text-[5pt] text-slate-600 leading-tight">
+                  <p>Aadhar/Ref: <span id="badge-aadhar" class="font-mono font-semibold text-slate-800">-</span></p>
+                  <p>Issue: <span id="badge-issue" class="font-semibold">-</span> | Valid: <span id="badge-valid" class="font-semibold">-</span></p>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <div class="text-right leading-none">
+                    <span id="badge-auth" class="block text-[4.5pt] font-bold text-slate-700">Project HR</span>
+                    <span class="block text-[3.5pt] text-slate-400">Authorized Signatory</span>
+                  </div>
+                  <div id="badge-qr-code" class="w-[11mm] h-[11mm] bg-white border border-slate-300 p-0.5 rounded"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ==================== BACK OF ID CARD (90mm x 60mm) ==================== -->
+            <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
+              <div class="space-y-1 text-[6.5pt] leading-tight">
+                <p class="font-bold text-rose-700">
+                  Emergency Contact No. <span id="badge-back-emergency" class="text-slate-900 font-extrabold ml-1">-</span>
+                </p>
+                <p class="font-bold text-slate-900">
+                  Project Manager: <span id="badge-back-pm" class="font-semibold text-slate-800 ml-1">K. Narayanan</span>
+                </p>
+                <p class="font-bold text-slate-900">
+                  Safety Manager: <span id="badge-back-sm" class="font-semibold text-slate-800 ml-1">S. Rajesh</span>
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 my-1">
+                <div class="flex flex-col items-center text-center w-[28mm] shrink-0">
+                  <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="5.5" stroke-linecap="round"/>
+                    <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
+                    <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
+                  </svg>
+                  <span class="text-[8.5pt] font-black text-blue-950 tracking-[0.14em] leading-none mt-0.5">OCEAN<sup class="text-[4.5pt]">®</sup></span>
+                  <span class="text-[4.5pt] font-semibold text-slate-600 tracking-[0.14em] leading-none mt-0.5">DELIVERING DREAMS</span>
+                </div>
+
+                <div class="flex-1 text-[6.2pt] leading-snug text-slate-900">
+                  <p class="font-bold">If found Please return it to:</p>
+                  <p class="font-bold">Company Address:</p>
+                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">
+                    Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032
+                  </p>
+                </div>
+              </div>
+
+              <div class="text-[5.8pt] leading-tight text-slate-900">
+                <p class="font-bold text-rose-700 underline mb-0.5">Instructions:</p>
+                <p class="font-semibold">1. Identity Card Must always be carried and displayed while on duty</p>
+                <p class="font-semibold">2. ID Loss of card must be returned to the authorities on completion of employment /Contract</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Registered Workforce Directory -->
+        <div class="lg:col-span-12 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900">Registered Workforce &amp; Contractor Directory</h3>
+              <p class="text-xs text-slate-500">Search and filter registered staff across all vendors and designations</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="printAllWorkerQRCodesA4()" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold">
+                🖨️ Print All QR Codes (A4 Portrait)
+              </button>
+              <button type="button" onclick="exportWorkersJSON()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">
+                ⬇ Backup Staff List
+              </button>
+              <label class="px-3 py-1.5 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-bold cursor-pointer mb-0">
+                ⬆ Load Staff List
+                <input type="file" accept=".json" onchange="importWorkersJSON(event)" class="hidden" />
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 mb-4">
+            <input type="text" id="dir-search-input" oninput="renderDirectoryTable()" placeholder="🔍 Search ID, Name, Blood, Ref..." class="sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" />
+            <select id="dir-filter-vendor" onchange="renderDirectoryTable()" class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold bg-white">
+              <option value="">All Vendors / Agencies</option>
+            </select>
+            <div class="flex gap-2">
+              <select id="dir-filter-desig" onchange="renderDirectoryTable()" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold bg-white">
+                <option value="">All Designations</option>
+              </select>
+              <button type="button" onclick="resetDirectoryFilters()" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <th class="py-3 px-3 font-bold">Photo</th>
+                  <th class="py-3 px-3 font-bold">ID NO</th>
+                  <th class="py-3 px-3 font-bold">Full Name</th>
+                  <th class="py-3 px-3 font-bold">Designation</th>
+                  <th class="py-3 px-3 font-bold">Vendor Agency</th>
+                  <th class="py-3 px-3 font-bold">Blood / Ref</th>
+                  <th class="py-3 px-3 font-bold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staff-directory-body" class="divide-y divide-slate-200"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== TAB 3: REPORTS & ANALYTICS CENTER ==================== -->
+      <div id="tab-reports" class="hidden space-y-4 no-print">
+        <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200">
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Attendance Reports &amp; Analytics Center</h3>
+              <p class="text-xs text-slate-500">Generate Daily Logs, Monthly Workforce Summaries, and Individual Worker Date/Month Reports</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="syncAllDataFromCloud(true)" class="px-3.5 py-2 rounded-lg bg-sky-700 hover:bg-sky-600 text-white text-xs font-extrabold shadow flex items-center gap-1">
+                <span>🔄</span> Sync Cloud Logs
+              </button>
+              <button type="button" onclick="exportActiveReportToExcel()" class="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow flex items-center gap-1.5">
+                <span>📊</span> Export Current Report (.xlsx)
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 my-4">
+            <button type="button" id="rep-btn-daily" onclick="switchReportSubTab('daily')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-blue-900 text-white shadow-xs transition">
+              📅 1. Daily Attendance Report
+            </button>
+            <button type="button" id="rep-btn-monthly" onclick="switchReportSubTab('monthly')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              📆 2. Monthly Summary Report
+            </button>
+            <button type="button" id="rep-btn-individual" onclick="switchReportSubTab('individual')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              👷 3. Individual Worker Report (Date / Month Wise)
+            </button>
+          </div>
+
+          <!-- SUB-REPORT A: DAILY ATTENDANCE REPORT -->
+          <div id="subreport-daily" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <input type="text" id="daily-search" oninput="renderDailyReport()" placeholder="🔍 Search Name, ID, Agency..." class="lg:col-span-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              <input type="date" id="daily-date-filter" onchange="renderDailyReport()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              <select id="daily-vendor-filter" onchange="renderDailyReport()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">
+                <option value="">All Vendors</option>
+              </select>
+              <select id="daily-status-filter" onchange="renderDailyReport()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">
+                <option value="">All Status (IN &amp; OUT)</option>
+                <option value="IN">Currently On-Site (IN)</option>
+                <option value="OUT">Completed Shift (OUT)</option>
+              </select>
+              <button type="button" onclick="resetDailyFilters()" class="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold">
+                Reset All
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                    <th class="py-3 px-3 font-bold">S.No</th>
+                    <th class="py-3 px-3 font-bold">Photo</th>
+                    <th class="py-3 px-3 font-bold">Date</th>
+                    <th class="py-3 px-3 font-bold">ID NO</th>
+                    <th class="py-3 px-3 font-bold">Worker Name</th>
+                    <th class="py-3 px-3 font-bold">Designation</th>
+                    <th class="py-3 px-3 font-bold">Vendor Agency</th>
+                    <th class="py-3 px-3 font-bold">IN Time</th>
+                    <th class="py-3 px-3 font-bold">OUT Time</th>
+                    <th class="py-3 px-3 font-bold">Total Hrs</th>
+                    <th class="py-3 px-3 font-bold">Overtime</th>
+                    <th class="py-3 px-3 font-bold">Verified By</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-report-body" class="divide-y divide-slate-200"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB-REPORT B: MONTHLY SUMMARY REPORT -->
+          <div id="subreport-monthly" class="hidden space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Select Month</label>
+                <input type="month" id="monthly-month-filter" onchange="renderMonthlyReport()" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div class="lg:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Search Worker</label>
+                <input type="text" id="monthly-search" oninput="renderMonthlyReport()" placeholder="🔍 Search Worker Name or ID..." class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Filter Vendor</label>
+                <select id="monthly-vendor-filter" onchange="renderMonthlyReport()" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">
+                  <option value="">All Vendors</option>
+                </select>
+              </div>
+              <div class="flex items-end">
+                <button type="button" onclick="resetMonthlyFilters()" class="w-full px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                    <th class="py-3 px-3 font-bold">S.No</th>
+                    <th class="py-3 px-3 font-bold">Photo</th>
+                    <th class="py-3 px-3 font-bold">Month</th>
+                    <th class="py-3 px-3 font-bold">ID NO</th>
+                    <th class="py-3 px-3 font-bold">Worker Name</th>
+                    <th class="py-3 px-3 font-bold">Designation</th>
+                    <th class="py-3 px-3 font-bold">Vendor Agency</th>
+                    <th class="py-3 px-3 font-bold text-center">Present Days</th>
+                    <th class="py-3 px-3 font-bold text-center">Total Punches</th>
+                    <th class="py-3 px-3 font-bold">Total Hours</th>
+                    <th class="py-3 px-3 font-bold">Overtime Hours</th>
+                  </tr>
+                </thead>
+                <tbody id="monthly-report-body" class="divide-y divide-slate-200"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB-REPORT C: INDIVIDUAL WORKER REPORT -->
+          <div id="subreport-individual" class="hidden space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <div class="lg:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Select Worker</label>
+                <select id="indiv-worker-select" onchange="renderIndividualReport()" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+                  <option value="">-- All Workers --</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Search ID / Name</label>
+                <input type="text" id="indiv-search" oninput="renderIndividualReport()" placeholder="🔍 Type ID..." class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Month Wise</label>
+                <input type="month" id="indiv-month-filter" onchange="document.getElementById('indiv-date-filter').value=''; renderIndividualReport();" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Exact Date Wise</label>
+                <input type="date" id="indiv-date-filter" onchange="document.getElementById('indiv-month-filter').value=''; renderIndividualReport();" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div class="flex items-end">
+                <button type="button" onclick="resetIndividualFilters()" class="w-full px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Summary Banner -->
+            <div id="indiv-summary-banner" class="hidden p-4 rounded-xl bg-sky-50 border border-sky-200 flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <img id="indiv-card-photo" src="" alt="Worker" class="w-12 h-14 rounded-lg object-cover border border-slate-300 bg-white" />
+                <div>
+                  <span id="indiv-card-id" class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-blue-900 text-white">ID</span>
+                  <h4 id="indiv-card-name" class="text-sm sm:text-base font-black text-slate-900 mt-0.5">Worker Name</h4>
+                  <p id="indiv-card-meta" class="text-xs text-slate-600 font-medium">Designation • Vendor</p>
+                </div>
+              </div>
+              <div class="flex gap-4 text-center">
+                <div class="bg-white px-3.5 py-2 rounded-lg border border-sky-200">
+                  <span class="block text-[10px] font-bold text-slate-500 uppercase">Days Present</span>
+                  <span id="indiv-stat-days" class="text-base font-black text-emerald-700">0</span>
+                </div>
+                <div class="bg-white px-3.5 py-2 rounded-lg border border-sky-200">
+                  <span class="block text-[10px] font-bold text-slate-500 uppercase">Total Work Hrs</span>
+                  <span id="indiv-stat-hrs" class="text-base font-black text-blue-900">0.00</span>
+                </div>
+                <div class="bg-white px-3.5 py-2 rounded-lg border border-sky-200">
+                  <span class="block text-[10px] font-bold text-slate-500 uppercase">Overtime Hrs</span>
+                  <span id="indiv-stat-ot" class="text-base font-black text-rose-700">0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                    <th class="py-3 px-3 font-bold">S.No</th>
+                    <th class="py-3 px-3 font-bold">Date</th>
+                    <th class="py-3 px-3 font-bold">ID NO</th>
+                    <th class="py-3 px-3 font-bold">Worker Name</th>
+                    <th class="py-3 px-3 font-bold">Designation</th>
+                    <th class="py-3 px-3 font-bold">Vendor Agency</th>
+                    <th class="py-3 px-3 font-bold">IN Time</th>
+                    <th class="py-3 px-3 font-bold">OUT Time</th>
+                    <th class="py-3 px-3 font-bold">Total Hrs</th>
+                    <th class="py-3 px-3 font-bold">Overtime</th>
+                    <th class="py-3 px-3 font-bold">Verified By</th>
+                  </tr>
+                </thead>
+                <tbody id="individual-report-body" class="divide-y divide-slate-200"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: ADMIN & SECURITY CREDENTIALS ==================== -->
+      <div id="tab-admin-auth" class="hidden max-w-2xl mx-auto bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6 no-print">
+        <div class="border-b border-slate-200 pb-3">
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Admin User ID &amp; Password Management</h3>
+          <p class="text-xs text-slate-500">Change Admin Portal credentials and Security Gate login credentials securely</p>
+        </div>
+
+        <form onsubmit="event.preventDefault(); updateAdminCredentials();" class="space-y-4 bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+          <h4 class="text-xs font-extrabold text-blue-900 uppercase tracking-wider">🛡️ Change Admin Login User ID &amp; Password</h4>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Current Admin Password *</label>
+            <input type="password" id="auth-current-pass" required placeholder="Verify current password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">New Admin User ID *</label>
+              <input type="text" id="auth-new-admin-id" required placeholder="Enter new Admin User ID" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">New Admin Password *</label>
+              <input type="password" id="auth-new-admin-pass" required placeholder="Enter new password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Confirm New Admin Password *</label>
+            <input type="password" id="auth-confirm-admin-pass" required placeholder="Re-enter new password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" />
+          </div>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm shadow transition">
+            Update Admin User ID &amp; Password
+          </button>
+        </form>
+
+        <form onsubmit="event.preventDefault(); updateSecurityCredentials();" class="space-y-4 bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+          <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">🚨 Security Gate Login Credentials</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Security Gate User ID *</label>
+              <input type="text" id="auth-sec-id" required placeholder="Enter Security User ID" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Security Gate Password *</label>
+              <input type="password" id="auth-sec-pass" required placeholder="Enter Security Password" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" />
+            </div>
+          </div>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm shadow transition">
+            Save Security Credentials
+          </button>
+        </form>
+      </div>
+
+      <!-- ==================== TAB 5: SETTINGS & VOICE PHRASES ==================== -->
+      <div id="tab-settings" class="hidden max-w-2xl mx-auto bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5 no-print">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Backend Cloud Sync, Voice Prompts &amp; Site Settings</h3>
+          <p class="text-xs text-slate-500">Connect your Google Apps Script Web App URL and customize spoken Clock-In / Clock-Out voice phrases</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 space-y-2">
+          <label class="block text-xs font-extrabold text-sky-950 uppercase">Backend API / Google Apps Script Web App URL</label>
+          <input type="url" id="set-backend-url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" class="w-full rounded-lg border border-sky-300 bg-white px-3 py-2.5 text-sm font-mono" />
+          <p class="text-[11px] text-sky-800">Paste your deployed Google Apps Script Web App URL above and click Save Configuration.</p>
+        </div>
+
+        <!-- CUSTOM SPOKEN VOICE PHRASES -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">🔊 Custom Spoken Voice Wording</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Clock-In Voice Phrase</label>
+              <input type="text" id="set-voice-in" placeholder="{name} clock in success" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Clock-Out Voice Phrase</label>
+              <input type="text" id="set-voice-out" placeholder="{name} clock out success" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" />
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500">Use <code class="bg-slate-200 px-1 rounded">{name}</code> for worker name and <code class="bg-slate-200 px-1 rounded">{id}</code> for badge ID.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Project Site Address (Printed on Front of ID Card)</label>
+          <input type="text" id="set-project-addr" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Return Company Address (Printed on Back of ID Card)</label>
+          <textarea id="set-return-addr" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Project Manager Name</label>
+            <input type="text" id="set-pm" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Safety Manager Name</label>
+            <input type="text" id="set-sm" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+        </div>
+
+        <div class="max-w-xs">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Standard Shift Hours (Before Overtime)</label>
+          <input type="number" id="set-shift-hrs" min="1" max="24" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+
+        <div class="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200">
+          <button type="button" onclick="saveSettings()" class="px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-sm shadow transition">
+            Save Configuration
+          </button>
+          <button type="button" onclick="clearAllSystemRecords()" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow transition flex items-center gap-1.5">
+            <span>🗑️</span> Clear All Registrations &amp; Records
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 hidden no-print">
+    <span id="toast-msg" class="text-xs font-bold">Notification</span>
+    <button type="button" onclick="hideToast()" class="text-slate-400 hover:text-white text-sm font-bold">&times;</button>
   </div>
- </section>
- <section id="tab-registers" class="tab hidden">
-  <div class="panel"><div class="section-head"><h3>Registered workforce directory</h3><input id="workerSearch" style="max-width:300px" placeholder="Search ID, name, vendor…" oninput="renderWorkers()"></div><div class="table-wrap"><table><thead><tr><th>Worker ID</th><th>Pass No</th><th>Name</th><th>Designation</th><th>Vendor</th><th>Blood</th><th>Contact</th><th>Action</th></tr></thead><tbody id="workerRows"></tbody></table></div></div>
- </section>
- <section id="tab-reports" class="tab hidden">
-  <div class="panel"><div class="section-head"><div><h3>Attendance reports & analytics</h3><p class="muted">Records are stored in the connected Google Sheets database.</p></div><div class="button-row" style="margin:0"><button class="btn outline small" onclick="refreshData()">Refresh</button><button class="btn success small" onclick="exportExcel()">Export Excel</button></div></div>
-   <div class="mode-row" style="max-width:520px"><button id="dailyBtn" class="btn dark" onclick="reportMode('daily')">Daily</button><button id="monthlyBtn" class="btn outline" onclick="reportMode('monthly')">Monthly</button></div>
-   <div class="filters"><div><label>Date</label><input id="rDate" type="date" onchange="renderReports()"></div><div><label>Month</label><input id="rMonth" type="month" onchange="renderReports()"></div><div><label>Vendor</label><select id="rVendor" onchange="renderReports()"><option value="">All vendors</option></select></div><div><label>Search worker / ID</label><input id="rSearch" oninput="renderReports()" placeholder="Search…"></div></div>
-   <div class="table-wrap"><table id="reportTable"><thead id="reportHead"></thead><tbody id="reportRows"></tbody></table></div>
-  </div>
- </section>
- <section id="tab-settings" class="tab hidden">
-  <div class="layout-2">
-   <div class="panel"><h3>Company & project settings</h3><label>Company logo</label><input id="logoFile" type="file" accept="image/*"><label>Project site address</label><input id="sSite"><label>Project manager</label><input id="sPm"><label>Safety manager</label><input id="sSm"><label>Company return address</label><input id="sAddress"><label>Standard shift hours</label><input id="sShift" type="number" min="1" max="24" step=".5"><button class="btn primary block" style="margin-top:16px" onclick="saveSettings()">Save settings</button></div>
-   <div class="panel"><h3>Account security</h3><div class="notice">Login credentials are validated on the Apps Script backend. Do not store passwords in the browser or share the deployment URL publicly.</div><label>Current password</label><input id="oldPassword" type="password" autocomplete="current-password"><label>New password</label><input id="newPassword" type="password" autocomplete="new-password"><label>Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password"><button class="btn dark block" style="margin-top:16px" onclick="changePassword()">Change my password</button></div>
-  </div>
- </section>
-</section>
-</main>
-<div id="toast" class="toast hidden" role="status"></div>
-<script>
-  const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzb6xhEUWx2IGexBDR4JXIP058-sfAF_m7WzKAcn6g8jXvKSWRjlgIFo8EOAeIDiLYPgQ/exec";
-const $=id=>document.getElementById(id);
-const DEFAULT_LOGO='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="240" height="80" fill="white"/><circle cx="35" cy="35" r="22" fill="none" stroke="#07599b" stroke-width="6"/><circle cx="35" cy="35" r="13" fill="none" stroke="#8cc63f" stroke-width="4"/><text x="70" y="42" font-family="Arial" font-size="29" font-weight="bold" fill="#07599b">OCEAN</text><text x="72" y="58" font-family="Arial" font-size="9" fill="#475569">DELIVERING DREAMS</text></svg>');
-let token='',role='ADMIN',mode='IN',workers=[],logs=[],settings={},scanner=null,scanning=false,reportType='daily',photoData='',lastScan={id:'',at:0},toastTimer;
-function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),3500)}
-function setConnection(ok,msg){$('connection').textContent=msg;$('connection').className='status '+(ok?'ok':'bad')}
-function callServer(fn,...args){return new Promise((resolve,reject)=>{if(typeof google==='undefined'||!google.script||!google.script.run){reject(new Error('Open this portal using the deployed Google Apps Script web app URL.'));return}google.script.run.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(e.message||String(e))))[fn](...args)})}
-function chooseRole(r){role=r;$('adminRole').className=r==='ADMIN'?'btn dark':'btn outline';$('gateRole').className=r==='GATE'?'btn dark':'btn outline'}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{const res=await callServer('apiLogin',$('loginUser').value.trim(),$('loginPass').value,role);if(!res.ok)throw Error(res.message||'Login failed');token=res.token;role=res.role;$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('roleTag').textContent='ROLE: '+role;$('roleTag').classList.remove('hidden');$('logoutBtn').classList.remove('hidden');document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',role!=='ADMIN'));setConnection(true,'Cloud connected');await refreshData();tab('scanner')}catch(err){toast(err.message)}});
-async function logout(){await stopScanner();token='';location.reload()}
-function tab(name){document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));$('tab-'+name).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));if(name==='reports')renderReports()}
-function setMode(m){mode=m;$('inMode').className=m==='IN'?'btn success':'btn outline';$('outMode').className=m==='OUT'?'btn danger':'btn outline'}
-async function refreshData(){try{const d=await callServer('apiBootstrap',token);if(!d.ok)throw Error(d.message||'Could not load data');workers=d.workers||[];logs=d.logs||[];settings=d.settings||{};applySettings();renderAll();setConnection(true,'Cloud connected')}catch(e){setConnection(false,'Cloud error');toast(e.message)}}
-function applySettings(){const logo=settings.logoData||DEFAULT_LOGO;document.querySelectorAll('#headerLogo,#loginLogo,.logo').forEach(i=>i.src=logo);$('sSite').value=settings.site||'';$('sPm').value=settings.pm||'';$('sSm').value=settings.sm||'';$('sAddress').value=settings.returnAddress||'';$('sShift').value=settings.shiftHours||8;$('cSite').textContent=settings.site||'';$('cPm').textContent=settings.pm||'';$('cSm').textContent=settings.sm||'';$('cAddress').textContent=settings.returnAddress||'';updateCardPreview()}
-function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
-function renderAll(){const todays=logs.filter(l=>l.date===today());$('statTotal').textContent=workers.length;$('statIn').textContent=todays.filter(l=>!l.outTime).length;$('statOut').textContent=todays.filter(l=>l.outTime).length;$('statRecords').textContent=todays.length;renderQuick();renderWorkers();populateVendors();renderReports()}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderQuick(){const q=$('quickSearch').value.toLowerCase();const arr=workers.filter(w=>(w.name+' '+w.id+' '+w.vendor).toLowerCase().includes(q)).slice(0,100);$('quickList').innerHTML=arr.map(w=>`<div class="quick-item"><div><strong>${esc(w.name)} <small>${esc(w.id)}</small></strong><small>${esc(w.designation)} · ${esc(w.vendor)}</small></div><button class="btn primary small" onclick="punch('${esc(w.id)}')">Punch ${mode}</button></div>`).join('')||'<p class="muted">No matching workers found.</p>'}
-async function punch(id){try{const res=await callServer('apiPunch',token,id,mode);if(!res.ok)throw Error(res.message);if(res.log){const i=logs.findIndex(l=>l.id===res.log.id&&l.date===res.log.date);if(i>=0)logs[i]=res.log;else logs.unshift(res.log)}const w=workers.find(x=>x.id===id);if(w&&w.photoFileId){try{const ph=await callServer('apiGetPhoto',token,id);if(ph.ok)w.photoData='data:'+ph.mimeType+';base64,'+ph.data}catch(e){}}showVerification(w,res.log,mode);renderAll();toast(res.message)}catch(e){toast(e.message)}}
-function showVerification(w,l,m){if(!w)return;$('verifyPhoto').src=w.photoData||DEFAULT_LOGO;$('verifyName').textContent=w.name;$('verifyId').textContent=w.id;$('verifyMeta').textContent=(w.designation||'')+' · '+(w.vendor||'');$('verifyBadge').textContent=m==='IN'?'CLOCK IN SUCCESS':'CLOCK OUT SUCCESS';$('verifyBadge').className='pill '+(m==='IN'?'in':'out');$('verifyTime').textContent=(m==='IN'?l.inTime:l.outTime)+' · '+l.date}
-async function startScanner(){if(scanning)return;if(!window.Html5Qrcode){toast('Scanner library failed to load.');return}try{scanner=new Html5Qrcode('reader',{verbose:false});await scanner.start({facingMode:'environment'},{fps:12,qrbox:(vw,vh)=>({width:Math.min(240,vw*.78),height:Math.min(240,vh*.78)}),aspectRatio:1},text=>{const now=Date.now();if(text===lastScan.id&&now-lastScan.at<2500)return;lastScan={id:text,at:now};punch(text.trim())},()=>{});scanning=true;$('scanHint').textContent='Camera active. Hold the worker QR code inside the frame.'}catch(e){toast('Camera could not start: '+e);$('scanHint').textContent='Check camera permission and use HTTPS.'}}
-async function stopScanner(){if(scanner&&scanning){try{await scanner.stop();await scanner.clear()}catch(e){}scanning=false}$('reader').textContent='Camera is stopped'}
-$('workerForm').addEventListener('input',updateCardPreview);
-$('wPhoto').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')){toast('Please choose an image file.');return}try{photoData=await resizeImage(f);$('cPhoto').src=photoData;toast('Photo ready to upload')}catch(err){toast('Could not read photo')}});
-function resizeImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const max=640,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.78))};im.src=reader.result};reader.readAsDataURL(file)})}
-const fields={id:'wId',passNo:'wPass',name:'wName',vendor:'wVendor',designation:'wDesignation',dob:'wDob',bloodGroup:'wBlood',aadhaar:'wAadhaar',issueDate:'wIssue',validUpto:'wValid',eohsDate:'wEohs',emergencyContact:'wPhone'};
-function updateCardPreview(){const map={id:'cId',passNo:'cPass',name:'cName',vendor:'cVendor',designation:'cDesignation',dob:'cDob',bloodGroup:'cBlood',aadhaar:'cAadhaar',issueDate:'cIssue',validUpto:'cValid',eohsDate:'cEohs',emergencyContact:'cPhone'};Object.entries(fields).forEach(([k,id])=>$(map[k]).textContent=$(id).value);$('cPhoto').src=photoData||DEFAULT_LOGO;const q=$('cardQr');q.innerHTML='';if(window.QRCode)new QRCode(q,{text:$('wId').value||'OLS-001',width:100,height:100,correctLevel:QRCode.CorrectLevel.M})}
-async function saveWorker(e){e.preventDefault();const w={};Object.entries(fields).forEach(([k,id])=>w[k]=$(id).value.trim());w.photoData=photoData;try{const r=await callServer('apiSaveWorker',token,w);if(!r.ok)throw Error(r.message);toast(r.message||'Worker saved');clearWorkerForm();await refreshData()}catch(err){toast(err.message)}}
-function clearWorkerForm(){ $('workerForm').reset();photoData='';updateCardPreview()}
-function renderWorkers(){const q=$('workerSearch').value.toLowerCase();$('workerRows').innerHTML=workers.filter(w=>(w.id+' '+w.name+' '+w.vendor+' '+w.designation).toLowerCase().includes(q)).map(w=>`<tr><td>${esc(w.id)}</td><td>${esc(w.passNo)}</td><td>${esc(w.name)}</td><td>${esc(w.designation)}</td><td>${esc(w.vendor)}</td><td>${esc(w.bloodGroup)}</td><td>${esc(w.emergencyContact)}</td><td><button class="btn outline small" onclick="editWorker('${esc(w.id)}')">Edit / ID</button></td></tr>`).join('')}
-async function editWorker(id){const w=workers.find(x=>x.id===id);if(!w)return;Object.entries(fields).forEach(([k,f])=>$(f).value=w[k]||'');photoData='';$('cPhoto').src=DEFAULT_LOGO;if(w.photoFileId){try{const ph=await callServer('apiGetPhoto',token,id);if(ph.ok){photoData='data:'+ph.mimeType+';base64,'+ph.data;$('cPhoto').src=photoData}}catch(e){toast('Photo could not be loaded: '+e.message)}}updateCardPreview();tab('register');toast('Worker details loaded.') }
-function printId(){updateCardPreview();window.print()}
-function populateVendors(){const old=$('rVendor').value;const vs=[...new Set(workers.map(w=>w.vendor).filter(Boolean))].sort();$('rVendor').innerHTML='<option value="">All vendors</option>'+vs.map(v=>`<option>${esc(v)}</option>`).join('');$('rVendor').value=old}
-function reportMode(m){reportType=m;$('dailyBtn').className=m==='daily'?'btn dark':'btn outline';$('monthlyBtn').className=m==='monthly'?'btn dark':'btn outline';$('rDate').disabled=m!=='daily';$('rMonth').disabled=m!=='monthly';renderReports()}
-function renderReports(){if(!$('reportRows'))return;const q=$('rSearch').value.toLowerCase(),vendor=$('rVendor').value;let rows=[];if(reportType==='daily'){const d=$('rDate').value||today();rows=logs.filter(l=>l.date===d&&(!vendor||l.vendor===vendor)&&(l.name+' '+l.id).toLowerCase().includes(q));$('reportHead').innerHTML='<tr><th>Date</th><th>ID</th><th>Name</th><th>Designation</th><th>Vendor</th><th>IN</th><th>OUT</th><th>Hours</th><th>OT</th></tr>';$('reportRows').innerHTML=rows.map(l=>`<tr><td>${esc(l.date)}</td><td>${esc(l.id)}</td><td>${esc(l.name)}</td><td>${esc(l.designation)}</td><td>${esc(l.vendor)}</td><td>${esc(l.inTime)}</td><td>${esc(l.outTime||'On site')}</td><td>${esc(l.totalHrs||'0.00')}</td><td>${esc(l.overtime||'0.00')}</td></tr>`).join('')}else{const m=$('rMonth').value||today().slice(0,7);const arr=workers.filter(w=>(!vendor||w.vendor===vendor)&&(w.name+' '+w.id).toLowerCase().includes(q));$('reportHead').innerHTML='<tr><th>Month</th><th>ID</th><th>Name</th><th>Vendor</th><th>Present days</th><th>Total hours</th><th>Overtime</th></tr>';$('reportRows').innerHTML=arr.map(w=>{const a=logs.filter(l=>l.id===w.id&&l.date.startsWith(m));return `<tr><td>${m}</td><td>${esc(w.id)}</td><td>${esc(w.name)}</td><td>${esc(w.vendor)}</td><td>${new Set(a.map(x=>x.date)).size}</td><td>${a.reduce((s,x)=>s+Number(x.totalHrs||0),0).toFixed(2)}</td><td>${a.reduce((s,x)=>s+Number(x.overtime||0),0).toFixed(2)}</td></tr>`}).join('')}}
-function exportExcel(){if(!window.XLSX){toast('Excel export library unavailable');return}const table=$('reportTable');const wb=XLSX.utils.table_to_book(table,{sheet:'Attendance'});XLSX.writeFile(wb,`Ocean_Attendance_${reportType}_${today()}.xlsx`)}
-async function saveSettings(){const s={site:$('sSite').value,pm:$('sPm').value,sm:$('sSm').value,returnAddress:$('sAddress').value,shiftHours:Number($('sShift').value)};const f=$('logoFile').files[0];if(f)s.logoData=await resizeImage(f);try{const r=await callServer('apiSaveSettings',token,s);if(!r.ok)throw Error(r.message);await refreshData();toast('Settings saved')}catch(e){toast(e.message)}}
-async function changePassword(){const a=$('oldPassword').value,b=$('newPassword').value,c=$('confirmPassword').value;if(!a||b.length<10||b!==c){toast('Enter current password and a matching new password (at least 10 characters).');return}try{const r=await callServer('apiChangePassword',token,a,b);if(!r.ok)throw Error(r.message);$('oldPassword').value=$('newPassword').value=$('confirmPassword').value='';toast('Password changed')}catch(e){toast(e.message)}}
-$('rDate').value=today();$('rMonth').value=today().slice(0,7);chooseRole('ADMIN');setMode('IN');$('cSite').textContent='';$('headerLogo').src=DEFAULT_LOGO;$('loginLogo').src=DEFAULT_LOGO;
-callServer('apiHealth').then(()=>setConnection(true,'Backend ready')).catch(()=>setConnection(false,'Open deployed Apps Script URL'));
-</script>
+
+  <script>
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbyFtunzhbthBV4XISD9yAEV8k4JlcFogl8r8waXYCh9edPS3T-A6pWjKW-whovBtd27NQ/exec";
+    const STORAGE_KEY_WORKERS = 'ocean_v6_workers';
+    const STORAGE_KEY_LOGS = 'ocean_v6_logs';
+    const STORAGE_KEY_SETTINGS = 'ocean_v6_settings';
+    const STORAGE_KEY_AUTH = 'ocean_v6_auth';
+
+    let currentRole = null;
+    let activeReportSubTab = 'daily';
+    let voiceEnabled = true;
+    let html5QrCode = null;
+    let isScanning = false;
+    let lastScanTimestamp = 0;
+    let lastScannedCode = "";
+    let activeScanMode = "IN";
+    let uploadedPhotoDataUrl = "";
+    let verifyModalTimer = null;
+    let cloudPollInterval = null;
+
+    let authCredentials = {
+      adminUser: "admin",
+      adminPass: "admin123",
+      secUser: "security",
+      secPass: "sec123"
+    };
+
+    let settings = {
+      backendUrl: DEFAULT_BACKEND_URL,
+      projectAddress: "Project Site Office, Infopark Phase II, Kakkanad, Kochi, Kerala 682042",
+      returnAddress: "Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032",
+      projectManager: "K. Narayanan",
+      safetyManager: "S. Rajesh",
+      shiftHours: 8,
+      voiceInPhrase: "{name} clock in success",
+      voiceOutPhrase: "{name} clock out success"
+    };
+
+    let workers = [];
+    let logs = [];
+
+    // ==================== VOICE ENGINE ====================
+    function toggleVoiceAudio() {
+      voiceEnabled = !voiceEnabled;
+      const btn = document.getElementById('voice-toggle-btn');
+      if (btn) {
+        btn.innerHTML = voiceEnabled
+          ? `<span>🔊</span><span class="hidden sm:inline">Voice ON</span>`
+          : `<span>🔇</span><span class="hidden sm:inline">Voice OFF</span>`;
+      }
+      if (voiceEnabled) speakVoice("Voice enabled");
+    }
+
+    function speakVoice(text) {
+      if (!voiceEnabled) return;
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'en-IN';
+          utterance.rate = 0.98;
+          utterance.pitch = 1.0;
+          window.speechSynthesis.speak(utterance);
+        }
+      } catch (e) {}
+    }
+
+    function formatVoiceTemplate(template, worker) {
+      return String(template)
+        .replace(/\{name\}/gi, worker.name)
+        .replace(/\{id\}/gi, worker.id);
+    }
+
+    // ==================== LIVE CLOCK ====================
+    function startLiveClock() {
+      function tick() {
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const timeStr = getRailwayTime(now);
+        const fullStamp = `${dd}-${mm}-${yyyy} | ${timeStr}`;
+
+        const headerEl = document.getElementById('live-header-timestamp');
+        if (headerEl) headerEl.innerText = fullStamp;
+
+        const scannerEl = document.getElementById('scanner-live-clock');
+        if (scannerEl) scannerEl.innerText = fullStamp;
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    function formatDisplayDate(dateVal) {
+      if (!dateVal) return "-";
+      let str = String(dateVal);
+      if (str.includes("GMT") || str.includes("T")) {
+        try {
+          const d = new Date(str);
+          if (!isNaN(d.getTime())) {
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
+          }
+        } catch(e) {}
+      }
+      const parts = str.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+      return str;
+    }
+
+    function formatDisplayTime(timeVal) {
+      if (!timeVal) return "";
+      let str = String(timeVal);
+      if (str.includes("GMT")) {
+        try {
+          const d = new Date(str);
+          if (!isNaN(d.getTime())) {
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+          }
+        } catch(e) {}
+      }
+      return str;
+    }
+
+    function getRailwayTime(dateObj = new Date()) {
+      return String(dateObj.getHours()).padStart(2, '0') + ":" +
+             String(dateObj.getMinutes()).padStart(2, '0') + ":" +
+             String(dateObj.getSeconds()).padStart(2, '0');
+    }
+
+    function initAppState() {
+      try {
+        const savedW = localStorage.getItem(STORAGE_KEY_WORKERS);
+        const savedL = localStorage.getItem(STORAGE_KEY_LOGS);
+        const savedS = localStorage.getItem(STORAGE_KEY_SETTINGS);
+        const savedA = localStorage.getItem(STORAGE_KEY_AUTH);
+
+        workers = savedW ? JSON.parse(savedW) : [];
+        logs = savedL ? JSON.parse(savedL) : [];
+        if (savedS) settings = { ...settings, ...JSON.parse(savedS) };
+        if (savedA) authCredentials = { ...authCredentials, ...JSON.parse(savedA) };
+      } catch (e) {
+        workers = [];
+        logs = [];
+      }
+      updateBackendBadge();
+      refreshAllFilterDropdowns();
+    }
+
+    function persistAll() {
+      try {
+        localStorage.setItem(STORAGE_KEY_WORKERS, JSON.stringify(workers));
+        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+        localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+        localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(authCredentials));
+      } catch (e) {}
+    }
+
+    function updateBackendBadge() {
+      const pill = document.getElementById('backend-status-pill');
+      if (!pill) return;
+      if (settings.backendUrl && settings.backendUrl.startsWith('http')) {
+        pill.innerText = "🟢 Cloud DB Connected";
+        pill.className = "hidden lg:inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700";
+      } else {
+        pill.innerText = "🟡 Local Mode";
+        pill.className = "hidden lg:inline-block px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-amber-300 border border-slate-700";
+      }
+    }
+
+    function getWorkerPhoto(workerId, fallbackName = "ID") {
+      const w = workers.find(item => item.id.toUpperCase() === String(workerId).toUpperCase());
+      if (w && w.photo) return w.photo;
+      const initials = fallbackName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || "ID";
+      return `https://placehold.co/240x300/1e3a8a/ffffff?text=${initials}`;
+    }
+
+    function refreshAllFilterDropdowns() {
+      const vendors = [...new Set([
+        ...workers.map(w => w.agency).filter(Boolean),
+        ...logs.map(l => l.agency).filter(Boolean)
+      ])].sort();
+
+      const designations = [...new Set([
+        ...workers.map(w => w.designation).filter(Boolean),
+        ...logs.map(l => l.designation).filter(Boolean)
+      ])].sort();
+
+      ['gate-filter-vendor', 'dir-filter-vendor', 'daily-vendor-filter', 'monthly-vendor-filter'].forEach(selId => {
+        const el = document.getElementById(selId);
+        if (!el) return;
+        const currentVal = el.value;
+        el.innerHTML = `<option value="">All Vendors</option>` +
+          vendors.map(v => `<option value="${v}">${v}</option>`).join('');
+        el.value = currentVal;
+      });
+
+      const desigEl = document.getElementById('dir-filter-desig');
+      if (desigEl) {
+        const curD = desigEl.value;
+        desigEl.innerHTML = `<option value="">All Designations</option>` +
+          designations.map(d => `<option value="${d}">${d}</option>`).join('');
+        desigEl.value = curD;
+      }
+
+      const indivSel = document.getElementById('indiv-worker-select');
+      if (indivSel) {
+        const curW = indivSel.value;
+        const workerMap = new Map();
+        workers.forEach(w => workerMap.set(w.id.toUpperCase(), `${w.id} — ${w.name} (${w.agency})`));
+        logs.forEach(l => {
+          if (!workerMap.has(l.id.toUpperCase())) {
+            workerMap.set(l.id.toUpperCase(), `${l.id} — ${l.name} (${l.agency})`);
+          }
+        });
+        indivSel.innerHTML = `<option value="">-- All Workers --</option>` +
+          Array.from(workerMap.entries()).map(([id, label]) => `<option value="${id}">${label}</option>`).join('');
+        indivSel.value = curW;
+      }
+    }
+
+    // ==================== LOGIN ====================
+    function selectLoginRole(role) {
+      const adminBtn = document.getElementById('login-btn-admin');
+      const secBtn = document.getElementById('login-btn-security');
+      document.getElementById('login-role').value = role;
+
+      if (role === 'admin') {
+        adminBtn.className = "py-3 px-4 rounded-xl border-2 font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 bg-blue-900 text-white border-blue-900 shadow-sm";
+        secBtn.className = "py-3 px-4 rounded-xl border-2 font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200";
+      } else {
+        secBtn.className = "py-3 px-4 rounded-xl border-2 font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 bg-blue-900 text-white border-blue-900 shadow-sm";
+        adminBtn.className = "py-3 px-4 rounded-xl border-2 font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200";
+      }
+    }
+
+    function handleLogin() {
+      const role = document.getElementById('login-role').value;
+      const user = document.getElementById('login-user').value.trim();
+      const pass = document.getElementById('login-pass').value;
+
+      const validAdmin = role === 'admin' && user === authCredentials.adminUser && pass === authCredentials.adminPass;
+      const validSecurity = role === 'security' && user === authCredentials.secUser && pass === authCredentials.secPass;
+
+      if (!validAdmin && !validSecurity) {
+        speakVoice("Invalid login credentials");
+        showToast("Authentication failed. Invalid User ID or Password.");
+        return;
+      }
+
+      document.getElementById('login-user').value = "";
+      document.getElementById('login-pass').value = "";
+
+      currentRole = role;
+      document.getElementById('login-view').classList.add('hidden');
+      document.getElementById('app-view').classList.remove('hidden');
+      document.getElementById('role-badge').innerText = `ROLE: ${role.toUpperCase()}`;
+
+      const navTabs = document.getElementById('app-nav-tabs');
+      if (role === 'security') {
+        if (navTabs) navTabs.classList.add('hidden');
+      } else {
+        if (navTabs) navTabs.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('.admin-only').forEach(el => {
+        el.classList.toggle('hidden', role !== 'admin');
+      });
+
+      initAppState();
+      updateKPIs();
+      renderAllViews();
+      loadSettingsIntoUI();
+      loadAuthIntoUI();
+
+      if (workers.length > 0) renderIDCardPreview(workers[0]);
+      else renderBlankIDCardPreview();
+
+      if (settings.backendUrl) {
+        syncAllDataFromCloud(false);
+        if (cloudPollInterval) clearInterval(cloudPollInterval);
+        cloudPollInterval = setInterval(() => syncAllDataFromCloud(false), 10000);
+      }
+
+      switchTab('scanner');
+
+      if (role === 'admin') {
+        speakVoice("Welcome to Admin Ocean Attendance Portal");
+        showToast("Welcome to Admin Ocean Attendance Portal");
+      } else {
+        speakVoice("Welcome to Security Ocean Attendance Portal");
+        showToast("Welcome to Security Ocean Attendance Portal");
+      }
+    }
+
+    function logout() {
+      stopScanner();
+      if (cloudPollInterval) clearInterval(cloudPollInterval);
+      currentRole = null;
+      document.getElementById('app-view').classList.add('hidden');
+      document.getElementById('login-view').classList.remove('hidden');
+      showToast("Signed out.");
+    }
+
+    function loadAuthIntoUI() {
+      document.getElementById('auth-new-admin-id').value = authCredentials.adminUser;
+      document.getElementById('auth-sec-id').value = authCredentials.secUser;
+    }
+
+    function updateAdminCredentials() {
+      const curPass = document.getElementById('auth-current-pass').value;
+      const newId = document.getElementById('auth-new-admin-id').value.trim();
+      const newPass = document.getElementById('auth-new-admin-pass').value;
+      const confirmPass = document.getElementById('auth-confirm-admin-pass').value;
+
+      if (curPass !== authCredentials.adminPass) {
+        showToast("Current Admin Password is incorrect.");
+        return;
+      }
+      if (!newId || !newPass) {
+        showToast("New User ID and Password cannot be empty.");
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast("New Password and Confirm Password do not match.");
+        return;
+      }
+
+      authCredentials.adminUser = newId;
+      authCredentials.adminPass = newPass;
+      persistAll();
+      postToCloudBackend({ type: "UPDATE_CREDENTIALS", credentials: authCredentials });
+
+      document.getElementById('auth-current-pass').value = "";
+      document.getElementById('auth-new-admin-pass').value = "";
+      document.getElementById('auth-confirm-admin-pass').value = "";
+      showToast("✅ Admin User ID and Password updated successfully!");
+    }
+
+    function updateSecurityCredentials() {
+      const secId = document.getElementById('auth-sec-id').value.trim();
+      const secPass = document.getElementById('auth-sec-pass').value;
+
+      if (!secId || !secPass) {
+        showToast("Security User ID and Password cannot be empty.");
+        return;
+      }
+
+      authCredentials.secUser = secId;
+      authCredentials.secPass = secPass;
+      persistAll();
+      postToCloudBackend({ type: "UPDATE_CREDENTIALS", credentials: authCredentials });
+      document.getElementById('auth-sec-pass').value = "";
+      showToast("✅ Security Gate credentials updated!");
+    }
+
+    // ==================== NAVIGATION ====================
+    function switchTab(tabName) {
+      if (currentRole === 'security' && tabName !== 'scanner') return;
+      const tabs = ['scanner', 'register', 'reports', 'admin-auth', 'settings'];
+      tabs.forEach(t => {
+        const panel = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`btn-tab-${t}`);
+        if (panel) panel.classList.toggle('hidden', t !== tabName);
+        if (btn) {
+          if (t === tabName) {
+            btn.className = "tab-btn shrink-0 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold bg-blue-900 text-white transition";
+          } else {
+            btn.className = "tab-btn shrink-0 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+          }
+        }
+      });
+
+      if (tabName === 'reports') {
+        refreshAllFilterDropdowns();
+        renderActiveReport();
+      }
+      if (tabName === 'scanner') {
+        renderGateLookupList();
+      }
+      if (tabName !== 'scanner') stopScanner();
+    }
+
+    function switchReportSubTab(subTab) {
+      activeReportSubTab = subTab;
+      ['daily', 'monthly', 'individual'].forEach(name => {
+        const sec = document.getElementById(`subreport-${name}`);
+        const btn = document.getElementById(`rep-btn-${name}`);
+        if (sec) sec.classList.toggle('hidden', name !== subTab);
+        if (btn) {
+          btn.className = name === subTab
+            ? "py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-blue-900 text-white shadow-xs transition"
+            : "py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+        }
+      });
+      renderActiveReport();
+    }
+
+    function renderActiveReport() {
+      if (activeReportSubTab === 'daily') renderDailyReport();
+      else if (activeReportSubTab === 'monthly') renderMonthlyReport();
+      else renderIndividualReport();
+    }
+
+    function renderAllViews() {
+      refreshAllFilterDropdowns();
+      renderGateLookupList();
+      renderDirectoryTable();
+      renderActiveReport();
+    }
+
+    // ==================== CLOUD SYNC ====================
+    async function postToCloudBackend(payload) {
+      if (!settings.backendUrl || !settings.backendUrl.startsWith('http')) return;
+      try {
+        await fetch(settings.backendUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {}
+    }
+
+    async function syncAllDataFromCloud(notify = false) {
+      if (!settings.backendUrl || !settings.backendUrl.startsWith('http')) {
+        if (notify) showToast("Set your Backend Web App URL in Tab 5 first.");
+        return;
+      }
+      try {
+        const res = await fetch(settings.backendUrl);
+        const data = await res.json();
+
+        if (data && data.credentials) {
+          authCredentials = { ...authCredentials, ...data.credentials };
+        }
+
+        if (data && Array.isArray(data.workers)) {
+          data.workers.forEach(cw => {
+            const idx = workers.findIndex(lw => lw.id.toUpperCase() === cw.id.toUpperCase());
+            if (idx >= 0) workers[idx] = { ...workers[idx], ...cw };
+            else workers.push(cw);
+          });
+        }
+
+        if (data && Array.isArray(data.logs)) {
+          data.logs.forEach(cl => {
+            const existing = logs.find(ll => ll.date === cl.date && ll.id.toUpperCase() === cl.id.toUpperCase() && ll.inTime === cl.inTime);
+            if (existing) {
+              if (cl.outTime) {
+                existing.outTime = cl.outTime;
+                existing.totalHrs = cl.totalHrs;
+                existing.overtimeHrs = cl.overtimeHrs;
+                existing.loggedBy = cl.loggedBy;
+              }
+              if (!existing.photo) existing.photo = cl.photo || getWorkerPhoto(cl.id, cl.name);
+            } else {
+              logs.push({ ...cl, photo: cl.photo || getWorkerPhoto(cl.id, cl.name) });
+            }
+          });
+          logs.sort((a, b) => (b.date + b.inTime).localeCompare(a.date + a.inTime));
+        }
+
+        persistAll();
+        updateKPIs();
+        renderAllViews();
+        if (notify) showToast(`Synced ${logs.length} logs & ${workers.length} workers from cloud!`);
+      } catch (err) {
+        if (notify) showToast("Cloud sync failed. Verify Web App URL.");
+      }
+    }
+
+    async function clearAllSystemRecords() {
+      const confirmed = confirm("⚠️ WARNING: Permanently delete ALL workers and attendance records? Continue?");
+      if (!confirmed) return;
+
+      workers = [];
+      logs = [];
+      uploadedPhotoDataUrl = "";
+      localStorage.removeItem(STORAGE_KEY_WORKERS);
+      localStorage.removeItem(STORAGE_KEY_LOGS);
+
+      if (settings.backendUrl && settings.backendUrl.startsWith('http')) {
+        await postToCloudBackend({ type: "CLEAR_ALL" });
+      }
+
+      updateKPIs();
+      renderAllViews();
+      clearRegistrationForm();
+      renderBlankIDCardPreview();
+      showToast("✅ All records cleared!");
+    }
+
+    // ==================== PHOTO VERIFICATION & SCANNING ====================
+    function updateScanPanelPhotoPreview(worker, direction, timeStr) {
+      const resolvedPhoto = worker.photo || getWorkerPhoto(worker.id, worker.name);
+
+      const panelCard = document.getElementById('scan-panel-preview-card');
+      const panelBadge = document.getElementById('scan-panel-badge');
+      const panelPhoto = document.getElementById('scan-panel-photo');
+      const panelId = document.getElementById('scan-panel-id');
+      const panelName = document.getElementById('scan-panel-name');
+      const panelDesig = document.getElementById('scan-panel-desig');
+      const panelAgency = document.getElementById('scan-panel-agency');
+      const panelTime = document.getElementById('scan-panel-time');
+
+      panelPhoto.src = resolvedPhoto;
+      panelId.innerText = worker.id;
+      panelName.innerText = worker.name;
+      panelDesig.innerText = `Designation: ${worker.designation || "Site Operative"}`;
+      panelAgency.innerText = `Vendor: ${worker.agency || "Vendor"}`;
+      panelTime.innerText = `${direction === 'IN' ? 'Clock-In' : 'Clock-Out'} Time: ${formatDisplayTime(timeStr)}`;
+
+      if (direction === 'IN') {
+        panelCard.className = "bg-white rounded-2xl p-5 shadow-md border-2 border-emerald-500 transition-all";
+        panelBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800";
+        panelBadge.innerText = "✅ CLOCK IN SUCCESS";
+        panelTime.className = "text-xs font-mono font-extrabold text-emerald-700 pt-1";
+      } else {
+        panelCard.className = "bg-white rounded-2xl p-5 shadow-md border-2 border-amber-500 transition-all";
+        panelBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800";
+        panelBadge.innerText = "🚪 CLOCK OUT SUCCESS";
+        panelTime.className = "text-xs font-mono font-extrabold text-amber-700 pt-1";
+      }
+
+      const modal = document.getElementById('verify-photo-modal');
+      const card = document.getElementById('verify-modal-card');
+      const banner = document.getElementById('verify-banner');
+      const statusText = document.getElementById('verify-status-text');
+      const timeText = document.getElementById('verify-time-text');
+      const photoEl = document.getElementById('verify-worker-photo');
+      const idEl = document.getElementById('verify-worker-id');
+      const nameEl = document.getElementById('verify-worker-name');
+      const desigEl = document.getElementById('verify-worker-desig');
+      const agencyEl = document.getElementById('verify-worker-agency');
+      const bar = document.getElementById('verify-progress-bar');
+
+      photoEl.src = resolvedPhoto;
+      idEl.innerText = worker.id;
+      nameEl.innerText = worker.name;
+      desigEl.innerText = worker.designation || "Site Operative";
+      agencyEl.innerText = worker.agency || "Vendor";
+      timeText.innerText = formatDisplayTime(timeStr);
+
+      if (direction === 'IN') {
+        card.className = "bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border-4 border-emerald-500 transform transition-all scale-100";
+        banner.className = "bg-emerald-600 text-white px-4 py-3 text-center";
+        statusText.innerText = "✅ CLOCK IN SUCCESS";
+        bar.className = "bg-emerald-600 h-full w-full";
+      } else {
+        card.className = "bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border-4 border-amber-500 transform transition-all scale-100";
+        banner.className = "bg-amber-600 text-white px-4 py-3 text-center";
+        statusText.innerText = "🚪 CLOCK OUT SUCCESS";
+        bar.className = "bg-amber-600 h-full w-full";
+      }
+
+      bar.classList.remove('animate-shrink-2s');
+      void bar.offsetWidth;
+      bar.classList.add('animate-shrink-2s');
+
+      modal.classList.remove('hidden');
+
+      if (verifyModalTimer) clearTimeout(verifyModalTimer);
+      verifyModalTimer = setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 2000);
+    }
+
+    function playBeep(type = 'success') {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.25);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(type === 'OUT' ? 580 : 880, ctx.currentTime);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.15);
+        }
+      } catch (e) {}
+    }
+
+    function createEmployeeQrToken() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+      return "OQR-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12).toUpperCase();
+    }
+
+    function parseScannedPayload(rawText) {
+      const clean = String(rawText || "").trim();
+
+      // New secure format: OCEANQR|unique-token|employee-id
+      if (clean.startsWith("OCEANQR|")) {
+        const parts = clean.split("|");
+        const token = (parts[1] || "").trim();
+        const id = (parts[2] || "").trim().toUpperCase();
+        const worker = workers.find(w =>
+          String(w.qrToken || "") === token &&
+          String(w.id || "").toUpperCase() === id
+        );
+        return worker ? worker.id.toUpperCase() : "";
+      }
+
+      // Backward compatibility for older printed QR cards.
+      if (clean.startsWith("OCEAN|")) {
+        const parts = clean.split("|");
+        return (parts[1] || "").trim().toUpperCase();
+      }
+
+      // Also allow a plain employee ID QR for legacy badges.
+      return clean.toUpperCase();
+    }
+
+    async function startScanner() {
+      const diagBox = document.getElementById('camera-diag');
+      diagBox.classList.add('hidden');
+      document.getElementById('camera-placeholder').classList.add('hidden');
+      document.getElementById('camera-status').innerText = `Scanning Active (${activeScanMode})`;
+
+      if (isScanning) return;
+
+      try {
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        const devices = await Html5Qrcode.getCameras();
+        if (!devices || devices.length === 0) throw new Error("No camera detected.");
+        const backCam = devices.find(d => /back|rear|environment/i.test(d.label));
+        const camId = backCam ? backCam.id : devices[devices.length - 1].id;
+
+        await html5QrCode.start(
+          camId,
+          {
+            fps: 30,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.777778,
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+            experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+          },
+          (decodedText) => {
+            const now = Date.now();
+            const scannedId = parseScannedPayload(decodedText);
+            if (!scannedId) {
+              if (now - lastScanTimestamp > 1800) {
+                lastScanTimestamp = now;
+                playBeep("error");
+                showToast("QR not recognised. Please scan a valid registered employee QR code.");
+              }
+              return;
+            }
+            if (scannedId === lastScannedCode && (now - lastScanTimestamp < 1800)) return;
+            lastScanTimestamp = now;
+            lastScannedCode = scannedId;
+            executeScannedPunch(scannedId);
+          },
+          () => {}
+        );
+        isScanning = true;
+        document.getElementById('camera-status').innerText = `Scanning Active (${activeScanMode})`;
+      } catch (err) {
+        isScanning = false;
+        document.getElementById('camera-placeholder').classList.remove('hidden');
+        document.getElementById('camera-status').innerText = "Camera Unavailable";
+        diagBox.classList.remove('hidden');
+        diagBox.innerHTML = `<strong>Camera Notice:</strong> ${err.message || err}.`;
+      }
+    }
+
+    function stopScanner() {
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().then(() => {
+          isScanning = false;
+          document.getElementById('camera-placeholder').classList.remove('hidden');
+          document.getElementById('camera-status').innerText = "Camera Standby";
+        }).catch(() => { isScanning = false; });
+      }
+    }
+
+    function handlePunchButtonClick(direction) {
+      activeScanMode = direction;
+      speakVoice(direction === 'IN' ? "Clock In mode active" : "Clock Out mode active");
+      if (isScanning) {
+        document.getElementById('camera-status').innerText = `Scanning Active (${activeScanMode})`;
+      } else {
+        startScanner();
+      }
+    }
+
+    function executeScannedPunch(workerId) {
+      const worker = workers.find(w => String(w.id).toUpperCase() === String(workerId).toUpperCase());
+      if (!worker) {
+        playBeep("error");
+        showToast("Employee is not registered. Attendance was not recorded.");
+        return;
+      }
+      recordAttendance(activeScanMode, worker.id);
+    }
+
+    function recordAttendance(direction, workerId) {
+      const feedback = document.getElementById('punch-feedback');
+      feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-300', 'bg-amber-50', 'text-amber-800', 'border-amber-300', 'bg-rose-50', 'text-rose-800', 'border-rose-300');
+
+      let worker = workers.find(w => w.id.toUpperCase() === workerId.toUpperCase());
+      if (!worker) {
+        worker = {
+          id: workerId,
+          name: `Worker (${workerId})`,
+          agency: "Ocean Lifespaces Subcontractor",
+          designation: "Site Operative",
+          photo: `https://placehold.co/240x300/1e3a8a/ffffff?text=${workerId}`
+        };
+      }
+
+      const workerPhoto = worker.photo || getWorkerPhoto(worker.id, worker.name);
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      const nowTime = getRailwayTime(new Date());
+      const nowMs = Date.now();
+      const openLog = logs.find(l => l.id.toUpperCase() === worker.id.toUpperCase() && l.date === todayStr && !l.outTime);
+
+      if (direction === 'IN') {
+        if (openLog) {
+          playBeep('error');
+          speakVoice(`${worker.name} already clocked in`);
+          updateScanPanelPhotoPreview(worker, 'IN', `Already IN at ${openLog.inTime}`);
+          feedback.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-300');
+          feedback.innerText = `⚠️ ${worker.name} is ALREADY clocked IN at ${openLog.inTime}.`;
+          return;
+        }
+
+        const newEntry = {
+          action: "IN",
+          date: todayStr,
+          id: worker.id,
+          name: worker.name,
+          designation: worker.designation || 'Site Operative',
+          agency: worker.agency || 'Vendor',
+          inTime: nowTime,
+          inMs: nowMs,
+          outTime: "",
+          totalHrs: "-",
+          overtimeHrs: "-",
+          loggedBy: currentRole.toUpperCase(),
+          photo: workerPhoto
+        };
+
+        logs.unshift(newEntry);
+        postToCloudBackend(newEntry);
+
+        playBeep('IN');
+        const spokenIn = formatVoiceTemplate(settings.voiceInPhrase || "{name} clock in success", worker);
+        speakVoice(spokenIn);
+        updateScanPanelPhotoPreview(worker, 'IN', nowTime);
+        feedback.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-300');
+        feedback.innerText = `✅ CLOCK IN SUCCESS: ${worker.name} at ${nowTime}`;
+      } else {
+        const spokenOut = formatVoiceTemplate(settings.voiceOutPhrase || "{name} clock out success", worker);
+
+        if (!openLog) {
+          const directOutEntry = {
+            action: "OUT_DIRECT",
+            date: todayStr,
+            id: worker.id,
+            name: worker.name,
+            designation: worker.designation || 'Site Operative',
+            agency: worker.agency || 'Vendor',
+            inTime: "08:00:00",
+            inMs: nowMs - (8 * 3600 * 1000),
+            outTime: nowTime,
+            totalHrs: "8.00 hrs",
+            overtimeHrs: "0.00 hrs",
+            loggedBy: `${currentRole.toUpperCase()} (Direct Out)`,
+            photo: workerPhoto
+          };
+          logs.unshift(directOutEntry);
+          postToCloudBackend(directOutEntry);
+
+          playBeep('OUT');
+          speakVoice(spokenOut);
+          updateScanPanelPhotoPreview(worker, 'OUT', nowTime);
+          feedback.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300');
+          feedback.innerText = `🚪 CLOCK OUT SUCCESS: ${worker.name} at ${nowTime}`;
+          persistAll();
+          updateKPIs();
+          renderAllViews();
+          return;
+        }
+
+        openLog.outTime = nowTime;
+        openLog.photo = openLog.photo || workerPhoto;
+        const durationHrs = Math.max(0.01, (nowMs - openLog.inMs) / (1000 * 60 * 60));
+        const overtime = Math.max(0, durationHrs - settings.shiftHours);
+        openLog.totalHrs = `${durationHrs.toFixed(2)} hrs`;
+        openLog.overtimeHrs = `${overtime.toFixed(2)} hrs`;
+        openLog.loggedBy = `${openLog.loggedBy} / ${currentRole.toUpperCase()}`;
+
+        postToCloudBackend({
+          action: "OUT",
+          date: todayStr,
+          id: worker.id,
+          name: worker.name,
+          designation: openLog.designation,
+          agency: openLog.agency,
+          inTime: openLog.inTime,
+          outTime: openLog.outTime,
+          totalHrs: openLog.totalHrs,
+          overtimeHrs: openLog.overtimeHrs,
+          loggedBy: openLog.loggedBy,
+          photo: openLog.photo
+        });
+
+        playBeep('OUT');
+        speakVoice(spokenOut);
+        updateScanPanelPhotoPreview(worker, 'OUT', `${nowTime} (${openLog.totalHrs})`);
+        feedback.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300');
+        feedback.innerText = `🚪 CLOCK OUT SUCCESS: ${worker.name} at ${nowTime} • Total: ${openLog.totalHrs}`;
+      }
+
+      persistAll();
+      updateKPIs();
+      renderAllViews();
+    }
+
+    function renderGateLookupList() {
+      const container = document.getElementById('gate-lookup-list');
+      if (!container) return;
+      const q = (document.getElementById('gate-search-input')?.value || "").trim().toLowerCase();
+      const vendorFilter = document.getElementById('gate-filter-vendor')?.value || "";
+
+      const filtered = workers.filter(w => {
+        const matchQ = !q || w.id.toLowerCase().includes(q) || w.name.toLowerCase().includes(q) || w.agency.toLowerCase().includes(q);
+        const matchV = !vendorFilter || w.agency === vendorFilter;
+        return matchQ && matchV;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-5 text-center text-xs text-slate-400 font-medium">No matching workers found.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(w => `
+        <div class="p-2.5 flex items-center justify-between gap-2 hover:bg-slate-50">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img src="${w.photo}" alt="${w.name}" class="w-9 h-10 rounded object-cover border border-slate-300 shrink-0" onerror="this.src='https://placehold.co/80x100/1e3a8a/ffffff?text=ID'" />
+            <div class="min-w-0">
+              <p class="text-xs font-extrabold text-slate-900 truncate">${w.id} &bull; ${w.name}</p>
+              <p class="text-[11px] text-slate-500 truncate">${w.designation} &bull; ${w.agency}</p>
+            </div>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" onclick="recordAttendance('IN', '${w.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold">IN</button>
+            <button type="button" onclick="recordAttendance('OUT', '${w.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-extrabold">OUT</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== REGISTRATION & ID CARD ====================
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 240;
+          canvas.height = 240;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 240, 240);
+          uploadedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          document.getElementById('badge-photo-box').innerHTML = `<img src="${uploadedPhotoDataUrl}" alt="Worker Photo" class="w-full h-full object-cover" />`;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function liveUpdatePreview() {
+      const id = document.getElementById('reg-id').value.trim().toUpperCase() || "NEW-001";
+      const name = document.getElementById('reg-name').value.trim() || "-";
+      const agency = document.getElementById('reg-agency').value.trim() || "-";
+      const designation = document.getElementById('reg-desig').value.trim() || "-";
+      const dob = document.getElementById('reg-dob').value.trim() || "-";
+      const blood = document.getElementById('reg-blood').value.trim() || "-";
+      const aadhar = document.getElementById('reg-aadhar').value.trim() || "-";
+      const issue = document.getElementById('reg-issue').value.trim() || "-";
+      const valid = document.getElementById('reg-valid').value.trim() || "-";
+      const auth = document.getElementById('reg-auth').value.trim() || "Project HR";
+      const emergency = document.getElementById('reg-emergency').value.trim() || "-";
+
+      document.getElementById('badge-id-no').innerText = id;
+      document.getElementById('badge-name').innerText = name;
+      document.getElementById('badge-vendor').innerText = agency;
+      document.getElementById('badge-desig').innerText = designation;
+      document.getElementById('badge-dob').innerText = dob;
+      document.getElementById('badge-blood').innerText = blood;
+      document.getElementById('badge-aadhar').innerText = aadhar;
+      document.getElementById('badge-issue').innerText = issue;
+      document.getElementById('badge-valid').innerText = valid;
+      document.getElementById('badge-auth').innerText = auth;
+      document.getElementById('badge-back-emergency').innerText = emergency;
+    }
+
+    function saveWorker() {
+      const id = document.getElementById('reg-id').value.trim().toUpperCase();
+      const name = document.getElementById('reg-name').value.trim();
+      const agency = document.getElementById('reg-agency').value.trim();
+      const designation = document.getElementById('reg-desig').value.trim();
+      const dob = document.getElementById('reg-dob').value.trim() || "-";
+      const blood = document.getElementById('reg-blood').value.trim() || "-";
+      const aadhar = document.getElementById('reg-aadhar').value.trim() || "-";
+      const issue = document.getElementById('reg-issue').value.trim() || "-";
+      const valid = document.getElementById('reg-valid').value.trim() || "-";
+      const eohs = document.getElementById('reg-eohs').value.trim() || "-";
+      const auth = document.getElementById('reg-auth').value.trim() || "Project HR";
+      const emergency = document.getElementById('reg-emergency').value.trim() || "-";
+
+      if (!id || !name || !agency || !designation) {
+        showToast("Please fill all required fields (*).");
+        return;
+      }
+
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      const existingIdx = workers.findIndex(w => w.id.toUpperCase() === id);
+      const photoFinal = uploadedPhotoDataUrl || (existingIdx >= 0 ? workers[existingIdx].photo : `https://placehold.co/240x300/1e3a8a/ffffff?text=${initials}`);
+
+      const previousWorker = existingIdx >= 0 ? workers[existingIdx] : null;
+      const workerRecord = {
+        id, name, agency, designation, dob, blood, aadhar, issue, valid, eohs, auth, emergency,
+        photo: photoFinal,
+        qrToken: (previousWorker && previousWorker.qrToken) || createEmployeeQrToken()
+      };
+
+      if (existingIdx >= 0) workers[existingIdx] = workerRecord;
+      else workers.push(workerRecord);
+
+      logs.forEach(l => { if (l.id.toUpperCase() === id) l.photo = photoFinal; });
+
+      persistAll();
+      postToCloudBackend({ type: "REGISTER_WORKER", worker: workerRecord });
+      updateKPIs();
+      renderAllViews();
+      renderIDCardPreview(workerRecord);
+      showToast(`Saved ${name} (${id}) & generated ID card!`);
+    }
+
+    function clearRegistrationForm() {
+      document.getElementById('worker-form').reset();
+      uploadedPhotoDataUrl = "";
+      renderBlankIDCardPreview();
+    }
+
+    function deleteWorker(id) {
+      workers = workers.filter(w => w.id !== id);
+      persistAll();
+      updateKPIs();
+      renderAllViews();
+      showToast(`Removed ${id} from staff directory.`);
+    }
+
+    function renderBlankIDCardPreview() {
+      document.getElementById('badge-id-no').innerText = "NEW-001";
+      document.getElementById('badge-name').innerText = "-";
+      document.getElementById('badge-vendor').innerText = "-";
+      document.getElementById('badge-desig').innerText = "-";
+      document.getElementById('badge-dob').innerText = "-";
+      document.getElementById('badge-blood').innerText = "-";
+      document.getElementById('badge-aadhar').innerText = "-";
+      document.getElementById('badge-issue').innerText = "-";
+      document.getElementById('badge-valid').innerText = "-";
+      document.getElementById('badge-auth').innerText = "Project HR";
+      document.getElementById('badge-back-emergency').innerText = "-";
+
+      document.getElementById('badge-project-addr').innerText = settings.projectAddress;
+      document.getElementById('badge-back-return-addr').innerText = settings.returnAddress;
+      document.getElementById('badge-back-pm').innerText = settings.projectManager;
+      document.getElementById('badge-back-sm').innerText = settings.safetyManager;
+      document.getElementById('badge-photo-box').innerHTML = `<span class="text-[6pt] font-semibold text-rose-400">Photo</span>`;
+
+      const qrBox = document.getElementById('badge-qr-code');
+      qrBox.innerHTML = "";
+      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 44, height: 44, colorDark: "#0f172a", colorLight: "#ffffff" });
+    }
+
+    function renderIDCardPreview(worker) {
+      document.getElementById('badge-id-no').innerText = worker.id;
+      document.getElementById('badge-name').innerText = worker.name;
+      document.getElementById('badge-vendor').innerText = worker.agency;
+      document.getElementById('badge-desig').innerText = worker.designation;
+      document.getElementById('badge-dob').innerText = worker.dob;
+      document.getElementById('badge-blood').innerText = worker.blood;
+      document.getElementById('badge-aadhar').innerText = worker.aadhar;
+      document.getElementById('badge-issue').innerText = worker.issue;
+      document.getElementById('badge-valid').innerText = worker.valid;
+      document.getElementById('badge-auth').innerText = worker.auth;
+      document.getElementById('badge-back-emergency').innerText = worker.emergency;
+
+      document.getElementById('badge-project-addr').innerText = settings.projectAddress;
+      document.getElementById('badge-back-return-addr').innerText = settings.returnAddress;
+      document.getElementById('badge-back-pm').innerText = settings.projectManager;
+      document.getElementById('badge-back-sm').innerText = settings.safetyManager;
+
+      document.getElementById('badge-photo-box').innerHTML = `<img src="${worker.photo}" alt="${worker.name}" class="w-full h-full object-cover" />`;
+
+      const qrBox = document.getElementById('badge-qr-code');
+      qrBox.innerHTML = "";
+      worker.qrToken = worker.qrToken || createEmployeeQrToken();
+      const savedWorkerIndex = workers.findIndex(w => String(w.id).toUpperCase() === String(worker.id).toUpperCase());
+      if (savedWorkerIndex >= 0) {
+        workers[savedWorkerIndex].qrToken = worker.qrToken;
+        persistAll();
+      }
+      const qrPayload = `OCEANQR|${worker.qrToken}|${worker.id}`;
+      new QRCode(qrBox, { text: qrPayload, width: 44, height: 44, colorDark: "#0f172a", colorLight: "#ffffff" });
+    }
+
+    async function printAllWorkerQRCodesA4() {
+      if (!workers.length) {
+        showToast("No registered employees available to print.");
+        return;
+      }
+      const printBtnMessage = "Preparing employee QR codes...";
+      showToast(printBtnMessage);
+
+      // Render QR images in an off-screen staging area before opening the print window.
+      const staging = document.createElement("div");
+      staging.style.cssText = "position:fixed;left:-10000px;top:0;background:#fff;";
+      document.body.appendChild(staging);
+
+      try {
+        const cards = [];
+        for (const worker of workers) {
+          worker.qrToken = worker.qrToken || createEmployeeQrToken();
+          const qrHost = document.createElement("div");
+          staging.appendChild(qrHost);
+          new QRCode(qrHost, {
+            text: `OCEANQR|${worker.qrToken}|${worker.id}`,
+            width: 180,
+            height: 180,
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          await new Promise(resolve => setTimeout(resolve, 35));
+          const qrImage = qrHost.querySelector("canvas")?.toDataURL("image/png")
+            || qrHost.querySelector("img")?.src;
+          if (!qrImage) throw new Error("Could not render QR code for " + worker.id);
+          cards.push({ id: worker.id, name: worker.name, designation: worker.designation, agency: worker.agency, qrImage });
+        }
+
+        persistAll();
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) throw new Error("Please allow pop-ups to print the QR sheet.");
+
+        const cardHtml = cards.map(w => `
+          <article class="qr-card">
+            <img src="${w.qrImage}" alt="QR ${escapeHtml(w.id)}">
+            <div class="details">
+              <strong>${escapeHtml(w.id)}</strong>
+              <span>${escapeHtml(w.name || "")}</span>
+              <small>${escapeHtml(w.designation || "")}</small>
+              <small>${escapeHtml(w.agency || "")}</small>
+            </div>
+          </article>`).join("");
+
+        printWindow.document.open();
+        printWindow.document.write(`<!doctype html>
+<html><head><meta charset="utf-8"><title>Ocean Lifespaces Employee QR Codes</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:Arial,sans-serif; color:#111827; }
+  h1 { font-size:16pt; text-align:center; margin:0 0 3mm; }
+  .sub { text-align:center; font-size:8pt; margin:0 0 7mm; color:#475569; }
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:5mm 4mm; }
+  .qr-card { height:58mm; border:0.3mm solid #cbd5e1; border-radius:2mm; padding:3mm; display:flex; flex-direction:column; align-items:center; justify-content:center; break-inside:avoid; page-break-inside:avoid; }
+  .qr-card img { width:34mm; height:34mm; object-fit:contain; }
+  .details { text-align:center; display:flex; flex-direction:column; gap:1mm; width:100%; margin-top:1.5mm; }
+  .details strong { font-size:9pt; }
+  .details span { font-size:8pt; font-weight:600; }
+  .details small { font-size:6.5pt; color:#475569; }
+  @media print { .qr-card { break-inside:avoid; } }
+</style></head><body>
+<h1>OCEAN LIFESPACES INDIA PVT LTD</h1>
+<p class="sub">EMPLOYEE QR CODE REGISTER · Total Employees: ${cards.length}</p>
+<section class="grid">${cardHtml}</section>
+<script>window.onload=()=>setTimeout(()=>window.print(),500);<\/script>
+</body></html>`);
+        printWindow.document.close();
+      } catch (err) {
+        showToast(err.message || "Unable to prepare QR print sheet.");
+      } finally {
+        staging.remove();
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+      }[ch]));
+    }
+
+    function exportWorkersJSON() {
+      const blob = new Blob([JSON.stringify(workers, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Ocean_Staff_Directory_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importWorkersJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            workers = imported.map(w => ({ ...w, qrToken: w.qrToken || createEmployeeQrToken() }));
+            persistAll();
+            updateKPIs();
+            renderAllViews();
+            if (workers.length > 0) renderIDCardPreview(workers[0]);
+            showToast(`Loaded ${workers.length} registered workers.`);
+          }
+        } catch (err) {
+          showToast("Invalid backup file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetDirectoryFilters() {
+      document.getElementById('dir-search-input').value = "";
+      document.getElementById('dir-filter-vendor').value = "";
+      document.getElementById('dir-filter-desig').value = "";
+      renderDirectoryTable();
+    }
+
+    function renderDirectoryTable() {
+      const tbody = document.getElementById('staff-directory-body');
+      const q = (document.getElementById('dir-search-input')?.value || "").trim().toLowerCase();
+      const vendorF = document.getElementById('dir-filter-vendor')?.value || "";
+      const desigF = document.getElementById('dir-filter-desig')?.value || "";
+
+      const filtered = workers.filter(w => {
+        const matchQ = !q || w.id.toLowerCase().includes(q) || w.name.toLowerCase().includes(q) || w.agency.toLowerCase().includes(q);
+        const matchV = !vendorF || w.agency === vendorF;
+        const matchD = !desigF || w.designation === desigF;
+        return matchQ && matchV && matchD;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 text-xs font-medium">No matching workers found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(w => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3">
+            <img src="${w.photo}" alt="${w.name}" class="w-9 h-10 rounded object-cover border border-slate-300" onerror="this.src='https://placehold.co/80x100/1e3a8a/ffffff?text=ID'" />
+          </td>
+          <td class="py-2.5 px-3 font-extrabold text-sky-900">${w.id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900">${w.name}</td>
+          <td class="py-2.5 px-3 text-slate-700">${w.designation}</td>
+          <td class="py-2.5 px-3 text-slate-700">${w.agency}</td>
+          <td class="py-2.5 px-3 text-xs text-slate-600">${w.blood} &bull; ${w.aadhar}</td>
+          <td class="py-2.5 px-3 text-right space-x-1.5 whitespace-nowrap">
+            <button type="button" onclick='renderIDCardPreview(${JSON.stringify(w).replace(/'/g, "&#39;")})' class="px-2.5 py-1 rounded bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-bold">Load ID</button>
+            <button type="button" onclick="deleteWorker('${w.id}')" class="px-2.5 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateKPIs() {
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      const todayLogs = logs.filter(l => l.date === todayStr);
+      document.getElementById('stat-total').innerText = workers.length;
+      document.getElementById('stat-in').innerText = todayLogs.filter(l => !l.outTime).length;
+      document.getElementById('stat-out').innerText = todayLogs.filter(l => l.outTime).length;
+    }
+
+    // ==================== REPORTS ====================
+    function getFilteredDailyLogs() {
+      const q = (document.getElementById('daily-search')?.value || "").trim().toLowerCase();
+      const dateF = document.getElementById('daily-date-filter')?.value || "";
+      const vendorF = document.getElementById('daily-vendor-filter')?.value || "";
+      const statusF = document.getElementById('daily-status-filter')?.value || "";
+
+      return logs.filter(l => {
+        const matchQ = !q || l.name.toLowerCase().includes(q) || l.id.toLowerCase().includes(q);
+        const matchDate = !dateF || l.date === dateF;
+        const matchVendor = !vendorF || l.agency === vendorF;
+        const matchStatus = !statusF || (statusF === 'IN' ? !l.outTime : Boolean(l.outTime));
+        return matchQ && matchDate && matchVendor && matchStatus;
+      });
+    }
+
+    function resetDailyFilters() {
+      document.getElementById('daily-search').value = "";
+      document.getElementById('daily-date-filter').value = "";
+      document.getElementById('daily-vendor-filter').value = "";
+      document.getElementById('daily-status-filter').value = "";
+      renderDailyReport();
+    }
+
+    function renderDailyReport() {
+      const tbody = document.getElementById('daily-report-body');
+      const filtered = getFilteredDailyLogs();
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-slate-400 text-xs font-medium">No daily records match your filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((l, index) => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-bold text-slate-500">${index + 1}</td>
+          <td class="py-2 px-3"><img src="${l.photo || getWorkerPhoto(l.id, l.name)}" class="w-9 h-10 rounded object-cover border border-slate-300" /></td>
+          <td class="py-2.5 px-3 font-medium text-slate-600 whitespace-nowrap">${formatDisplayDate(l.date)}</td>
+          <td class="py-2.5 px-3 font-extrabold text-slate-900 whitespace-nowrap">${l.id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900">${l.name}</td>
+          <td class="py-2.5 px-3 text-slate-700">${l.designation}</td>
+          <td class="py-2.5 px-3 text-slate-700">${l.agency}</td>
+          <td class="py-2.5 px-3 font-bold text-emerald-700 whitespace-nowrap">${formatDisplayTime(l.inTime)}</td>
+          <td class="py-2.5 px-3 font-bold whitespace-nowrap ${l.outTime ? 'text-amber-700' : 'text-sky-600'}">${l.outTime ? formatDisplayTime(l.outTime) : "On-Site"}</td>
+          <td class="py-2.5 px-3 font-semibold whitespace-nowrap">${l.totalHrs}</td>
+          <td class="py-2.5 px-3 font-semibold text-rose-700 whitespace-nowrap">${l.overtimeHrs}</td>
+          <td class="py-2.5 px-3 text-xs font-bold text-slate-500">${l.loggedBy}</td>
+        </tr>
+      `).join('');
+    }
+
+    function parseHoursNumber(hrsStr) {
+      if (!hrsStr || hrsStr === "-") return 0;
+      const num = parseFloat(String(hrsStr).replace(/[^\d.]/g, ''));
+      return isNaN(num) ? 0 : num;
+    }
+
+    function getMonthlySummaryRows() {
+      const monthF = document.getElementById('monthly-month-filter')?.value || new Date().toISOString().slice(0, 7);
+      const q = (document.getElementById('monthly-search')?.value || "").trim().toLowerCase();
+      const vendorF = document.getElementById('monthly-vendor-filter')?.value || "";
+      const summaryMap = new Map();
+
+      workers.forEach(w => {
+        summaryMap.set(w.id.toUpperCase(), {
+          month: monthF, id: w.id, name: w.name, designation: w.designation, agency: w.agency, photo: w.photo,
+          daysSet: new Set(), punches: 0, totalHrs: 0, overtimeHrs: 0
+        });
+      });
+
+      logs.forEach(l => {
+        if (monthF && !String(l.date).startsWith(monthF)) return;
+        const key = l.id.toUpperCase();
+        if (!summaryMap.has(key)) {
+          summaryMap.set(key, {
+            month: monthF || String(l.date).slice(0, 7), id: l.id, name: l.name, designation: l.designation, agency: l.agency,
+            photo: l.photo || getWorkerPhoto(l.id, l.name), daysSet: new Set(), punches: 0, totalHrs: 0, overtimeHrs: 0
+          });
+        }
+        const rec = summaryMap.get(key);
+        rec.daysSet.add(l.date);
+        rec.punches += 1;
+        rec.totalHrs += parseHoursNumber(l.totalHrs);
+        rec.overtimeHrs += parseHoursNumber(l.overtimeHrs);
+      });
+
+      return Array.from(summaryMap.values()).filter(r => {
+        const matchQ = !q || r.id.toLowerCase().includes(q) || r.name.toLowerCase().includes(q);
+        const matchV = !vendorF || r.agency === vendorF;
+        return matchQ && matchV;
+      });
+    }
+
+    function resetMonthlyFilters() {
+      document.getElementById('monthly-month-filter').value = new Date().toISOString().slice(0, 7);
+      document.getElementById('monthly-search').value = "";
+      document.getElementById('monthly-vendor-filter').value = "";
+      renderMonthlyReport();
+    }
+
+    function renderMonthlyReport() {
+      const tbody = document.getElementById('monthly-report-body');
+      const rows = getMonthlySummaryRows();
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-slate-400 text-xs font-medium">No monthly summary data available.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map((r, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-bold text-slate-500">${idx + 1}</td>
+          <td class="py-2 px-3"><img src="${r.photo || getWorkerPhoto(r.id, r.name)}" class="w-9 h-10 rounded object-cover border border-slate-300" /></td>
+          <td class="py-2.5 px-3 font-bold text-slate-700 whitespace-nowrap">${r.month}</td>
+          <td class="py-2.5 px-3 font-extrabold text-sky-900 whitespace-nowrap">${r.id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900">${r.name}</td>
+          <td class="py-2.5 px-3 text-slate-700">${r.designation}</td>
+          <td class="py-2.5 px-3 text-slate-700">${r.agency}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-emerald-700">${r.daysSet.size}</td>
+          <td class="py-2.5 px-3 text-center font-semibold text-slate-700">${r.punches}</td>
+          <td class="py-2.5 px-3 font-extrabold text-blue-900 whitespace-nowrap">${r.totalHrs.toFixed(2)} hrs</td>
+          <td class="py-2.5 px-3 font-bold text-rose-700 whitespace-nowrap">${r.overtimeHrs.toFixed(2)} hrs</td>
+        </tr>
+      `).join('');
+    }
+
+    function getFilteredIndividualLogs() {
+      const selectedId = document.getElementById('indiv-worker-select')?.value || "";
+      const q = (document.getElementById('indiv-search')?.value || "").trim().toLowerCase();
+      const monthF = document.getElementById('indiv-month-filter')?.value || "";
+      const dateF = document.getElementById('indiv-date-filter')?.value || "";
+
+      return logs.filter(l => {
+        const matchSel = !selectedId || l.id.toUpperCase() === selectedId.toUpperCase();
+        const matchQ = !q || l.id.toLowerCase().includes(q) || l.name.toLowerCase().includes(q);
+        const matchMonth = !monthF || String(l.date).startsWith(monthF);
+        const matchDate = !dateF || l.date === dateF;
+        return matchSel && matchQ && matchMonth && matchDate;
+      });
+    }
+
+    function resetIndividualFilters() {
+      document.getElementById('indiv-worker-select').value = "";
+      document.getElementById('indiv-search').value = "";
+      document.getElementById('indiv-month-filter').value = "";
+      document.getElementById('indiv-date-filter').value = "";
+      renderIndividualReport();
+    }
+
+    function renderIndividualReport() {
+      const selectedId = document.getElementById('indiv-worker-select')?.value || "";
+      const filtered = getFilteredIndividualLogs();
+      const banner = document.getElementById('indiv-summary-banner');
+      const tbody = document.getElementById('individual-report-body');
+
+      const uniqueIds = [...new Set(filtered.map(l => l.id.toUpperCase()))];
+      const targetId = selectedId || (uniqueIds.length === 1 ? uniqueIds[0] : "");
+
+      if (targetId) {
+        const wObj = workers.find(w => w.id.toUpperCase() === targetId.toUpperCase()) || filtered[0];
+        if (wObj) {
+          banner.classList.remove('hidden');
+          document.getElementById('indiv-card-photo').src = wObj.photo || getWorkerPhoto(wObj.id, wObj.name);
+          document.getElementById('indiv-card-id').innerText = wObj.id;
+          document.getElementById('indiv-card-name').innerText = wObj.name;
+          document.getElementById('indiv-card-meta').innerText = `${wObj.designation} • ${wObj.agency}`;
+
+          const daysCount = new Set(filtered.map(l => l.date)).size;
+          const totalH = filtered.reduce((acc, l) => acc + parseHoursNumber(l.totalHrs), 0);
+          const totalOT = filtered.reduce((acc, l) => acc + parseHoursNumber(l.overtimeHrs), 0);
+
+          document.getElementById('indiv-stat-days').innerText = daysCount;
+          document.getElementById('indiv-stat-hrs').innerText = `${totalH.toFixed(2)} hrs`;
+          document.getElementById('indiv-stat-ot').innerText = `${totalOT.toFixed(2)} hrs`;
+        }
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-slate-400 text-xs font-medium">No individual records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((l, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-bold text-slate-500">${idx + 1}</td>
+          <td class="py-2.5 px-3 font-medium text-slate-600 whitespace-nowrap">${formatDisplayDate(l.date)}</td>
+          <td class="py-2.5 px-3 font-extrabold text-sky-900 whitespace-nowrap">${l.id}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900">${l.name}</td>
+          <td class="py-2.5 px-3 text-slate-700">${l.designation}</td>
+          <td class="py-2.5 px-3 text-slate-700">${l.agency}</td>
+          <td class="py-2.5 px-3 font-bold text-emerald-700 whitespace-nowrap">${formatDisplayTime(l.inTime)}</td>
+          <td class="py-2.5 px-3 font-bold whitespace-nowrap ${l.outTime ? 'text-amber-700' : 'text-sky-600'}">${l.outTime ? formatDisplayTime(l.outTime) : "On-Site"}</td>
+          <td class="py-2.5 px-3 font-semibold whitespace-nowrap">${l.totalHrs}</td>
+          <td class="py-2.5 px-3 font-semibold text-rose-700 whitespace-nowrap">${l.overtimeHrs}</td>
+          <td class="py-2.5 px-3 text-xs font-bold text-slate-500">${l.loggedBy}</td>
+        </tr>
+      `).join('');
+    }
+
+    function exportActiveReportToExcel() {
+      let worksheetRows = [];
+      let sheetTitle = "Attendance_Report";
+      let fileName = `Ocean_Lifespaces_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+      if (activeReportSubTab === 'daily') {
+        const data = getFilteredDailyLogs();
+        if (data.length === 0) return showToast("No daily records to export.");
+        sheetTitle = "Daily_Attendance";
+        fileName = `Ocean_Daily_Attendance_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        worksheetRows = data.map((l, i) => ({
+          "S.No": i + 1, "Date": formatDisplayDate(l.date), "ID NO": l.id, "Worker Name": l.name, "Designation": l.designation,
+          "Vendor Agency": l.agency, "IN Time": formatDisplayTime(l.inTime), "OUT Time": l.outTime ? formatDisplayTime(l.outTime) : "Still On-Site",
+          "Total Working Hours": l.totalHrs, "Overtime Hours": l.overtimeHrs, "Verified By": l.loggedBy
+        }));
+      } else if (activeReportSubTab === 'monthly') {
+        const data = getMonthlySummaryRows();
+        if (data.length === 0) return showToast("No monthly records to export.");
+        sheetTitle = "Monthly_Summary";
+        fileName = `Ocean_Monthly_Summary_${new Date().toISOString().slice(0, 7)}.xlsx`;
+        worksheetRows = data.map((r, i) => ({
+          "S.No": i + 1, "Month": r.month, "ID NO": r.id, "Worker Name": r.name, "Designation": r.designation,
+          "Vendor Agency": r.agency, "Present Days": r.daysSet.size, "Total Punches": r.punches,
+          "Total Working Hours": `${r.totalHrs.toFixed(2)} hrs`, "Overtime Hours": `${r.overtimeHrs.toFixed(2)} hrs`
+        }));
+      } else {
+        const data = getFilteredIndividualLogs();
+        if (data.length === 0) return showToast("No individual records to export.");
+        sheetTitle = "Individual_Report";
+        fileName = `Ocean_Individual_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        worksheetRows = data.map((l, i) => ({
+          "S.No": i + 1, "Date": formatDisplayDate(l.date), "ID NO": l.id, "Worker Name": l.name, "Designation": l.designation,
+          "Vendor Agency": l.agency, "IN Time": formatDisplayTime(l.inTime), "OUT Time": l.outTime ? formatDisplayTime(l.outTime) : "Still On-Site",
+          "Total Working Hours": l.totalHrs, "Overtime Hours": l.overtimeHrs, "Verified By": l.loggedBy
+        }));
+      }
+
+      try {
+        const ws = XLSX.utils.json_to_sheet(worksheetRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, sheetTitle);
+        XLSX.writeFile(wb, fileName);
+        showToast(`Exported ${worksheetRows.length} rows to Excel!`);
+      } catch (err) {
+        showToast("Error exporting Excel file.");
+      }
+    }
+
+    // ==================== SETTINGS ====================
+    function loadSettingsIntoUI() {
+      document.getElementById('set-backend-url').value = settings.backendUrl || "";
+      document.getElementById('set-voice-in').value = settings.voiceInPhrase || "{name} clock in success";
+      document.getElementById('set-voice-out').value = settings.voiceOutPhrase || "{name} clock out success";
+      document.getElementById('set-project-addr').value = settings.projectAddress;
+      document.getElementById('set-return-addr').value = settings.returnAddress;
+      document.getElementById('set-pm').value = settings.projectManager;
+      document.getElementById('set-sm').value = settings.safetyManager;
+      document.getElementById('set-shift-hrs').value = settings.shiftHours;
+    }
+
+    function saveSettings() {
+      settings.backendUrl = document.getElementById('set-backend-url').value.trim();
+      settings.voiceInPhrase = document.getElementById('set-voice-in').value.trim() || "{name} clock in success";
+      settings.voiceOutPhrase = document.getElementById('set-voice-out').value.trim() || "{name} clock out success";
+      settings.projectAddress = document.getElementById('set-project-addr').value.trim();
+      settings.returnAddress = document.getElementById('set-return-addr').value.trim();
+      settings.projectManager = document.getElementById('set-pm').value.trim();
+      settings.safetyManager = document.getElementById('set-sm').value.trim();
+      settings.shiftHours = parseFloat(document.getElementById('set-shift-hrs').value) || 8;
+
+      persistAll();
+      updateBackendBadge();
+      if (settings.backendUrl) syncAllDataFromCloud(true);
+      if (workers.length > 0) renderIDCardPreview(workers[0]);
+      else renderBlankIDCardPreview();
+      showToast("Settings saved successfully.");
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const box = document.getElementById('toast-box');
+      const msgEl = document.getElementById('toast-msg');
+      if (!box || !msgEl) return;
+      msgEl.innerText = message;
+      box.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, 4000);
+    }
+
+    function hideToast() {
+      const box = document.getElementById('toast-box');
+      if (box) box.classList.add('hidden');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      startLiveClock();
+      initAppState();
+      selectLoginRole('admin');
+      const mFilter = document.getElementById('monthly-month-filter');
+      if (mFilter) mFilter.value = new Date().toISOString().slice(0, 7);
+    });
+  </script>
 </body>
 </html>
