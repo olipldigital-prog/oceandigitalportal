@@ -26,7 +26,7 @@
       animation: shrinkBar 2s linear forwards;
     }
     /* Exact 6cm x 9cm ID Card print sizing */
-    @page { size: 90mm 60mm; margin: 0; }
+    @page { size: A4 portrait; margin: 10mm; }
     .ocean-id-card {
       width: 90mm;
       height: 60mm;
@@ -36,9 +36,13 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       border-radius: 4mm;
       box-sizing: border-box;
-      page-break-after: always;
+      page-break-after: avoid;
     }
-  </style>
+  #reader { width:min(100%,350px)!important; height:450px!important; min-height:450px; margin:0 auto; overflow:hidden; background:#0f172a; border-radius:14px; }
+#reader video { width:100%!important; height:100%!important; object-fit:cover!important; }
+#reader__scan_region { min-height:100%!important; }
+@media print { @page { size:A4 portrait; margin:10mm; } }
+</style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
@@ -553,88 +557,17 @@
             <table class="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
                 <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <th class="py-3 px-3 font-bold">QR Code</th>
                   <th class="py-3 px-3 font-bold">Photo</th>
                   <th class="py-3 px-3 font-bold">ID NO</th>
                   <th class="py-3 px-3 font-bold">Full Name</th>
                   <th class="py-3 px-3 font-bold">Designation</th>
                   <th class="py-3 px-3 font-bold">Vendor Agency</th>
                   <th class="py-3 px-3 font-bold">Blood / Ref</th>
+                  <th class="py-3 px-3 font-bold">QR Status</th>
                   <th class="py-3 px-3 font-bold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="staff-directory-body" class="divide-y divide-slate-200"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ==================== TAB 3: REPORTS & ANALYTICS CENTER ==================== -->
-      <div id="tab-reports" class="hidden space-y-4 no-print">
-        <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200">
-            <div>
-              <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Attendance Reports &amp; Analytics Center</h3>
-              <p class="text-xs text-slate-500">Generate Daily Logs, Monthly Workforce Summaries, and Individual Worker Date/Month Reports</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <button type="button" onclick="syncAllDataFromCloud(true)" class="px-3.5 py-2 rounded-lg bg-sky-700 hover:bg-sky-600 text-white text-xs font-extrabold shadow flex items-center gap-1">
-                <span>🔄</span> Sync Cloud Logs
-              </button>
-              <button type="button" onclick="exportActiveReportToExcel()" class="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow flex items-center gap-1.5">
-                <span>📊</span> Export Current Report (.xlsx)
-              </button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 my-4">
-            <button type="button" id="rep-btn-daily" onclick="switchReportSubTab('daily')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-blue-900 text-white shadow-xs transition">
-              📅 1. Daily Attendance Report
-            </button>
-            <button type="button" id="rep-btn-monthly" onclick="switchReportSubTab('monthly')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
-              📆 2. Monthly Summary Report
-            </button>
-            <button type="button" id="rep-btn-individual" onclick="switchReportSubTab('individual')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
-              👷 3. Individual Worker Report (Date / Month Wise)
-            </button>
-          </div>
-
-          <!-- SUB-REPORT A: DAILY ATTENDANCE REPORT -->
-          <div id="subreport-daily" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-              <input type="text" id="daily-search" oninput="renderDailyReport()" placeholder="🔍 Search Name, ID, Agency..." class="lg:col-span-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
-              <input type="date" id="daily-date-filter" onchange="renderDailyReport()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold" />
-              <select id="daily-vendor-filter" onchange="renderDailyReport()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">
-                <option value="">All Vendors</option>
-              </select>
-              <select id="daily-status-filter" onchange="renderDailyReport()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold">
-                <option value="">All Status (IN &amp; OUT)</option>
-                <option value="IN">Currently On-Site (IN)</option>
-                <option value="OUT">Completed Shift (OUT)</option>
-              </select>
-              <button type="button" onclick="resetDailyFilters()" class="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold">
-                Reset All
-              </button>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                <thead>
-                  <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                    <th class="py-3 px-3 font-bold">S.No</th>
-                    <th class="py-3 px-3 font-bold">Photo</th>
-                    <th class="py-3 px-3 font-bold">Date</th>
-                    <th class="py-3 px-3 font-bold">ID NO</th>
-                    <th class="py-3 px-3 font-bold">Worker Name</th>
-                    <th class="py-3 px-3 font-bold">Designation</th>
-                    <th class="py-3 px-3 font-bold">Vendor Agency</th>
-                    <th class="py-3 px-3 font-bold">IN Time</th>
-                    <th class="py-3 px-3 font-bold">OUT Time</th>
-                    <th class="py-3 px-3 font-bold">Total Hrs</th>
-                    <th class="py-3 px-3 font-bold">Overtime</th>
-                    <th class="py-3 px-3 font-bold">Verified By</th>
-                  </tr>
-                </thead>
                 <tbody id="daily-report-body" class="divide-y divide-slate-200"></tbody>
               </table>
             </div>
@@ -1004,6 +937,11 @@
     function formatDisplayTime(timeVal) {
       if (!timeVal) return "";
       let str = String(timeVal);
+      if (/^\\d{4}-\\d{2}-\\d{2}T/.test(str)) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+      }
+      if (/^\\d{4}-\\d{2}-\\d{2}$/.test(str)) return "";
       if (str.includes("GMT")) {
         try {
           const d = new Date(str);
@@ -1531,8 +1469,8 @@
           camId,
           {
             fps: 30,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.777778,
+            qrbox: (viewW, viewH) => { const side = Math.floor(Math.min(viewW, viewH) * 0.72); return { width: side, height: side }; },
+            aspectRatio: 3.5 / 4.5,
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
             experimentalFeatures: { useBarCodeDetectorIfSupported: true }
           },
@@ -1614,7 +1552,16 @@
       const todayStr = new Date().toLocaleDateString('en-CA');
       const nowTime = getRailwayTime(new Date());
       const nowMs = Date.now();
-      const openLog = logs.find(l => l.id.toUpperCase() === worker.id.toUpperCase() && l.date === todayStr && !l.outTime);
+      const openLog = logs.find(l => String(l.id).toUpperCase() === worker.id.toUpperCase() && String(l.date).slice(0,10) === todayStr && !l.outTime);
+      const duplicatePunch = logs.find(l => String(l.id).toUpperCase() === worker.id.toUpperCase() &&
+        String(l.date).slice(0,10) === todayStr && Math.abs(nowMs - Number(direction === 'IN' ? l.inMs : (l.outMs || 0))) < 2500 &&
+        (direction === 'IN' ? !l.outTime : !!l.outTime));
+      if (duplicatePunch) {
+        playBeep('error');
+        feedback.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-300');
+        feedback.innerText = `Duplicate ${direction} scan ignored for ${worker.name}.`;
+        return;
+      }
 
       if (direction === 'IN') {
         if (openLog) {
@@ -1685,6 +1632,7 @@
         }
 
         openLog.outTime = nowTime;
+        openLog.outMs = nowMs;
         openLog.photo = openLog.photo || workerPhoto;
         const durationHrs = Math.max(0.01, (nowMs - openLog.inMs) / (1000 * 60 * 60));
         const overtime = Math.max(0, durationHrs - settings.shiftHours);
@@ -2050,7 +1998,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 text-xs font-medium">No matching workers found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-slate-400 text-xs font-medium">No matching workers found.</td></tr>`;
         return;
       }
 
@@ -2064,12 +2012,30 @@
           <td class="py-2.5 px-3 text-slate-700">${w.designation}</td>
           <td class="py-2.5 px-3 text-slate-700">${w.agency}</td>
           <td class="py-2.5 px-3 text-xs text-slate-600">${w.blood} &bull; ${w.aadhar}</td>
+          <td class="py-2.5 px-3 text-center"><button type="button" onclick="toggleWorkerQr('${w.id}')" class="px-2 py-1 rounded-lg text-[10px] font-black">${w.active === false ? 'QR OFF' : 'QR ON'}</button></td>
           <td class="py-2.5 px-3 text-right space-x-1.5 whitespace-nowrap">
             <button type="button" onclick='renderIDCardPreview(${JSON.stringify(w).replace(/'/g, "&#39;")})' class="px-2.5 py-1 rounded bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-bold">Load ID</button>
             <button type="button" onclick="deleteWorker('${w.id}')" class="px-2.5 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold">Delete</button>
           </td>
         </tr>
       `).join('');
+      tbody.querySelectorAll('.worker-qr-mini').forEach(host => {
+        const w = workers.find(x => x.id === host.dataset.workerId);
+        if (w && typeof QRCode !== 'undefined') {
+          w.qrToken = w.qrToken || createEmployeeQrToken();
+          new QRCode(host, { text:`OCEANQR|${w.qrToken}|${w.id}`, width:54, height:54, correctLevel:QRCode.CorrectLevel.M });
+        }
+      });
+    }
+
+    function toggleWorkerQr(workerId) {
+      const w = workers.find(x => String(x.id).toUpperCase() === String(workerId).toUpperCase());
+      if (!w) return;
+      w.active = !(w.active === false || String(w.active).toLowerCase() === 'false');
+      persistAll();
+      postToCloudBackend({type:'SET_WORKER_ACTIVE', id:w.id, active:w.active});
+      renderDirectoryTable();
+      showToast(`${w.name}: QR ${w.active ? 'activated' : 'deactivated'}.`);
     }
 
     function updateKPIs() {
@@ -2109,7 +2075,7 @@
       const filtered = getFilteredDailyLogs();
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-slate-400 text-xs font-medium">No daily records match your filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" class="py-6 text-center text-slate-400 text-xs font-medium">No daily records match your filters.</td></tr>`;
         return;
       }
 
@@ -2129,6 +2095,13 @@
           <td class="py-2.5 px-3 text-xs font-bold text-slate-500">${l.loggedBy}</td>
         </tr>
       `).join('');
+      tbody.querySelectorAll('.daily-qr').forEach(host => {
+        const w = workers.find(x => String(x.id).toUpperCase() === String(host.dataset.workerId).toUpperCase());
+        if (w && typeof QRCode !== 'undefined') {
+          w.qrToken = w.qrToken || createEmployeeQrToken();
+          new QRCode(host, { text:`OCEANQR|${w.qrToken}|${w.id}`, width:48, height:48, correctLevel:QRCode.CorrectLevel.M });
+        }
+      });
     }
 
     function parseHoursNumber(hrsStr) {
