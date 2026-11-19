@@ -165,6 +165,31 @@
     @media (orientation: landscape) and (max-width: 900px) {
       #security-qr-reader video { max-height: 55vh; }
     }
+    /* Android camera viewport: keep the live preview visible and touch-friendly. */
+    #security-qr-reader, #admin-qr-reader {
+      width: 100% !important;
+      min-height: 220px;
+      background: #020617;
+      overflow: hidden;
+    }
+    #security-qr-reader video, #admin-qr-reader video {
+      display: block !important;
+      width: 100% !important;
+      max-height: 68vh;
+      min-height: 220px;
+      object-fit: cover !important;
+      background: #020617;
+    }
+    #security-qr-reader__scan_region, #admin-qr-reader__scan_region {
+      min-height: 220px;
+    }
+    @media (max-width: 640px) {
+      #security-qr-reader, #admin-qr-reader { min-height: 250px; }
+      #security-qr-reader video, #admin-qr-reader video {
+        min-height: 250px;
+        max-height: 58vh;
+      }
+    }
     @media print {
       #olipl-responsive-enhancements { display: none !important; }
     }
@@ -1157,7 +1182,7 @@
        APPLICATION JAVASCRIPT (LOGO SVG, IST CLOCK, VOICE, QR, STORAGE, SYNC)
        ===================================================================== -->
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbz0W1jb1arL63YfDEwx9DQWMSbFBb-skhe0TGoDkrIJR-JZey8kS6ZnXRyED0aYzhUnzQ/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycby0yIayY1vSr8V-_ILTe_yt3Js_mDmRgT5ejwL6aJvLEfV7XTZcsez40rAydm6O6_Ed5Q/exec";
 
     /* -----------------------------------------------------------------------
        1. CUSTOM SVG RECREATION OF OCEAN DELIVERING DREAMS LOGO
@@ -1774,65 +1799,144 @@
        7. SHARED CAMERA SCANNER (SECURITY & ADMIN) + SIMULATOR + MANUAL ID
        ----------------------------------------------------------------------- */
     let lastScanTimestamp = 0;
+    let cameraStartInProgress = false;
 
-    function startCameraScanner(portal) {
+    function setScannerInstance(portal, scanner) {
+      if (portal === 'security') secQrScanner = scanner;
+      else admQrScanner = scanner;
+    }
+
+    function getScannerInstance(portal) {
+      return portal === 'security' ? secQrScanner : admQrScanner;
+    }
+
+    function scannerMessage(portal, message) {
+      const feedbackId = portal === 'security' ? 'sec-camera-placeholder' : 'adm-camera-placeholder';
+      const node = document.getElementById(feedbackId);
+      if (node) {
+        node.classList.remove('hidden');
+        node.innerHTML = `<div class="max-w-sm mx-auto text-center p-3">
+          <p class="text-sm font-bold">${message}</p>
+          <p class="text-xs opacity-80 mt-2">Allow camera permission in Chrome and open this portal using its HTTPS web-app link.</p>
+        </div>`;
+      }
+    }
+
+    async function startCameraScanner(portal) {
       const isSec = portal === 'security';
       const readerId = isSec ? 'security-qr-reader' : 'admin-qr-reader';
       const placeholderId = isSec ? 'sec-camera-placeholder' : 'adm-camera-placeholder';
-      const existing = isSec ? secQrScanner : admQrScanner;
 
-      if (typeof Html5Qrcode === 'undefined') {
-        showToast('QR Camera library still loading. Use Simulator below.', 'warning');
+      if (cameraStartInProgress) {
+        showToast('Camera is starting. Please wait.', 'info');
         return;
       }
-      if (existing) {
+      if (getScannerInstance(portal)) {
         showToast('Camera scanner is already running.', 'info');
         return;
       }
+      if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        scannerMessage(portal, 'Camera needs a secure HTTPS connection.');
+        showToast('Open the attendance portal using its HTTPS link. Android camera access is blocked on HTTP or local-file pages.', 'warning');
+        return;
+      }
+      if (typeof Html5Qrcode === 'undefined') {
+        showToast('QR scanner library is not loaded. Check your internet connection and reload this page.', 'warning');
+        return;
+      }
 
+      cameraStartInProgress = true;
       const placeholder = document.getElementById(placeholderId);
       if (placeholder) placeholder.classList.add('hidden');
 
-      const scanner = new Html5Qrcode(readerId);
-      if (isSec) secQrScanner = scanner;
-      else admQrScanner = scanner;
+      // Android permits only one active camera stream in many browsers.
+      const otherPortal = isSec ? 'admin' : 'security';
+      if (getScannerInstance(otherPortal)) await stopCameraScanner(otherPortal);
 
-      scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 210, height: 210 } },
-        (decodedText) => {
-          const now = Date.now();
-          if (now - lastScanTimestamp < 2500) return;
-          lastScanTimestamp = now;
-          const res = processAttendanceScan(decodedText, isSec ? 'Security Camera QR' : 'Admin Camera QR');
-          if (isSec) renderSecurityScanResult(res);
-        },
-        () => {}
-      ).catch(() => {
-        if (placeholder) placeholder.classList.remove('hidden');
-        if (isSec) secQrScanner = null;
-        else admQrScanner = null;
-        showToast('Camera unavailable or permission denied. Use QR Simulator / ID input.', 'warning');
+      const scanner = new Html5Qrcode(readerId, {
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+        verbose: false
       });
+      setScannerInstance(portal, scanner);
+
+      const scanConfig = {
+        fps: 12,
+        qrbox: (viewWidth, viewHeight) => {
+          const side = Math.max(160, Math.min(280, Math.floor(Math.min(viewWidth, viewHeight) * 0.72)));
+          return { width: side, height: side };
+        },
+        aspectRatio: 1.0,
+        disableFlip: false
+      };
+
+      const onDecoded = (decodedText) => {
+        const now = Date.now();
+        if (now - lastScanTimestamp < 2200) return;
+        lastScanTimestamp = now;
+        const res = processAttendanceScan(String(decodedText || '').trim(), isSec ? 'Security Camera QR' : 'Admin Camera QR');
+        if (isSec) renderSecurityScanResult(res);
+      };
+
+      try {
+        // Ask Android/Chrome for available cameras, then prefer the rear-facing camera.
+        let cameras = [];
+        try {
+          cameras = await Html5Qrcode.getCameras();
+        } catch (cameraListError) {
+          console.warn('Camera list unavailable; trying environment-facing camera.', cameraListError);
+        }
+
+        if (cameras && cameras.length) {
+          const rearCamera = cameras.find(c => /back|rear|environment|world/i.test(c.label || ''));
+          const selectedCamera = rearCamera || cameras[cameras.length - 1] || cameras[0];
+          await scanner.start(selectedCamera.id, scanConfig, onDecoded, () => {});
+        } else {
+          // Fallback for browsers that do not expose camera labels/device IDs.
+          await scanner.start({ facingMode: 'environment' }, scanConfig, onDecoded, () => {});
+        }
+
+        if (placeholder) placeholder.classList.add('hidden');
+        showToast('Camera started. Hold the worker QR code steady inside the scan box.', 'success');
+      } catch (err) {
+        console.error('Android camera start failed:', err);
+        try { await scanner.clear(); } catch (_) {}
+        setScannerInstance(portal, null);
+        if (placeholder) placeholder.classList.remove('hidden');
+
+        const errName = err && err.name ? err.name : '';
+        let message = 'Unable to start camera.';
+        if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+          message = 'Camera permission denied. Tap the site settings icon in Chrome, allow Camera, then reload.';
+        } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+          message = 'No camera was found on this device.';
+        } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+          message = 'Camera is busy in another app. Close other camera apps and try again.';
+        } else if (errName === 'OverconstrainedError') {
+          message = 'Rear camera could not be selected. Check camera permission and try again.';
+        }
+        scannerMessage(portal, message);
+        showToast(message, 'warning');
+      } finally {
+        cameraStartInProgress = false;
+      }
     }
 
-    function stopCameraScanner(portal) {
-      const isSec = portal === 'security';
-      const scanner = isSec ? secQrScanner : admQrScanner;
-      const placeholderId = isSec ? 'sec-camera-placeholder' : 'adm-camera-placeholder';
+    async function stopCameraScanner(portal) {
+      const scanner = getScannerInstance(portal);
+      const placeholderId = portal === 'security' ? 'sec-camera-placeholder' : 'adm-camera-placeholder';
+      if (!scanner) return;
 
-      if (scanner) {
-        scanner.stop().then(() => {
-          scanner.clear();
-          if (isSec) secQrScanner = null;
-          else admQrScanner = null;
-          const ph = document.getElementById(placeholderId);
-          if (ph) ph.classList.remove('hidden');
-        }).catch(() => {
-          if (isSec) secQrScanner = null;
-          else admQrScanner = null;
-        });
+      try {
+        if (scanner.isScanning) await scanner.stop();
+      } catch (err) {
+        console.warn('Scanner stop warning:', err);
       }
+      try { await scanner.clear(); } catch (err) {
+        console.warn('Scanner clear warning:', err);
+      }
+      setScannerInstance(portal, null);
+      const placeholder = document.getElementById(placeholderId);
+      if (placeholder) placeholder.classList.remove('hidden');
     }
 
     function simulateScan(portal) {
