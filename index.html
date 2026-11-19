@@ -112,6 +112,64 @@
       border-radius: 9999px;
     }
   </style>
+
+  <!-- Cross-device responsive enhancements: Android phones, tablets, laptops and desktops -->
+  <style id="olipl-responsive-enhancements">
+    html { -webkit-text-size-adjust: 100%; }
+    body { min-width: 320px; overflow-x: hidden; }
+    button, input, select, textarea { max-width: 100%; }
+    button { touch-action: manipulation; }
+    img, video, canvas { max-width: 100%; }
+    #security-view, #admin-view, #login-view { width: 100%; }
+    #security-qr-reader, #admin-qr-reader { width: 100% !important; max-width: 100%; }
+    #security-qr-reader video, #admin-qr-reader video {
+      width: 100% !important; height: auto !important; object-fit: cover !important;
+      border-radius: 0.75rem;
+    }
+    #security-qr-reader canvas, #admin-qr-reader canvas { max-width: 100%; }
+    table { border-collapse: collapse; }
+    .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+    @media (max-width: 640px) {
+      body { font-size: 14px; }
+      header { max-width: 100vw; }
+      #login-view header > div, #security-view header > div { align-items: flex-start; }
+      #login-view main { padding: 12px !important; }
+      #login-view main > div { max-width: 100%; }
+      #security-view main { padding: 12px !important; gap: 12px !important; }
+      #security-view main > div { padding: 14px !important; }
+      #security-view .min-h-\\[250px\\] { min-height: 240px; }
+      #security-qr-reader { min-height: 220px; }
+      #security-view button, #admin-view button { min-height: 42px; }
+      #admin-view main { padding: 12px !important; }
+      #admin-view .admin-nav-btn { white-space: nowrap; }
+      #admin-view table { font-size: 12px; }
+      #admin-view input, #admin-view select, #security-view input, #security-view select {
+        font-size: 16px; /* prevents iOS zoom; also comfortable on Android */
+      }
+      #worker-form { grid-template-columns: minmax(0, 1fr) !important; }
+      #worker-form > * { min-width: 0; }
+      #idcard-preview-stage { overflow-x: auto; justify-content: flex-start; }
+      .id-card-scale-wrap { transform: scale(.78); transform-origin: top left; margin-bottom: -1.25cm; }
+      #print-id-sheet .id-card-scale-wrap { transform: none; margin: 0; }
+    }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      #security-view main, #admin-view main { padding: 16px !important; }
+      #security-view main { gap: 16px !important; }
+      #admin-view .admin-nav-btn { white-space: nowrap; }
+      #worker-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      #idcard-preview-stage { overflow-x: auto; }
+    }
+    @media (min-width: 1025px) {
+      #security-view main, #admin-view main { padding: 24px !important; }
+    }
+    @media (orientation: landscape) and (max-width: 900px) {
+      #security-qr-reader video { max-height: 55vh; }
+    }
+    @media print {
+      #olipl-responsive-enhancements { display: none !important; }
+    }
+  </style>
+
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -1099,7 +1157,7 @@
        APPLICATION JAVASCRIPT (LOGO SVG, IST CLOCK, VOICE, QR, STORAGE, SYNC)
        ===================================================================== -->
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbynUpPw9mqZvlHXU6ZNX0MvHNeOS107-Zv0OeVd4wHDDh1eyUb2lr4JM6-o76m5NLUy6A/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbz0W1jb1arL63YfDEwx9DQWMSbFBb-skhe0TGoDkrIJR-JZey8kS6ZnXRyED0aYzhUnzQ/exec";
 
     /* -----------------------------------------------------------------------
        1. CUSTOM SVG RECREATION OF OCEAN DELIVERING DREAMS LOGO
