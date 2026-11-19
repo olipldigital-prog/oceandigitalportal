@@ -400,129 +400,95 @@
           </form>
         </div>
 
-        <!-- ID Card Live Preview (6cm x 9cm Layout) -->
+        <!-- Front Side ID Card Preview (6cm x 9cm Layout) -->
         <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center space-y-4">
           <div class="w-full flex items-center justify-between">
-            <h3 class="text-base font-extrabold text-slate-900">ID Card Live Preview</h3>
+            <h3 class="text-base font-extrabold text-slate-900">Front Side ID Card Preview</h3>
             <button type="button" onclick="printSelectedIDCardA4()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold shadow flex items-center gap-1.5">
-              <span>🖨️</span> Print ID on A4 Portrait
+              <span>🖨️</span> Print Front + Back on A4
             </button>
           </div>
 
           <div class="space-y-4 w-full flex flex-col items-center">
             
-            <!-- ==================== FRONT OF ID CARD (90mm x 60mm) ==================== -->
-            <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
-              <!-- Header -->
-              <div class="flex items-center justify-between border-b border-blue-900 pb-[1.5mm]">
-                <div class="flex items-center gap-1.5">
-                  <svg width="24" height="24" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- ==================== FRONT OF ID CARD: OCEAN REFERENCE FORMAT ==================== -->
+            <div class="ocean-id-card border border-slate-300 p-[2.5mm] bg-white">
+              <div class="flex items-center justify-between gap-1 border-b border-slate-300 pb-[1.2mm]">
+                <div class="flex items-center gap-1 shrink-0">
+                  <svg width="13mm" height="13mm" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Ocean logo">
                     <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
                     <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
                     <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
                   </svg>
-                  <div>
-                    <h2 class="text-[7pt] font-black text-blue-950 tracking-tight leading-none">OCEAN LIFESPACES</h2>
-                    <p class="text-[4pt] font-semibold text-slate-500 tracking-tighter leading-none mt-0.5">INDIA PRIVATE LIMITED</p>
+                  <div class="leading-none"><div class="text-[7pt] font-black tracking-wider text-blue-950">OCEAN<sup class="text-[3pt]">®</sup></div><div class="text-[3.4pt] font-bold text-slate-500">DELIVERING DREAMS</div></div>
+                </div>
+                <div class="flex-1 text-center text-[9pt] font-bold tracking-wide text-slate-900 leading-tight">OCEAN LIFESPACES INDIA PVT LTD</div>
+                <div class="w-[23mm] shrink-0 border border-amber-600 bg-yellow-100 px-1 py-1 text-[6pt] font-bold text-slate-900">ID NO:<br><span id="badge-id-no" class="text-[8pt]">NEW-001</span></div>
+              </div>
+
+              <div class="flex gap-[2mm] mt-[1.5mm] h-[44mm]">
+                <div class="flex-1 min-w-0 flex flex-col">
+                  <div class="border border-slate-300 bg-slate-50 px-1 py-1 min-h-[10mm] text-[6pt] leading-tight">
+                    <span class="font-bold underline">Project Address:</span><br>
+                    <span id="badge-project-addr" class="font-semibold">Project Site Address</span>
+                  </div>
+                  <div class="mt-[1.5mm] border border-emerald-600 flex-1 text-[6pt] leading-tight">
+                    <div class="bg-lime-300 border-b border-emerald-600 px-1 py-[1mm] font-black text-[7pt]">Name of Vendor: <span id="badge-vendor" class="font-bold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">Pass Number: <span id="badge-pass" class="font-semibold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">Name: <span id="badge-name" class="font-bold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">Designation: <span id="badge-desig" class="font-semibold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">DOB - Age - Sex: <span id="badge-dob" class="font-semibold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm] grid grid-cols-2"><span>Blood Group: <b id="badge-blood">-</b></span><span>Aadhar No: <b id="badge-aadhar">-</b></span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">Date of Issue: <span id="badge-issue" class="font-semibold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">Validity up to: <span id="badge-valid" class="font-semibold">-</span></div>
+                    <div class="border-b border-emerald-600 px-1 py-[0.8mm]">EOHS Inducted on: <span id="badge-eohs" class="font-semibold">-</span></div>
+                    <div class="px-1 py-[0.8mm]">Signature of Issuing Authority: <span id="badge-auth" class="font-semibold">Project HR</span></div>
                   </div>
                 </div>
-                <div class="text-right">
-                  <span class="text-[5pt] font-extrabold px-1.5 py-0.5 rounded bg-blue-950 text-white">ID PASS</span>
-                </div>
-              </div>
-
-              <!-- Project Site Office Banner -->
-              <div class="bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5 text-[5pt] text-sky-950 font-semibold text-center leading-tight truncate">
-                Site: <span id="badge-project-addr">Project Site Office, Infopark Phase II, Kochi</span>
-              </div>
-
-              <!-- Middle: Photo & Details -->
-              <div class="grid grid-cols-12 gap-2 items-center my-auto">
-                <div class="col-span-4 flex flex-col items-center">
-                  <div id="badge-photo-box" class="w-[20mm] h-[24mm] rounded bg-slate-100 border border-slate-300 overflow-hidden flex items-center justify-center shadow-2xs">
+                <div class="w-[32.5mm] shrink-0 flex flex-col items-center justify-start">
+                  <div id="badge-photo-box" style="width:20mm;height:25mm" class="w-[20mm] h-[25mm] border border-slate-400 bg-slate-100 overflow-hidden flex items-center justify-center">
                     <span class="text-[6pt] font-semibold text-rose-400">Photo</span>
                   </div>
-                  <span id="badge-id-no" class="text-[5.5pt] font-mono font-black text-blue-950 mt-0.5">NEW-001</span>
-                   <span id="badge-qr-status" class="text-[4.5pt] font-bold text-emerald-700">QR ACTIVE</span>
-                </div>
-
-                <div class="col-span-8 space-y-0.5 text-[6.5pt] leading-tight">
-                  <div>
-                    <p class="text-[4.5pt] font-bold text-slate-500 uppercase leading-none">Worker Name</p>
-                    <p id="badge-name" class="font-black text-slate-900 truncate text-[7.5pt]">-</p>
-                  </div>
-                  <div>
-                    <p class="text-[4.5pt] font-bold text-slate-500 uppercase leading-none">Vendor Agency</p>
-                    <p id="badge-vendor" class="font-bold text-slate-800 truncate">-</p>
-                  </div>
-                  <div>
-                    <p class="text-[4.5pt] font-bold text-slate-500 uppercase leading-none">Designation</p>
-                    <p id="badge-desig" class="font-bold text-blue-900 truncate">-</p>
-                  </div>
-                  <div class="grid grid-cols-2 gap-1 pt-0.5 border-t border-slate-100 text-[5.5pt]">
-                    <div><span class="text-slate-400">DOB:</span> <span id="badge-dob" class="font-semibold">-</span></div>
-                    <div><span class="text-slate-400">Blood:</span> <span id="badge-blood" class="font-bold text-rose-600">-</span></div>
-                  </div>
+                  <span id="badge-qr-status" class="text-[4pt] font-bold text-emerald-700 mt-[0.5mm]">QR ACTIVE</span>
                 </div>
               </div>
-
-              <!-- Footer with QR Code -->
-              <div class="flex items-center justify-between pt-1 border-t border-slate-200">
-                <div class="space-y-0.5 text-[5pt] text-slate-600 leading-tight">
-                  <p>Aadhar/Ref: <span id="badge-aadhar" class="font-mono font-semibold text-slate-800">-</span></p>
-                  <p>Issue: <span id="badge-issue" class="font-semibold">-</span> | Valid: <span id="badge-valid" class="font-semibold">-</span></p>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <div class="text-right leading-none">
-                    <span id="badge-auth" class="block text-[4.5pt] font-bold text-slate-700">Project HR</span>
-                    <span class="block text-[3.5pt] text-slate-400">Authorized Signatory</span>
-                  </div>
-                  <div id="badge-qr-code" class="w-[25mm] h-[25mm] bg-white border border-slate-300 p-0.5 rounded shrink-0"></div>
-                </div>
+              <div class="mt-[1mm] flex items-center gap-2 text-[6pt] leading-none">
+                <span class="font-semibold">SAFETY VIOLATIONS:</span><span>1ST</span><span class="inline-block w-[9mm] h-[4mm] rounded-full bg-yellow-300 border border-yellow-500"></span><span>2ND</span><span class="inline-block w-[9mm] h-[4mm] rounded-full bg-emerald-600"></span><span>3RD</span><span class="inline-block w-[9mm] h-[4mm] rounded-full bg-rose-600"></span>
               </div>
             </div>
 
-            <!-- ==================== BACK OF ID CARD (90mm x 60mm) ==================== -->
-            <div class="ocean-id-card border border-slate-300 flex flex-col justify-between p-[3mm]">
-              <div class="space-y-1 text-[6.5pt] leading-tight">
-                <p class="font-bold text-rose-700">
-                  Emergency Contact No. <span id="badge-back-emergency" class="text-slate-900 font-extrabold ml-1">-</span>
-                </p>
-                <p class="font-bold text-slate-900">
-                  Project Manager: <span id="badge-back-pm" class="font-semibold text-slate-800 ml-1">K. Narayanan</span>
-                </p>
-                <p class="font-bold text-slate-900">
-                  Safety Manager: <span id="badge-back-sm" class="font-semibold text-slate-800 ml-1">S. Rajesh</span>
-                </p>
+            <!-- ==================== BACK OF ID CARD: QR AT TOP RIGHT ==================== -->
+            <div class="ocean-id-card border border-slate-300 p-[3mm] bg-white">
+              <div class="flex justify-between items-start gap-2">
+                <div class="flex-1 space-y-[2mm] text-[7pt] leading-tight pt-[1mm]">
+                  <p class="font-bold text-rose-700">Emergency Contact No. <span id="badge-back-emergency" class="text-slate-900 font-extrabold ml-1">-</span></p>
+                  <p class="font-bold text-slate-900">Project Manager: <span id="badge-back-pm" class="font-semibold text-slate-800 ml-1">-</span></p>
+                  <p class="font-bold text-slate-900">Safety Manager: <span id="badge-back-sm" class="font-semibold text-slate-800 ml-1">-</span></p>
+                </div>
+                <div style="width:20mm;height:25mm" class="w-[20mm] h-[25mm] shrink-0 border border-slate-300 p-0 bg-white flex items-center justify-center" aria-label="QR code 2 by 2.5 centimetres">
+                  <div id="badge-qr-code" class="w-full h-full flex items-center justify-center"></div>
+                </div>
               </div>
-
-              <div class="flex items-center justify-between gap-2 my-1">
-                <div class="flex flex-col items-center text-center w-[28mm] shrink-0">
-                  <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="5.5" stroke-linecap="round"/>
-                    <path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/>
-                    <path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
+              <div class="flex items-center gap-3 mt-[3mm]">
+                <div class="w-[28mm] shrink-0 flex flex-col items-center text-center">
+                  <svg width="23mm" height="23mm" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 50 A 28 28 0 0 1 78 50" stroke="#d97706" stroke-width="5.5" stroke-linecap="round"/><path d="M56 36 C 36 33, 24 47, 26 65 C 28 82, 46 91, 63 85 C 74 81, 80 71, 79 62 C 74 74, 59 80, 45 75 C 33 70, 29 55, 38 45 C 43 39, 50 37, 56 36 Z" fill="#1d4ed8"/><path d="M43 32 C 62 27, 79 41, 78 59 C 77 75, 61 84, 46 79 C 36 76, 31 66, 33 56 C 37 67, 50 72, 62 67 C 71 62, 73 48, 63 40 C 57 35, 50 33, 43 32 Z" fill="#38bdf8"/>
                   </svg>
-                  <span class="text-[8.5pt] font-black text-blue-950 tracking-[0.14em] leading-none mt-0.5">OCEAN<sup class="text-[4.5pt]">®</sup></span>
-                  <span class="text-[4.5pt] font-semibold text-slate-600 tracking-[0.14em] leading-none mt-0.5">DELIVERING DREAMS</span>
+                  <span class="text-[10pt] font-black text-blue-950 tracking-[0.14em] leading-none">OCEAN<sup class="text-[4pt]">®</sup></span>
+                  <span class="text-[4.5pt] font-semibold text-slate-600 tracking-[0.14em]">DELIVERING DREAMS</span>
+                  <span class="text-[3.5pt] font-bold text-slate-500">CIVIL | INFRA | MARINE | DATA CENTRE | FITOUT</span>
                 </div>
-
-                <div class="flex-1 text-[6.2pt] leading-snug text-slate-900">
-                  <p class="font-bold">If found Please return it to:</p>
-                  <p class="font-bold">Company Address:</p>
-                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">
-                    Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032
-                  </p>
+                <div class="flex-1 text-[7pt] leading-snug text-slate-900 pt-[1mm]">
+                  <p class="font-bold">If found Please return it to:</p><p class="font-bold">Company Address:</p>
+                  <p id="badge-back-return-addr" class="font-semibold text-slate-800">Ocean One, MF-1, Industrial Estate, CIPET Hostel Road, Guindy, Chennai – 600032</p>
                 </div>
               </div>
-
-              <div class="text-[5.8pt] leading-tight text-slate-900">
-                <p class="font-bold text-rose-700 underline mb-0.5">Instructions:</p>
+              <div class="mt-[3mm] text-[6.5pt] leading-snug text-slate-900">
+                <p class="font-bold text-rose-700 underline mb-[1mm]">Instructions:</p>
                 <p class="font-semibold">1. Identity Card Must always be carried and displayed while on duty</p>
-                <p class="font-semibold">2. ID Loss of card must be returned to the authorities on completion of employment /Contract</p>
+                <p class="font-semibold mt-[1mm]">2. Loss of card must be returned to the authorities on completion of employment / Contract</p>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -839,7 +805,7 @@
         <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 space-y-2">
           <label class="block text-xs font-extrabold text-sky-950 uppercase">Backend API / Google Apps Script Web App URL</label>
           <input type="url" id="set-backend-url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" class="w-full rounded-lg border border-sky-300 bg-white px-3 py-2.5 text-sm font-mono" />
-          <p class="text-[11px] text-sky-800">Paste your deployed Google Apps Script Web App URL above and click Save Configuration.</p>
+          <p class="text-[11px] text-sky-800">Paste your deployed Google Apps Script Web App URL above and click Save Configuration.</p>\n          <p class="text-[11px] text-emerald-800 font-semibold">Server validation: one IN and one OUT per worker per day; India time stored as HH:MM:SS with millisecond timestamps.</p>
         </div>
 
         <!-- CUSTOM SPOKEN VOICE PHRASES -->
@@ -910,7 +876,8 @@
   </div>
 
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbyfgDkR5U96I86-uTG29AlQYSGs_oY2PkyCmKmSQRWtc5DYRkKuyC0ghNoOG5k1gmdm/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbysA7hAiPPAmvk-zn9IqUkXXTxUYWBmeThRBuLVAjME9j08iJJNYI5iZLbnq_YpvrdF/exec";
+    const DEFAULT_BACKEND_URL = ""; // Paste the newly deployed Apps Script URL in Settings.
     const STORAGE_KEY_WORKERS = 'ocean_v6_workers';
     const STORAGE_KEY_LOGS = 'ocean_v6_logs';
     const STORAGE_KEY_SETTINGS = 'ocean_v6_settings';
@@ -923,6 +890,7 @@
     let isScanning = false;
     let lastScanTimestamp = 0;
     let lastScannedCode = "";
+    const punchInProgress = new Set(); // prevents overlapping camera callbacks for one worker
     let activeScanMode = "IN";
     let uploadedPhotoDataUrl = "";
     let verifyModalTimer = null;
@@ -1047,7 +1015,7 @@
     }
     function getRailwayTime(dateObj = new Date()) {
       const p = indiaDateParts(dateObj);
-      return `${p.hour}:${p.minute}:${p.second}`;
+      return `${p.hour}:${p.minute}:${p.second}`; // 24-hour HH:MM:SS
     }
     function getPreciseTimestamp(dateObj = new Date()) {
       const p = indiaDateParts(dateObj);
@@ -1529,9 +1497,11 @@
       // activation is checked again by executeScannedPunch before attendance.
       if (upper.startsWith("OCEANQR|")) {
         const parts = clean.split("|");
+        const token = String(parts[1] || "").trim();
         const id = String(parts[2] || "").trim().toUpperCase();
         const worker = workers.find(w => String(w.id || "").trim().toUpperCase() === id);
-        return worker ? worker.id.toUpperCase() : "";
+        // Token-bearing QR codes must match the worker's registered token.
+        return worker && worker.qrToken && token === worker.qrToken ? worker.id.toUpperCase() : "";
       }
 
       // Legacy Ocean QR format: OCEAN|employee-id.
@@ -1643,119 +1613,93 @@
     }
 
     async function recordAttendance(direction, workerId) {
+      const normalizedId = String(workerId || "").trim().toUpperCase();
+      if (!normalizedId || punchInProgress.has(normalizedId)) return;
+      punchInProgress.add(normalizedId);
       const feedback = document.getElementById('punch-feedback');
       feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-300', 'bg-amber-50', 'text-amber-800', 'border-amber-300', 'bg-rose-50', 'text-rose-800', 'border-rose-300');
+      try {
+        const worker = workers.find(w => String(w.id).toUpperCase() === normalizedId);
+        if (!worker) { playBeep('error'); showToast('Employee is not registered. Attendance was not recorded.'); return; }
+        if (worker.qrActive === false) { showToast('This worker QR code is deactivated. Ask Admin to activate it.'); return; }
 
-      let worker = workers.find(w => w.id.toUpperCase() === workerId.toUpperCase());
-      if (!worker) {
-        worker = {
-          id: workerId,
-          name: `Worker (${workerId})`,
-          agency: "Ocean Lifespaces Subcontractor",
-          designation: "Site Operative",
-          photo: `https://placehold.co/240x300/1e3a8a/ffffff?text=${workerId}`
-        };
-      }
-
-      if (worker.qrActive === false) {
-        showToast("This worker QR code is deactivated. Ask Admin to activate it.");
-        return;
-      }
-      const punchDate = new Date();
-      const gps = await capturePunchLocation();
-      const workerPhoto = worker.photo || getWorkerPhoto(worker.id, worker.name);
-      const todayStr = punchDate.getFullYear() + "-" + String(punchDate.getMonth()+1).padStart(2,"0") + "-" + String(punchDate.getDate()).padStart(2,"0");
-      const nowTime = getRailwayTime(punchDate);
-      const nowMs = punchDate.getTime();
-      const preciseTimestamp = getPreciseTimestamp(punchDate);
-      const openLog = logs.find(l => l.id.toUpperCase() === worker.id.toUpperCase() && l.date === todayStr && !l.outTime);
-
-      if (direction === 'IN') {
-        if (openLog) {
-          playBeep('error');
-          speakVoice(`${worker.name} already clocked in`);
+        // Capture timestamp immediately when the QR is accepted, before optional GPS lookup.
+        // Re-check the current state immediately before creating the punch.
+        // One open attendance row per worker per India-local day is allowed.
+        const currentOpen = logs.find(l => String(l.id).toUpperCase() === normalizedId && l.date === indiaDateParts(new Date()).year + '-' + indiaDateParts(new Date()).month + '-' + indiaDateParts(new Date()).day && !l.outTime);
+        if (direction === 'IN' && currentOpen) {
+          playBeep('error'); showToast('Duplicate IN blocked: this worker is already clocked in.');
+          return;
+        }
+        if (direction === 'OUT' && !currentOpen) {
+          playBeep('error'); showToast('Duplicate/invalid OUT blocked: no open IN record exists.');
+          return;
+        }
+        const punchDate = new Date();
+        const india = indiaDateParts(punchDate);
+        const todayStr = `${india.year}-${india.month}-${india.day}`;
+        const nowTime = `${india.hour}:${india.minute}:${india.second}`; // HH:MM:SS
+        const nowMs = punchDate.getTime();
+        const preciseTimestamp = `${todayStr}T${nowTime}.${String(punchDate.getMilliseconds()).padStart(3, '0')}+05:30`;
+        const todayLogs = logs.filter(l => String(l.id).toUpperCase() === normalizedId && l.date === todayStr);
+        const openLog = todayLogs.find(l => !l.outTime);
+        if (direction === 'IN' && todayLogs.length > 0) {
+          playBeep('error'); speakVoice(`${worker.name} already clocked in`);
           updateScanPanelPhotoPreview(worker, 'IN', `Already IN at ${openLog.inTime}`);
           feedback.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-300');
-          feedback.innerText = `⚠️ ${worker.name} is ALREADY clocked IN at ${openLog.inTime}.`;
+          feedback.innerText = `⚠️ ${worker.name} already has an attendance entry today. A second IN is blocked.`;
+          return;
+        }
+        if (direction === 'OUT' && !openLog) {
+          playBeep('error'); showToast('No open IN record found for today. Clock-OUT was not recorded.');
           return;
         }
 
-        const newEntry = {
-          action: "IN",
-          date: todayStr,
-          id: worker.id,
-          name: worker.name,
-          designation: worker.designation || 'Site Operative',
-          agency: worker.agency || 'Vendor',
-          projectLocation: worker.projectLocation || '',
-          inTime: nowTime,
-          inMs: nowMs,
-          inTimestamp: preciseTimestamp,
-          inLatitude: gps.latitude, inLongitude: gps.longitude, inGpsAccuracyM: gps.accuracyM, inGpsStatus: gps.gpsStatus,
-          outTime: "",
-          totalHrs: "-",
-          overtimeHrs: "-",
-          loggedBy: currentRole.toUpperCase(),
-          photo: workerPhoto
-        };
-
-        logs.unshift(newEntry);
-        postToCloudBackend(newEntry);
-
-        playBeep('IN');
-        const spokenIn = formatVoiceTemplate(settings.voiceInPhrase || "{name} clock in success", worker);
-        speakVoice(spokenIn);
-        updateScanPanelPhotoPreview(worker, 'IN', nowTime);
-        feedback.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-300');
-        feedback.innerText = `✅ CLOCK IN SUCCESS: ${worker.name} at ${nowTime}`;
-      } else {
-        const spokenOut = formatVoiceTemplate(settings.voiceOutPhrase || "{name} clock out success", worker);
-
-        if (!openLog) {
-          playBeep('error');
-          showToast("No open IN record found for today. Clock-OUT was not recorded.");
-          return;
+        const gps = await capturePunchLocation();
+        const workerPhoto = worker.photo || getWorkerPhoto(worker.id, worker.name);
+        if (direction === 'IN') {
+          const newEntry = {
+            action: 'IN', date: todayStr, id: worker.id, name: worker.name,
+            designation: worker.designation || 'Site Operative', agency: worker.agency || 'Vendor',
+            projectLocation: worker.projectLocation || '', inTime: nowTime, inMs: nowMs,
+            inTimestamp: preciseTimestamp, inLatitude: gps.latitude, inLongitude: gps.longitude,
+            inGpsAccuracyM: gps.accuracyM, inGpsStatus: gps.gpsStatus, outTime: '',
+            totalHrs: '-', overtimeHrs: '-', loggedBy: currentRole.toUpperCase(), photo: workerPhoto
+          };
+          logs.unshift(newEntry);
+          postToCloudBackend(newEntry);
+          playBeep('IN');
+          speakVoice(formatVoiceTemplate(settings.voiceInPhrase || '{name} clock in success', worker));
+          updateScanPanelPhotoPreview(worker, 'IN', nowTime);
+          feedback.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-300');
+          feedback.innerText = `✅ CLOCK IN SUCCESS: ${worker.name} at ${nowTime}`;
+        } else {
+          openLog.outTime = nowTime; openLog.outTimestamp = preciseTimestamp;
+          openLog.outLatitude = gps.latitude; openLog.outLongitude = gps.longitude;
+          openLog.outGpsAccuracyM = gps.accuracyM; openLog.outGpsStatus = gps.gpsStatus;
+          openLog.photo = openLog.photo || workerPhoto;
+          const durationHrs = Math.max(0, (nowMs - Number(openLog.inMs || nowMs)) / 3600000);
+          const overtime = Math.max(0, durationHrs - Number(settings.shiftHours || 8));
+          openLog.totalHrs = `${durationHrs.toFixed(2)} hrs`;
+          openLog.overtimeHrs = `${overtime.toFixed(2)} hrs`;
+          openLog.loggedBy = `${openLog.loggedBy} / ${currentRole.toUpperCase()}`;
+          postToCloudBackend({ action: 'OUT', date: todayStr, id: worker.id, name: worker.name,
+            designation: openLog.designation, agency: openLog.agency, inTime: openLog.inTime,
+            outTime: openLog.outTime, outTimestamp: openLog.outTimestamp,
+            outLatitude: openLog.outLatitude, outLongitude: openLog.outLongitude,
+            outGpsAccuracyM: openLog.outGpsAccuracyM, outGpsStatus: openLog.outGpsStatus,
+            totalHrs: openLog.totalHrs, overtimeHrs: openLog.overtimeHrs,
+            loggedBy: openLog.loggedBy, photo: openLog.photo });
+          playBeep('OUT');
+          speakVoice(formatVoiceTemplate(settings.voiceOutPhrase || '{name} clock out success', worker));
+          updateScanPanelPhotoPreview(worker, 'OUT', `${nowTime} (${openLog.totalHrs})`);
+          feedback.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300');
+          feedback.innerText = `🚪 CLOCK OUT SUCCESS: ${worker.name} at ${nowTime} • Total: ${openLog.totalHrs}`;
         }
-
-        openLog.outTime = nowTime;
-        openLog.outTimestamp = preciseTimestamp;
-        openLog.outLatitude = gps.latitude; openLog.outLongitude = gps.longitude;
-        openLog.outGpsAccuracyM = gps.accuracyM; openLog.outGpsStatus = gps.gpsStatus;
-        openLog.photo = openLog.photo || workerPhoto;
-        const durationHrs = Math.max(0.01, (nowMs - openLog.inMs) / (1000 * 60 * 60));
-        const overtime = Math.max(0, durationHrs - settings.shiftHours);
-        openLog.totalHrs = `${durationHrs.toFixed(2)} hrs`;
-        openLog.overtimeHrs = `${overtime.toFixed(2)} hrs`;
-        openLog.loggedBy = `${openLog.loggedBy} / ${currentRole.toUpperCase()}`;
-
-        postToCloudBackend({
-          action: "OUT",
-          date: todayStr,
-          id: worker.id,
-          name: worker.name,
-          designation: openLog.designation,
-          agency: openLog.agency,
-          inTime: openLog.inTime,
-          outTime: openLog.outTime,
-          outTimestamp: openLog.outTimestamp,
-          outLatitude: openLog.outLatitude, outLongitude: openLog.outLongitude,
-          outGpsAccuracyM: openLog.outGpsAccuracyM, outGpsStatus: openLog.outGpsStatus,
-          totalHrs: openLog.totalHrs,
-          overtimeHrs: openLog.overtimeHrs,
-          loggedBy: openLog.loggedBy,
-          photo: openLog.photo
-        });
-
-        playBeep('OUT');
-        speakVoice(spokenOut);
-        updateScanPanelPhotoPreview(worker, 'OUT', `${nowTime} (${openLog.totalHrs})`);
-        feedback.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300');
-        feedback.innerText = `🚪 CLOCK OUT SUCCESS: ${worker.name} at ${nowTime} • Total: ${openLog.totalHrs}`;
+        persistAll(); updateKPIs(); renderAllViews();
+      } finally {
+        punchInProgress.delete(normalizedId);
       }
-
-      persistAll();
-      updateKPIs();
-      renderAllViews();
     }
 
     function renderGateLookupList() {
@@ -1806,7 +1750,7 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, 240, 240);
           uploadedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          document.getElementById('badge-photo-box').innerHTML = `<img src="${uploadedPhotoDataUrl}" alt="Worker Photo" class="w-full h-full object-cover" />`;
+          document.getElementById('badge-photo-box').innerHTML = `<img src="${uploadedPhotoDataUrl}" alt="Worker Photo" style="width:20mm;height:25mm;object-fit:cover;display:block" />`;
         };
         img.src = e.target.result;
       };
@@ -1918,6 +1862,8 @@
       document.getElementById('badge-id-no').innerText = "NEW-001";
       document.getElementById('badge-qr-status').innerText = "QR ACTIVE";
       document.getElementById('badge-name').innerText = "-";
+      document.getElementById('badge-pass').innerText = "NEW-001";
+      document.getElementById('badge-eohs').innerText = "-";
       document.getElementById('badge-vendor').innerText = "-";
       document.getElementById('badge-desig').innerText = "-";
       document.getElementById('badge-dob').innerText = "-";
@@ -1936,7 +1882,7 @@
 
       const qrBox = document.getElementById('badge-qr-code');
       qrBox.innerHTML = "";
-      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 240, height: 240, colorDark: "#0f172a", colorLight: "#ffffff" });
+      new QRCode(qrBox, { text: "OCEAN|NEW-001", width: 240, height: 240, correctLevel: QRCode.CorrectLevel.H, colorDark: "#0f172a", colorLight: "#ffffff" });
       qrBox.style.opacity = "1";
     }
 
@@ -1945,6 +1891,8 @@
       document.getElementById('badge-qr-status').innerText = worker.qrActive === false ? "QR DEACTIVATED" : "QR ACTIVE";
       document.getElementById('badge-qr-status').className = worker.qrActive === false ? "text-[4.5pt] font-bold text-rose-700" : "text-[4.5pt] font-bold text-emerald-700";
       document.getElementById('badge-name').innerText = worker.name;
+      document.getElementById('badge-pass').innerText = worker.id;
+      document.getElementById('badge-eohs').innerText = worker.eohs || '-';
       document.getElementById('badge-vendor').innerText = worker.agency;
       document.getElementById('badge-desig').innerText = worker.designation;
       document.getElementById('badge-dob').innerText = worker.dob;
@@ -1960,7 +1908,7 @@
       document.getElementById('badge-back-pm').innerText = settings.projectManager;
       document.getElementById('badge-back-sm').innerText = settings.safetyManager;
 
-      document.getElementById('badge-photo-box').innerHTML = `<img src="${worker.photo}" alt="${worker.name}" class="w-full h-full object-cover" />`;
+      document.getElementById('badge-photo-box').innerHTML = `<img src="${worker.photo}" alt="${worker.name}" style="width:20mm;height:25mm;object-fit:cover;display:block" />`;
 
       const qrBox = document.getElementById('badge-qr-code');
       qrBox.innerHTML = "";
@@ -1970,101 +1918,35 @@
         workers[savedWorkerIndex].qrToken = worker.qrToken;
         persistAll();
       }
-      const qrPayload = `OCEAN|${worker.id}`;
-      new QRCode(qrBox, { text: qrPayload, width: 240, height: 240, colorDark: "#0f172a", colorLight: "#ffffff" });
+      const qrPayload = `OCEANQR|${worker.qrToken}|${worker.id}`;
+      new QRCode(qrBox, { text: qrPayload, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.H, colorDark: "#0f172a", colorLight: "#ffffff" });
       if (worker.qrActive === false) qrBox.style.opacity = "0.25"; else qrBox.style.opacity = "1";
     }
 
     function printSelectedIDCardA4() {
       const cards = document.querySelectorAll('.ocean-id-card');
+      if (!cards || cards.length < 2) { showToast("Front and back ID card previews not found."); return; }
       const printWindow = window.open('', '_blank');
-      if (!printWindow) { showToast("Allow pop-ups to print the ID card."); return; }
-      const cardHtml = Array.from(cards).map(card => card.outerHTML).join("");
+      if (!printWindow) { showToast("Allow pop-ups to print the ID cards."); return; }
       printWindow.document.open();
-      printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Ocean Lifespaces ID Card</title>
-        <style>@page{size:A4 portrait;margin:8mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0}
-        .sheet{display:grid;grid-template-columns:repeat(2,90mm);grid-auto-rows:60mm;gap:5mm;justify-content:center;align-content:start}
-        .ocean-id-card{width:90mm;height:60mm;min-width:90mm;min-height:60mm;box-shadow:none!important;border-radius:0!important;break-inside:avoid;page-break-inside:avoid;page-break-after:auto}
-        </style></head><body><main class="sheet">${cardHtml}</main><script>window.onload=()=>setTimeout(()=>window.print(),400);<\/script></body></html>`);
+      printWindow.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><title>Ocean ID Card - Front and Back</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <style>
+          @page { size:A4 portrait; margin:10mm; }
+          * { box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+          html,body { margin:0;padding:0;background:#fff;font-family:Arial,sans-serif; }
+          .sheet { width:190mm;display:grid;grid-template-columns:90mm 90mm;gap:5mm;justify-content:center;align-items:start; }
+          .ocean-id-card { display:block!important;width:90mm!important;height:60mm!important;min-width:90mm!important;min-height:60mm!important;max-width:90mm!important;max-height:60mm!important;margin:0!important;box-shadow:none!important;border-radius:0!important;overflow:hidden!important;break-inside:avoid;page-break-inside:avoid; }
+          #badge-photo-box { width:20mm!important;height:25mm!important;min-width:20mm!important;min-height:25mm!important;max-width:20mm!important;max-height:25mm!important;overflow:hidden!important; }
+          #badge-photo-box img { width:20mm!important;height:25mm!important;object-fit:cover!important;display:block!important; }
+          #badge-qr-code { width:20mm!important;height:25mm!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important; }
+          #badge-qr-code img, #badge-qr-code canvas { width:20mm!important;height:25mm!important;max-width:20mm!important;max-height:25mm!important;object-fit:fill!important;display:block!important; }
+          @media screen { body { padding:16px; } }
+        </style></head><body><div class="sheet">${cards[0].outerHTML}${cards[1].outerHTML}</div>
+        <script>window.onload=()=>setTimeout(()=>{window.print();window.close()},700);<\/script>
+        </body></html>`);
       printWindow.document.close();
-    }
-
-    async function printAllWorkerQRCodesA4() {
-      if (!workers.length) {
-        showToast("No registered employees available to print.");
-        return;
-      }
-      const printBtnMessage = "Preparing employee QR codes...";
-      showToast(printBtnMessage);
-
-      // Render QR images in an off-screen staging area before opening the print window.
-      const staging = document.createElement("div");
-      staging.style.cssText = "position:fixed;left:-10000px;top:0;background:#fff;";
-      document.body.appendChild(staging);
-
-      try {
-        const cards = [];
-        for (const worker of workers) {
-          worker.qrToken = worker.qrToken || createEmployeeQrToken();
-          const qrHost = document.createElement("div");
-          staging.appendChild(qrHost);
-          new QRCode(qrHost, {
-            text: `OCEANQR|${worker.qrToken}|${worker.id}`,
-            width: 300,
-            height: 300,
-            correctLevel: QRCode.CorrectLevel.H
-          });
-          await new Promise(resolve => setTimeout(resolve, 35));
-          const qrImage = qrHost.querySelector("canvas")?.toDataURL("image/png")
-            || qrHost.querySelector("img")?.src;
-          if (!qrImage) throw new Error("Could not render QR code for " + worker.id);
-          cards.push({ id: worker.id, name: worker.name, designation: worker.designation, agency: worker.agency, qrImage });
-        }
-
-        persistAll();
-        const printWindow = window.open("", "_blank");
-        if (!printWindow) throw new Error("Please allow pop-ups to print the QR sheet.");
-
-        const cardHtml = cards.map(w => `
-          <article class="qr-card">
-            <img src="${w.qrImage}" alt="QR ${escapeHtml(w.id)}">
-            <div class="details">
-              <strong>${escapeHtml(w.id)}</strong>
-              <span>${escapeHtml(w.name || "")}</span>
-              <small>${escapeHtml(w.designation || "")}</small>
-              <small>${escapeHtml(w.agency || "")}</small>
-            </div>
-          </article>`).join("");
-
-        printWindow.document.open();
-        printWindow.document.write(`<!doctype html>
-<html><head><meta charset="utf-8"><title>Ocean Lifespaces Employee QR Codes</title>
-<style>
-  @page { size: A4 portrait; margin: 10mm; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family:Arial,sans-serif; color:#111827; }
-  h1 { font-size:16pt; text-align:center; margin:0 0 3mm; }
-  .sub { text-align:center; font-size:8pt; margin:0 0 7mm; color:#475569; }
-  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:5mm 4mm; }
-  .qr-card { height:58mm; border:0.3mm solid #cbd5e1; border-radius:2mm; padding:3mm; display:flex; flex-direction:column; align-items:center; justify-content:center; break-inside:avoid; page-break-inside:avoid; }
-  .qr-card img { width:34mm; height:34mm; object-fit:contain; }
-  .details { text-align:center; display:flex; flex-direction:column; gap:1mm; width:100%; margin-top:1.5mm; }
-  .details strong { font-size:9pt; }
-  .details span { font-size:8pt; font-weight:600; }
-  .details small { font-size:6.5pt; color:#475569; }
-  @media print { .qr-card { break-inside:avoid; } }
-</style></head><body>
-<h1>OCEAN LIFESPACES INDIA PVT LTD</h1>
-<p class="sub">EMPLOYEE QR CODE REGISTER · Total Employees: ${cards.length}</p>
-<section class="grid">${cardHtml}</section>
-<script>window.onload=()=>setTimeout(()=>window.print(),500);<\/script>
-</body></html>`);
-        printWindow.document.close();
-      } catch (err) {
-        showToast(err.message || "Unable to prepare QR print sheet.");
-      } finally {
-        staging.remove();
-      }
     }
 
     function escapeHtml(value) {
@@ -2133,7 +2015,7 @@
       tbody.innerHTML = filtered.map((w, index) => `
         <tr class="hover:bg-slate-50">
           <td class="py-2.5 px-3 font-bold text-slate-500">${index + 1}</td>
-          <td class="py-2.5 px-3"><div id="directory-qr-${index}" class="w-[25mm] h-[25mm] bg-white"></div></td>
+          <td class="py-2.5 px-3"><div id="directory-qr-${index}" class="w-[20mm] h-[20mm] bg-white"></div></td>
           <td class="py-2.5 px-3">
             <img src="${w.photo}" alt="${w.name}" class="w-9 h-10 rounded object-cover border border-slate-300" onerror="this.src='https://placehold.co/80x100/1e3a8a/ffffff?text=ID'" />
           </td>
@@ -2152,7 +2034,7 @@
       filtered.forEach((w, index) => {
         const host = document.getElementById(`directory-qr-${index}`);
         if (host && w.qrActive !== false) {
-          new QRCode(host, { text: `OCEANQR|${w.qrToken || ''}|${w.id}`, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.H });
+          new QRCode(host, { text: `OCEANQR|${w.qrToken || ''}|${w.id}`, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.H });
         } else if (host) host.innerHTML = '<span class="text-[10px] font-bold text-rose-700">DEACTIVATED</span>';
       });
     }
