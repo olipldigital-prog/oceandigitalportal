@@ -231,121 +231,50 @@
   </div>
 
   <!-- =====================================================================
-       2. SECURITY PANEL (RESTRICTED VIEW: QR SCANNER + LIVE PHOTO PREVIEW)
+       2. SECURITY PANEL (TWO BUTTONS + AUTOMATIC CAMERA SCANNER)
        ===================================================================== -->
-  <div id="security-view" class="hidden min-h-screen flex flex-col bg-slate-900 text-white">
-    <!-- Top Bar with Company Logo & Live IST Clock -->
-    <header class="bg-white text-slate-900 shadow-md px-4 py-3 border-b border-slate-200">
-      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div id="sec-header-logo" class="w-32 sm:w-40"></div>
-          <div>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-              SECURITY GATE TERMINAL
-            </span>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Arrival Clock-In & Departure Clock-Out QR Scanner</p>
+  <div id="security-view" class="hidden min-h-screen flex flex-col bg-slate-950 text-white">
+    <header class="bg-white text-slate-900 shadow-md px-4 py-3">
+      <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="sec-header-logo" class="w-28 sm:w-36 shrink-0"></div>
+          <div class="min-w-0">
+            <div class="text-sm sm:text-base font-extrabold text-blue-950">OCEAN ATTENDANCE</div>
+            <div class="text-xs text-slate-500">Security Attendance Scanner</div>
           </div>
         </div>
-
-        <div class="flex items-center gap-3">
-          <div class="bg-slate-900 text-white px-3.5 py-1.5 rounded-xl border border-slate-700 text-right">
-            <div id="sec-clock-time" class="text-sm sm:text-base font-mono font-extrabold text-amber-300">00:00:00 IST</div>
-            <div id="sec-clock-date" class="text-[11px] font-mono text-blue-200">DD-MM-YY</div>
-          </div>
-          <button onclick="logout()" class="px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow">
-            Logout
-          </button>
-        </div>
+        <button onclick="logout()" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-xs font-bold">Logout</button>
       </div>
     </header>
-
-    <!-- Main Security Scanner Area -->
-    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- Left: Two-Option Mode Selector + QR Code Camera Scanner Box -->
-      <div class="lg:col-span-6 bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
-            QR Scanner Area (Clock-In / Clock-Out)
-          </h2>
-          <div class="flex gap-2">
-            <button id="btn-start-sec-cam" onclick="startCameraScanner('security')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold">
-              Start Camera
-            </button>
-            <button id="btn-stop-sec-cam" onclick="stopCameraScanner('security')" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-bold">
-              Stop
-            </button>
-          </div>
+    <main class="w-full max-w-3xl mx-auto flex-1 p-3 sm:p-5 flex flex-col gap-4">
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="sec-mode-clock-in" onclick="selectSecurityPunchMode('CLOCK_IN')"
+          class="min-h-16 rounded-2xl px-3 py-4 text-base sm:text-lg font-extrabold bg-emerald-600 text-white ring-4 ring-emerald-300 shadow-lg">
+          ▶ CLOCK-IN
+        </button>
+        <button type="button" id="sec-mode-clock-out" onclick="selectSecurityPunchMode('CLOCK_OUT')"
+          class="min-h-16 rounded-2xl px-3 py-4 text-base sm:text-lg font-extrabold bg-slate-800 text-slate-200 border border-slate-700">
+          ■ CLOCK-OUT
+        </button>
+      </div>
+      <section class="rounded-2xl overflow-hidden border-2 border-blue-500/70 bg-black shadow-xl">
+        <div class="px-3 py-2 bg-slate-900 flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-bold text-white">SCAN WORKER QR CODE</span>
+          <span id="sec-camera-state" class="text-[11px] font-semibold text-emerald-300">Opening camera…</span>
         </div>
-
-        <!-- TWO-OPTION SCANNER MODE TOGGLE (CLOCK_IN vs CLOCK_OUT) -->
-        <div class="bg-slate-900/90 p-2 rounded-xl border border-slate-700">
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-1">
-            Select Active Scanner Mode:
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" id="sec-mode-clock-in" onclick="setScannerMode('CLOCK_IN')"
-              class="py-2.5 px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all bg-emerald-600 text-white shadow-md ring-2 ring-emerald-300">
-              <span>▶ CLOCK-IN (Arrival)</span>
-            </button>
-            <button type="button" id="sec-mode-clock-out" onclick="setScannerMode('CLOCK_OUT')"
-              class="py-2.5 px-3 rounded-lg font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all bg-slate-800 text-slate-300 hover:bg-slate-700">
-              <span>⏹ CLOCK-OUT (Shift End)</span>
-            </button>
-          </div>
-          <p id="sec-mode-helper" class="text-[11px] text-emerald-300 font-medium mt-2 px-1">
-            CLOCK-IN MODE: Records shift arrival time upon worker arrival.
-          </p>
-        </div>
-
-        <!-- Live Camera Viewport -->
-        <div class="relative rounded-xl overflow-hidden bg-slate-950 border-2 border-blue-500/50 min-h-[250px] flex items-center justify-center">
+        <div class="relative min-h-[260px] flex items-center justify-center">
           <div id="security-qr-reader" class="w-full"></div>
           <div id="sec-camera-placeholder" class="text-center p-6">
-            <svg class="w-12 h-12 mx-auto text-blue-400 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            <p class="text-sm font-semibold text-slate-300">Camera Ready for ID Card QR Scan</p>
-            <p class="text-xs text-slate-400 mt-1">Click "Start Camera" or use Instant QR Scan Simulator below</p>
+            <div class="text-4xl mb-3">▣</div>
+            <p class="text-sm font-semibold text-white">Starting rear camera…</p>
+            <p class="text-xs text-slate-400 mt-1">Allow camera permission when prompted</p>
           </div>
         </div>
-
-        <!-- Quick Scan Simulator / Manual Barcode Reader Input -->
-        <div class="pt-3 border-t border-slate-700 space-y-3">
-          <label class="block text-xs font-bold uppercase tracking-wider text-blue-300">
-            Instant QR Scan Simulator / Handheld Scanner Input
-          </label>
-          <div class="flex flex-col sm:flex-row gap-2">
-            <select id="sec-sim-worker" class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-2.5 text-sm text-white font-medium outline-none focus:border-blue-400">
-              <option value="">-- Select Worker ID to Simulate Scan --</option>
-            </select>
-            <button type="button" onclick="simulateScan('security')" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow">
-              Scan QR Now
-            </button>
-          </div>
-          <form onsubmit="handleManualBarcodeScan(event, 'security')" class="flex gap-2">
-            <input type="text" id="sec-manual-id" placeholder="Or scan/type ID No (e.g. OLIPL-1001)"
-              class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-emerald-400" />
-            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold uppercase">
-              Verify
-            </button>
-          </form>
-        </div>
+      </section>
+      <div id="sec-scan-result" aria-live="polite" class="rounded-xl bg-slate-900 border border-slate-700 p-4 text-center text-sm text-slate-200">
+        Select Clock-In or Clock-Out, then scan the worker ID QR code.
       </div>
-
-      <!-- Right: Scanned Worker Photo Preview & Voice Status Card -->
-      <div class="lg:col-span-6 bg-white text-slate-900 rounded-2xl border border-slate-200 p-6 shadow-xl">
-        <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-5">
-          <h3 class="text-base sm:text-lg font-extrabold text-blue-950">Scanned Worker Verification</h3>
-          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800">Voice Output Active</span>
-        </div>
-
-        <div id="sec-scan-result" class="flex flex-col items-center text-center py-6">
-          <div class="w-36 h-40 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden mb-4">
-            <span class="text-xs font-semibold text-slate-400 px-3">Worker Face Photo Appears Here on Scan</span>
-          </div>
-          <p class="text-base font-bold text-slate-700">Awaiting QR Code Scan...</p>
-          <p class="text-xs text-slate-500 mt-1">Select Clock-In or Clock-Out mode and present worker ID card QR code</p>
-        </div>
-      </div>
+      <div id="sec-clock-time" class="text-center text-xs font-mono text-slate-400">IST server time is recorded when the scan is accepted</div>
     </main>
   </div>
 
@@ -1591,6 +1520,22 @@
       }
     }
 
+    function selectSecurityPunchMode(mode) {
+      setScannerMode(mode);
+      const inBtn = document.getElementById('sec-mode-clock-in');
+      const outBtn = document.getElementById('sec-mode-clock-out');
+      const isIn = activeScannerMode === 'CLOCK_IN';
+      if (inBtn) inBtn.className = isIn
+        ? 'min-h-16 rounded-2xl px-3 py-4 text-base sm:text-lg font-extrabold bg-emerald-600 text-white ring-4 ring-emerald-300 shadow-lg'
+        : 'min-h-16 rounded-2xl px-3 py-4 text-base sm:text-lg font-extrabold bg-slate-800 text-slate-200 border border-slate-700';
+      if (outBtn) outBtn.className = !isIn
+        ? 'min-h-16 rounded-2xl px-3 py-4 text-base sm:text-lg font-extrabold bg-amber-600 text-white ring-4 ring-amber-300 shadow-lg'
+        : 'min-h-16 rounded-2xl px-3 py-4 text-base sm:text-lg font-extrabold bg-slate-800 text-slate-200 border border-slate-700';
+      const state = document.getElementById('sec-camera-state');
+      if (state) state.textContent = isIn ? 'CLOCK-IN MODE' : 'CLOCK-OUT MODE';
+      if (!secQrScanner) startCameraScanner('security');
+    }
+
     function parseTimeToSeconds(hms) {
       if (!hms || !hms.includes(':')) return 0;
       const [h, m, s] = hms.split(':').map(Number);
@@ -1816,7 +1761,75 @@
       });
     }
 
+    function callBackendJsonp(params, timeoutMs = 12000) {
+      return new Promise((resolve, reject) => {
+        const cfg = getCloudConfig();
+        if (!cfg.webAppUrl) return reject(new Error('Google Apps Script Web App URL is not configured'));
+        const callbackName = 'oceanApiCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const script = document.createElement('script');
+        let finished = false;
+        const cleanup = () => {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+          clearTimeout(timer);
+        };
+        const timer = setTimeout(() => {
+          if (finished) return;
+          finished = true; cleanup(); reject(new Error('Google Sheets did not respond. Check network and deployment.'));
+        }, timeoutMs);
+        window[callbackName] = payload => {
+          if (finished) return;
+          finished = true; cleanup(); resolve(payload);
+        };
+        script.onerror = () => {
+          if (finished) return;
+          finished = true; cleanup(); reject(new Error('Could not connect to Google Apps Script'));
+        };
+        const query = new URLSearchParams({ ...params, callback: callbackName, _: String(Date.now()) });
+        script.src = cfg.webAppUrl + (cfg.webAppUrl.includes('?') ? '&' : '?') + query.toString();
+        document.head.appendChild(script);
+      });
+    }
+
+    async function processSecurityCameraPunch(rawCode) {
+      const cleanId = extractWorkerIdFromQr(rawCode);
+      if (!cleanId) return null;
+      try {
+        const payload = await callBackendJsonp({ action: 'punch', raw: rawCode, mode: activeScannerMode });
+        if (!payload || payload.status !== 'success' || !payload.result) {
+          const message = payload && payload.message ? payload.message : 'Attendance could not be recorded';
+          speakVoice(message);
+          showToast(message, 'error');
+          renderSecurityScanResult({ error: message });
+          return { error: message };
+        }
+        const result = payload.result;
+        const logs = getAttendance();
+        const idx = logs.findIndex(x => String(x.uid) === String(result.record.uid));
+        if (idx >= 0) logs[idx] = result.record; else logs.unshift(result.record);
+        setAttendance(logs);
+        if (result.worker) {
+          const workers = getWorkers();
+          if (!workers.some(w => normalizeWorkerId(w.idNo) === normalizeWorkerId(result.worker.idNo))) {
+            workers.push(result.worker); setWorkers(workers);
+          }
+        }
+        const status = result.actionStatus || (activeScannerMode === 'CLOCK_IN' ? 'CLOCKED IN' : 'CLOCKED OUT');
+        speakVoice(`${result.worker.name}, ${status}`);
+        showToast(`${result.worker.name} (${result.worker.idNo}) ${status} at ${result.ist.time} IST`, 'success');
+        renderSecurityScanResult(result);
+        return result;
+      } catch (err) {
+        console.error('Server attendance punch failed:', err);
+        const message = err.message || 'Unable to connect to attendance database';
+        showToast(message, 'error');
+        renderSecurityScanResult({ error: message });
+        return { error: message };
+      }
+    }
+
     async function processCameraAttendanceScan(rawCode, portal) {
+      if (portal === 'security') return processSecurityCameraPunch(rawCode);
       const cleanId = extractWorkerIdFromQr(rawCode);
       const isSec = portal === 'security';
       let worker = getWorkers().find(w => normalizeWorkerId(w.idNo) === normalizeWorkerId(cleanId));
@@ -1868,7 +1881,7 @@
       };
       scanner.start(
         { facingMode: 'environment' },
-        { fps: 12, qrbox: qrBoxFunction, aspectRatio: 1.0, disableFlip: false },
+        { fps: 15, qrbox: qrBoxFunction, aspectRatio: 1.0, disableFlip: false, videoConstraints: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } },
         (decodedText) => {
           const now = Date.now();
           if (cameraScanBusy || now - lastScanTimestamp < 2800) return;
@@ -1881,12 +1894,16 @@
         () => {}
       ).then(() => {
         showToast('Camera ready. Hold the worker QR card steady inside the scan box.', 'success');
+        const cameraState = isSec ? document.getElementById('sec-camera-state') : null;
+        if (cameraState) cameraState.textContent = 'CAMERA READY';
       }).catch((err) => {
         console.warn('Camera start error:', err);
         if (placeholder) placeholder.classList.remove('hidden');
         if (isSec) secQrScanner = null;
         else admQrScanner = null;
         showToast('Camera unavailable. Allow camera permission and open this page using HTTPS/Chrome.', 'warning');
+        const cameraState = isSec ? document.getElementById('sec-camera-state') : null;
+        if (cameraState) cameraState.textContent = 'CAMERA BLOCKED — CHECK PERMISSION';
       });
     }
 
@@ -1937,11 +1954,11 @@
       document.getElementById('admin-view').classList.add('hidden');
       document.getElementById('security-view').classList.remove('hidden');
 
-      setScannerMode(activeScannerMode);
-      const sel = document.getElementById('sec-sim-worker');
-      const workers = getWorkers();
-      sel.innerHTML = '<option value="">-- Select Worker ID to Simulate Scan --</option>' +
-        workers.map(w => `<option value="${w.idNo}">${w.idNo} — ${w.name} (${w.active ? 'Active' : 'DEACTIVATED'})</option>`).join('');
+      selectSecurityPunchMode(activeScannerMode || 'CLOCK_IN');
+      const result = document.getElementById('sec-scan-result');
+      if (result) result.textContent = 'Camera is opening. Select Clock-In or Clock-Out and scan the worker QR code.';
+      // Start the rear camera immediately after the security screen becomes visible.
+      window.setTimeout(() => { if (currentSessionRole === 'SECURITY' && !secQrScanner) startCameraScanner('security'); }, 350);
     }
 
     function renderSecurityScanResult(res) {
@@ -2803,237 +2820,333 @@
        13. SETTINGS: PASSWORD MANAGEMENT, MULTI-STATE SITES & GOOGLE APPS SCRIPT
        ----------------------------------------------------------------------- */
     const GOOGLE_APPS_SCRIPT_TEMPLATE = `/**
- * OCEAN LIFESPACES INDIA PVT LTD - Google Apps Script Cloud Backend (Code.gs)
- * Enforces accurate Clock-In (arrival) & Clock-Out (shift departure) recording in IST.
+ * OCEAN LIFESPACES INDIA PVT LTD — Google Apps Script backend
+ * Uses the existing OCEAN_Attendance_Portal_DB spreadsheet (or the spreadsheet
+ * to which this script is bound). Security camera punches are timestamped on
+ * Google's server in Asia/Kolkata, not by the Android device.
  *
- * SETUP INSTRUCTIONS:
- * 1. Open https://script.google.com and create a New Project.
- * 2. Paste this entire code into Code.gs and save (Ctrl+S / Cmd+S).
- * 3. Click Deploy -> New deployment -> Select type: Web app.
- * 4. Set "Execute as: Me" and "Who has access: Anyone", then click Deploy.
- * 5. Copy the generated Web App URL and paste it in Ocean Attendance Portal -> Tab 5.
+ * Deploy as Web App. Execute as: Me. Access: choose the narrowest option
+ * compatible with the portal's access model and company policy.
  */
+var TIMEZONE_IST = 'Asia/Kolkata';
+var STANDARD_SHIFT_SECONDS = 28800;
 
-var TIMEZONE_IST = "Asia/Kolkata";
-var STANDARD_SHIFT_SECONDS = 28800; // 8 hours
+var WORKER_HEADERS = [
+  'ID No','Pass No','Worker Name','Designation','Contractor Agency',
+  'DOB-Age-Sex','Blood Group','Aadhar No','Project Location',
+  'Project Address','Issue Date','Validity','EOHS Date','QR Active','Updated At (IST)'
+];
+var ATTENDANCE_HEADERS = [
+  'UID','Date (IST)','ID No','Worker Name','Designation','Contractor Agency',
+  'Punch Mode','IN-Time (IST)','OUT-Time (IST)','Total Hrs','Project Location',
+  'Overtime','Verified By','Recorded At (IST)'
+];
+
+function doGet(e) {
+  try {
+    var ss = getOrCreateDatabaseSpreadsheet_();
+    var p = (e && e.parameter) || {};
+    var action = String(p.action || 'status').toLowerCase();
+    var callback = String(p.callback || '');
+    var result;
+
+    if (action === 'workers') {
+      var ws = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+      result = { status: 'success', workers: getMinimalWorkers_(ws), timestampIST: formatISTNow_() };
+    } else if (action === 'punch') {
+      result = processServerPunch_(ss, p.raw || p.id || '', p.mode || 'CLOCK_IN');
+    } else if (action === 'export') {
+      result = {
+        status: 'success', company: 'OCEAN LIFESPACES INDIA PVT LTD',
+        spreadsheetUrl: ss.getUrl(), timestampIST: formatISTNow_(),
+        workers: sheetToObjects_(getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS)),
+        attendance: sheetToObjects_(getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS))
+      };
+    } else {
+      var w = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+      var a = getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS);
+      result = {
+        status: 'online', company: 'OCEAN LIFESPACES INDIA PVT LTD',
+        spreadsheetUrl: ss.getUrl(), timestampIST: formatISTNow_(),
+        workersCount: Math.max(0, w.getLastRow() - 1),
+        attendanceCount: Math.max(0, a.getLastRow() - 1)
+      };
+    }
+    return response_(result, callback);
+  } catch (err) {
+    return response_({ status: 'error', message: errorText_(err), timestampIST: formatISTNow_() },
+      e && e.parameter ? e.parameter.callback : '');
+  }
+}
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
-  lock.waitLock(10000);
+  lock.waitLock(15000);
   try {
-    if (!e || !e.postData || !e.postData.contents) {
-      return jsonResponse_({ status: "error", message: "Empty POST payload" });
-    }
-
+    if (!e || !e.postData || !e.postData.contents) throw new Error('Empty POST payload');
     var payload = JSON.parse(e.postData.contents);
     var ss = getOrCreateDatabaseSpreadsheet_();
-
-    if (payload.type === "worker" || payload.type === "worker_status") {
-      var wSheet = getOrCreateSheet_(ss, "Workers", [
-        "ID No", "Pass No", "Worker Name", "Designation", "Contractor Agency",
-        "DOB-Age-Sex", "Blood Group", "Aadhar No", "Project Location",
-        "Project Address", "Issue Date", "Validity", "EOHS Date", "QR Active", "Updated At (IST)"
-      ]);
-      upsertWorkerRow_(wSheet, payload.data || {});
+    if (payload.type === 'worker' || payload.type === 'worker_status') {
+      upsertWorkerRow_(getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS), payload.data || {});
+    } else if (payload.type === 'attendance') {
+      upsertAttendanceRow_(getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS), payload.data || {});
+    } else {
+      throw new Error('Unsupported data type');
     }
-
-    if (payload.type === "attendance") {
-      var aSheet = getOrCreateSheet_(ss, "Attendance_Register", [
-        "UID", "Date (IST)", "ID No", "Worker Name", "Designation",
-        "Contractor Agency", "Punch Mode", "IN-Time (IST)", "OUT-Time (IST)",
-        "Total Hrs", "Project Location", "Overtime", "Verified By", "Recorded At (IST)"
-      ]);
-      upsertAttendanceRow_(aSheet, payload.data || {});
-    }
-
-    return jsonResponse_({
-      status: "success",
-      type: payload.type || "unknown",
-      timestampIST: formatISTNow_()
-    });
+    return jsonResponse_({ status: 'success', type: payload.type, timestampIST: formatISTNow_() });
   } catch (err) {
-    return jsonResponse_({
-      status: "error",
-      message: err && err.toString ? err.toString() : "Unknown error"
-    });
+    return jsonResponse_({ status: 'error', message: errorText_(err), timestampIST: formatISTNow_() });
   } finally {
     lock.releaseLock();
   }
 }
 
-function doGet(e) {
+function processServerPunch_(ss, rawQr, mode) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
   try {
-    var ss = getOrCreateDatabaseSpreadsheet_();
-    var wSheet = ss.getSheetByName("Workers");
-    var aSheet = ss.getSheetByName("Attendance_Register");
-    var action = (e && e.parameter && e.parameter.action) ? String(e.parameter.action) : "status";
-    var callback = (e && e.parameter && e.parameter.callback) ? String(e.parameter.callback) : "";
+    mode = String(mode).toUpperCase() === 'CLOCK_OUT' ? 'CLOCK_OUT' : 'CLOCK_IN';
+    var id = extractWorkerId_(rawQr);
+    if (!id) throw new Error('QR code does not contain a valid Worker ID.');
 
-    if (action === "workers") {
-      var workers = sheetToObjects_(wSheet);
-      var result = { status: "success", workers: workers, timestampIST: formatISTNow_() };
-      if (callback && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
-        return ContentService.createTextOutput(callback + "(" + JSON.stringify(result) + ");")
-          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    var workerSheet = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+    var attendanceSheet = getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS);
+    var worker = findWorker_(workerSheet, id);
+    if (!worker) throw new Error('Unknown QR / ID Code: ' + id);
+    if (['DEACTIVATED','INACTIVE','FALSE','0'].indexOf(String(worker.active).toUpperCase()) >= 0) {
+      throw new Error('This worker QR ID is deactivated.');
+    }
+
+    // Use one server-side Date object for the authoritative date, time and audit stamp.
+    var now = new Date();
+    var today = Utilities.formatDate(now, TIMEZONE_IST, 'dd-MM-yy');
+    var time = Utilities.formatDate(now, TIMEZONE_IST, 'HH:mm:ss');
+    var recordedAt = Utilities.formatDate(now, TIMEZONE_IST, "dd-MM-yy HH:mm:ss 'IST'");
+    var values = attendanceSheet.getDataRange().getValues();
+    var openRow = 0;
+
+    for (var i = 1; i < values.length; i++) {
+      var rowDate = values[i][1] instanceof Date
+        ? Utilities.formatDate(values[i][1], TIMEZONE_IST, 'dd-MM-yy')
+        : String(values[i][1] || '').trim();
+      var sameWorker = normalizeId_(values[i][2]) === normalizeId_(id);
+      var out = String(values[i][8] || '').trim();
+      if (sameWorker && rowDate === today && (!out || out === 'On-Site')) {
+        openRow = i + 1;
+        break;
       }
-      return jsonResponse_(result);
     }
 
-    if (action === "export") {
-      return jsonResponse_({
-        status: "success",
-        company: "OCEAN LIFESPACES INDIA PVT LTD",
-        spreadsheetUrl: ss.getUrl(),
-        timestampIST: formatISTNow_(),
-        workers: sheetToObjects_(wSheet),
-        attendance: sheetToObjects_(aSheet)
-      });
+    var uid, inTime, outTime, total, overtime, punchMode;
+    if (mode === 'CLOCK_IN') {
+      if (openRow) throw new Error('Worker already clocked in today. Existing IN time: ' + String(values[openRow - 1][7]) + ' IST.');
+      uid = 'LOG-' + Utilities.getUuid();
+      inTime = time;
+      outTime = 'On-Site';
+      total = 'On-Site';
+      overtime = '00:00:00';
+      punchMode = 'CLOCK_IN';
+    } else {
+      if (!openRow) throw new Error('No open Clock-In found for this worker today. Clock-In is required first.');
+      var existing = values[openRow - 1];
+      uid = String(existing[0]);
+      inTime = normalizeSheetTime_(existing[7]);
+      outTime = time;
+      var seconds = Math.max(0, parseHmsToSec_(outTime) - parseHmsToSec_(inTime));
+      total = secToHms_(seconds);
+      overtime = secToHms_(Math.max(0, seconds - STANDARD_SHIFT_SECONDS));
+      punchMode = 'CLOCK_OUT';
     }
 
-    return jsonResponse_({
-      status: "online",
-      company: "OCEAN LIFESPACES INDIA PVT LTD",
-      spreadsheetUrl: ss.getUrl(),
-      timestampIST: formatISTNow_(),
-      workersCount: wSheet ? Math.max(0, wSheet.getLastRow() - 1) : 0,
-      attendanceCount: aSheet ? Math.max(0, aSheet.getLastRow() - 1) : 0
-    });
-  } catch (err) {
-    return jsonResponse_({
-      status: "error",
-      message: err && err.toString ? err.toString() : "Unknown error"
-    });
+    var rowData = [uid, today, worker.idNo, worker.name, worker.designation,
+      worker.vendor, punchMode, inTime, outTime, total, worker.projectLocation,
+      overtime, 'Security Camera', recordedAt];
+    if (mode === 'CLOCK_OUT') attendanceSheet.getRange(openRow, 1, 1, rowData.length).setValues([rowData]);
+    else attendanceSheet.appendRow(rowData);
+
+    var record = {
+      uid: uid, date: today, idNo: worker.idNo, workerName: worker.name,
+      designation: worker.designation, vendor: worker.vendor, punchMode: punchMode,
+      inTime: inTime, outTime: outTime === 'On-Site' ? '' : outTime,
+      totalHrs: total, projectLocation: worker.projectLocation,
+      overtime: overtime, verifiedBy: 'Security Camera'
+    };
+    return {
+      status: 'success',
+      result: {
+        worker: worker,
+        record: record,
+        actionStatus: mode === 'CLOCK_IN' ? 'CLOCKED IN' : 'CLOCKED OUT',
+        ist: { date: today, time: time }
+      },
+      timestampIST: recordedAt
+    };
+  } finally {
+    lock.releaseLock();
   }
 }
 
+function extractWorkerId_(raw) {
+  var value = String(raw || '').trim();
+  if (!value) return '';
+  try {
+    var obj = JSON.parse(value);
+    if (obj && typeof obj === 'object') value = obj.idNo || obj.id || obj.workerId || obj.workerID || obj.code || obj.qr || value;
+  } catch (ignore) {}
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      var url = value.match(/[?&](?:idNo|id|workerId|code)=([^&#]+)/i);
+      if (url) value = decodeURIComponent(url[1].replace(/\+/g, ' '));
+    } catch (ignore2) {}
+  }
+  var labeled = value.match(/(?:ID\s*NO|WORKER\s*ID|EMPLOYEE\s*ID|CODE)\s*[:=#-]\s*([A-Z0-9][A-Z0-9_-]*)/i);
+  if (labeled) value = labeled[1];
+  value = value.replace(/[\s\u200B-\u200D\uFEFF]+/g, '').toUpperCase();
+  // Avoid accidentally treating arbitrary QR URLs or long text as a worker number.
+  return /^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value) ? value : '';
+}
+
+function findWorker_(sheet, id) {
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return null;
+  var headers = data[0];
+  var idx = {};
+  headers.forEach(function(h, i) { idx[String(h).trim()] = i; });
+  for (var r = 1; r < data.length; r++) {
+    if (normalizeId_(data[r][idx['ID No']]) !== normalizeId_(id)) continue;
+    function cell(name) { return idx[name] === undefined ? '' : data[r][idx[name]]; }
+    return {
+      idNo: String(cell('ID No') || '').trim(),
+      passNo: String(cell('Pass No') || ''),
+      name: String(cell('Worker Name') || ''),
+      designation: String(cell('Designation') || ''),
+      vendor: String(cell('Contractor Agency') || ''),
+      projectLocation: String(cell('Project Location') || ''),
+      active: String(cell('QR Active') || 'ACTIVE').toUpperCase() !== 'DEACTIVATED' &&
+        !['INACTIVE','FALSE','0'].includes(String(cell('QR Active') || '').toUpperCase()),
+      photo: ''
+    };
+  }
+  return null;
+}
+
+function getMinimalWorkers_(sheet) {
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return [];
+  var h = data[0];
+  var idx = {}; h.forEach(function(x, i) { idx[String(x).trim()] = i; });
+  return data.slice(1).filter(function(r) { return r.some(function(v) { return v !== '' && v !== null; }); }).map(function(r) {
+    function c(k) { return idx[k] === undefined ? '' : r[idx[k]]; }
+    return { 'ID No': String(c('ID No') || ''), 'Pass No': String(c('Pass No') || ''),
+      'Worker Name': String(c('Worker Name') || ''), Designation: String(c('Designation') || ''),
+      'Contractor Agency': String(c('Contractor Agency') || ''),
+      'Project Location': String(c('Project Location') || ''),
+      'QR Active': String(c('QR Active') || 'ACTIVE') };
+  });
+}
+
+function response_(obj, callback) {
+  if (callback && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
+    return ContentService.createTextOutput(callback + '(' + JSON.stringify(obj) + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return jsonResponse_(obj);
+}
 function jsonResponse_(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
-
 function getOrCreateDatabaseSpreadsheet_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  if (!ss) {
-    var files = DriveApp.getFilesByName("OCEAN_Attendance_Portal_DB");
-    ss = files.hasNext() ? SpreadsheetApp.open(files.next()) : SpreadsheetApp.create("OCEAN_Attendance_Portal_DB");
-  }
+  // Reuse the spreadsheet ID already saved by the earlier OCEAN Apps Script backend.
+  var savedId = PropertiesService.getScriptProperties().getProperty('DB_ID');
+  if (savedId) return SpreadsheetApp.openById(savedId);
+  var active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) { PropertiesService.getScriptProperties().setProperty('DB_ID', active.getId()); return active; }
+  var files = DriveApp.getFilesByName('OCEAN_Attendance_Portal_DB');
+  var ss = files.hasNext() ? SpreadsheetApp.open(files.next()) : SpreadsheetApp.create('OCEAN_Attendance_Portal_DB');
+  PropertiesService.getScriptProperties().setProperty('DB_ID', ss.getId());
   return ss;
 }
-
-function formatISTNow_() {
-  return Utilities.formatDate(new Date(), TIMEZONE_IST, "dd-MM-yy HH:mm:ss 'IST'");
-}
-
 function getOrCreateSheet_(ss, name, headers) {
   var sheet = ss.getSheetByName(name);
   if (!sheet) {
     sheet = ss.insertSheet(name);
     sheet.appendRow(headers);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
+  } else if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers); sheet.setFrozenRows(1);
   }
   return sheet;
 }
-
-function sheetToObjects_(sheet) {
-  if (!sheet || sheet.getLastRow() < 2) return [];
-  var values = sheet.getDataRange().getValues();
-  var headers = values[0];
-  var out = [];
-  for (var r = 1; r < values.length; r++) {
-    var rowObj = {};
-    for (var c = 0; c < headers.length; c++) {
-      rowObj[headers[c]] = values[r][c];
-    }
-    out.push(rowObj);
-  }
-  return out;
-}
-
-function parseHmsToSec_(hms) {
-  if (!hms || String(hms).indexOf(":") === -1) return 0;
-  var parts = String(hms).split(":").map(Number);
-  return ((parts[0] || 0) * 3600) + ((parts[1] || 0) * 60) + (parts[2] || 0);
-}
-
-function secToHms_(sec) {
-  if (sec < 0) sec = 0;
-  var h = String(Math.floor(sec / 3600)).padStart(2, "0");
-  var m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
-  var s = String(sec % 60).padStart(2, "0");
-  return h + ":" + m + ":" + s;
-}
-
 function upsertWorkerRow_(sheet, w) {
+  if (!w || !w.idNo) throw new Error('Worker ID is required.');
   var data = sheet.getDataRange().getValues();
-  var rowValues = [
-    w.idNo || "",
-    w.passNo || "",
-    w.name || "",
-    w.designation || "",
-    w.vendor || "",
-    w.dobAgeSex || "",
-    w.bloodGroup || "",
-    w.aadharNo || "",
-    w.projectLocation || "",
-    w.projectAddress || "",
-    w.issueDate || "",
-    w.validityUpTo || "",
-    w.eohsInductedOn || "",
-    w.active === false ? "DEACTIVATED" : "ACTIVE",
-    formatISTNow_()
-  ];
+  var headers = data[0].map(function(h) { return String(h).trim(); });
+  var idCol = headers.indexOf('ID No');
+  if (idCol < 0) throw new Error('Workers sheet is missing the ID No column.');
+  var existingRow = 0;
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).toUpperCase() === String(w.idNo || "").toUpperCase()) {
-      sheet.getRange(i + 1, 1, 1, rowValues.length).setValues([rowValues]);
-      return;
-    }
+    if (normalizeId_(data[i][idCol]) === normalizeId_(w.idNo)) { existingRow = i + 1; break; }
   }
-  sheet.appendRow(rowValues);
+  // Start from the existing row so legacy columns (photo, managers, masked Aadhaar) remain intact.
+  var row = existingRow ? data[existingRow - 1].slice() : headers.map(function() { return ''; });
+  var values = {
+    'ID No': w.idNo, 'Pass No': w.passNo || '', 'Worker Name': w.name || '',
+    'Designation': w.designation || '', 'Contractor Agency': w.vendor || '',
+    'DOB-Age-Sex': w.dobAgeSex || '', 'Blood Group': w.bloodGroup || '',
+    'Aadhar No': w.aadharNo || '', 'Aadhar No (masked)': maskAadhaar_(w.aadharNo || ''),
+    'Project Location': w.projectLocation || '', 'Project Address': w.projectAddress || '',
+    'Issue Date': w.issueDate || '', 'Validity': w.validityUpTo || '',
+    'EOHS Date': w.eohsInductedOn || '', 'Photo URL': w.photo || '',
+    'QR Active': w.active === false ? 'DEACTIVATED' : 'ACTIVE',
+    'Updated At': formatISTNow_(), 'Updated At (IST)': formatISTNow_()
+  };
+  headers.forEach(function(h, col) { if (Object.prototype.hasOwnProperty.call(values, h)) row[col] = values[h]; });
+  if (existingRow) sheet.getRange(existingRow, 1, 1, headers.length).setValues([row]);
+  else sheet.appendRow(row);
 }
-
 function upsertAttendanceRow_(sheet, a) {
   var data = sheet.getDataRange().getValues();
-  var mode = a.punchMode || (a.outTime ? "CLOCK_OUT" : "CLOCK_IN");
-  var totalHrs = a.totalHrs || "On-Site";
-  var overtime = a.overtime || "00:00:00";
-
-  if (a.inTime && a.outTime && (!a.totalHrs || a.totalHrs === "On-Site")) {
-    var diffSec = Math.max(0, parseHmsToSec_(a.outTime) - parseHmsToSec_(a.inTime));
-    totalHrs = secToHms_(diffSec);
-    overtime = secToHms_(diffSec > STANDARD_SHIFT_SECONDS ? diffSec - STANDARD_SHIFT_SECONDS : 0);
+  var mode = a.punchMode || (a.outTime ? 'CLOCK_OUT' : 'CLOCK_IN');
+  var total = a.totalHrs || 'On-Site';
+  var overtime = a.overtime || '00:00:00';
+  if (a.inTime && a.outTime && (!a.totalHrs || a.totalHrs === 'On-Site')) {
+    var seconds = Math.max(0, parseHmsToSec_(a.outTime) - parseHmsToSec_(a.inTime));
+    total = secToHms_(seconds);
+    overtime = secToHms_(Math.max(0, seconds - STANDARD_SHIFT_SECONDS));
   }
-
-  var rowValues = [
-    a.uid || ("LOG-" + Date.now()),
-    a.date || "",
-    a.idNo || "",
-    a.workerName || "",
-    a.designation || "",
-    a.vendor || "",
-    mode,
-    a.inTime || "",
-    a.outTime || "On-Site",
-    totalHrs,
-    a.projectLocation || "",
-    overtime,
-    a.verifiedBy || "Portal",
-    formatISTNow_()
-  ];
-
+  var row = [a.uid || ('LOG-' + Utilities.getUuid()), a.date || '', a.idNo || '',
+    a.workerName || '', a.designation || '', a.vendor || '', mode, a.inTime || '',
+    a.outTime || 'On-Site', total, a.projectLocation || '', overtime,
+    a.verifiedBy || 'Portal', formatISTNow_()];
   for (var i = 1; i < data.length; i++) {
-    var sameUid = String(data[i][0]) === String(a.uid || "");
-    var sameShift = String(data[i][1]) === String(a.date || "") &&
-                      String(data[i][2]).toUpperCase() === String(a.idNo || "").toUpperCase() &&
-                      (String(data[i][8]) === "On-Site" || String(data[i][8]) === "");
-    if (sameUid || (mode === "CLOCK_OUT" && sameShift)) {
-      sheet.getRange(i + 1, 1, 1, rowValues.length).setValues([rowValues]);
-      return;
-    }
+    var sameUid = String(data[i][0]) === String(a.uid || '');
+    var sameOpenShift = mode === 'CLOCK_OUT' && normalizeId_(data[i][2]) === normalizeId_(a.idNo) &&
+      String(data[i][8] || '') === 'On-Site';
+    if (sameUid || sameOpenShift) { sheet.getRange(i + 1, 1, 1, row.length).setValues([row]); return; }
   }
-  sheet.appendRow(rowValues);
-}`;
+  sheet.appendRow(row);
+}
+function sheetToObjects_(sheet) {
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var values = sheet.getDataRange().getValues(), headers = values[0];
+  return values.slice(1).map(function(row) {
+    var o = {}; headers.forEach(function(h, i) { o[h] = row[i]; }); return o;
+  });
+}
+function normalizeId_(v) { return String(v || '').normalize ? String(v || '').normalize('NFKC').replace(/[\s\u200B-\u200D\uFEFF]+/g, '').toUpperCase() : String(v || '').replace(/\s+/g, '').toUpperCase(); }
+function parseHmsToSec_(v) { var p = String(v || '0:0:0').split(':').map(Number); return (p[0] || 0) * 3600 + (p[1] || 0) * 60 + (p[2] || 0); }
+function secToHms_(n) { n = Math.max(0, Math.floor(n)); return [Math.floor(n / 3600), Math.floor((n % 3600) / 60), n % 60].map(function(x) { return String(x).padStart(2, '0'); }).join(':'); }
+function normalizeSheetTime_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, TIMEZONE_IST, 'HH:mm:ss');
+  var s = String(v || '').trim();
+  if (/^\d{1,2}:\d{2}$/.test(s)) return s + ':00';
+  return s;
+}
+function maskAadhaar_(value) { var digits = String(value || '').replace(/\D/g, ''); return digits.length >= 4 ? 'XXXX-XXXX-' + digits.slice(-4) : String(value || ''); }
+function formatISTNow_() { return Utilities.formatDate(new Date(), TIMEZONE_IST, "dd-MM-yy HH:mm:ss 'IST'"); }
+function errorText_(err) { return err && err.message ? err.message : String(err || 'Unknown error'); }
+`;
 
     function loadSettingsForm() {
       const creds = getCreds();
