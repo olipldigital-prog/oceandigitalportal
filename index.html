@@ -111,6 +111,20 @@
       background: #94a3b8;
       border-radius: 9999px;
     }
+    /* Android/mobile camera viewport: fill available screen width without horizontal overflow */
+    #security-qr-reader, #admin-qr-reader { width: 100% !important; max-width: 100%; }
+    #security-qr-reader video, #admin-qr-reader video {
+      width: 100% !important; height: auto !important; max-height: 62vh !important;
+      object-fit: cover !important; border-radius: 0.75rem;
+    }
+    #security-qr-reader__scan_region, #admin-qr-reader__scan_region { min-height: 0 !important; }
+    @media (max-width: 640px) {
+      #security-view main, #admin-view main { padding-left: 10px !important; padding-right: 10px !important; }
+      #security-view main > div:first-child { padding: 12px !important; }
+      #security-qr-reader, #admin-qr-reader { min-height: 0 !important; }
+      #security-qr-reader video, #admin-qr-reader video { max-height: 58vh !important; }
+      .camera-mobile-frame { width: 100%; min-height: 0 !important; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -1596,12 +1610,12 @@
      * times are accurately recorded against today's shift in IST.
      */
     function processAttendanceScan(rawCode, verifiedSource = 'Security Gate QR', modeOverride = null) {
-      const cleanId = String(rawCode || '').trim().toUpperCase();
+      const cleanId = extractWorkerIdFromQr(rawCode);
       if (!cleanId) return null;
 
       const mode = modeOverride || activeScannerMode;
       const workers = getWorkers();
-      const worker = workers.find(w => w.idNo.toUpperCase() === cleanId);
+      const worker = workers.find(w => normalizeWorkerId(w.idNo) === normalizeWorkerId(cleanId));
 
       if (!worker) {
         speakVoice('Unregistered ID Card');
@@ -1716,6 +1730,113 @@
        7. SHARED CAMERA SCANNER (SECURITY & ADMIN) + SIMULATOR + MANUAL ID
        ----------------------------------------------------------------------- */
     let lastScanTimestamp = 0;
+    let cameraScanBusy = false;
+
+    // Normalize QR payloads from plain ID text, JSON payloads, or URL-based QR codes.
+    function normalizeWorkerId(value) {
+      return String(value || '').normalize('NFKC').trim().replace(/[\s\u200B-\u200D\uFEFF]+/g, '').toUpperCase();
+    }
+
+    function extractWorkerIdFromQr(raw) {
+      let value = String(raw || '').trim();
+      if (!value) return '';
+      try {
+        const obj = JSON.parse(value);
+        if (obj && typeof obj === 'object') {
+          value = obj.idNo || obj.id || obj.workerId || obj.workerID || obj.code || obj.qr || value;
+        }
+      } catch (_) {}
+      try {
+        if (/^https?:\/\//i.test(value)) {
+          const u = new URL(value);
+          value = u.searchParams.get('idNo') || u.searchParams.get('id') || u.searchParams.get('workerId') || u.searchParams.get('code') || value;
+        }
+      } catch (_) {}
+      value = String(value).trim();
+      // Accept labels such as "ID NO: TEST-1122" while retaining the actual key.
+      const labeled = value.match(/(?:ID\s*NO|WORKER\s*ID|EMPLOYEE\s*ID|CODE)\s*[:=#-]\s*([A-Z0-9][A-Z0-9_-]*)/i);
+      if (labeled) value = labeled[1];
+      return normalizeWorkerId(value);
+    }
+
+    function mapCloudWorker(row) {
+      const activeText = String(row['QR Active'] || row.active || 'ACTIVE').toUpperCase();
+      return {
+        idNo: String(row['ID No'] || row.idNo || row.ID || '').trim().toUpperCase(),
+        passNo: row['Pass No'] || row.passNo || '',
+        name: row['Worker Name'] || row.name || '',
+        designation: row.Designation || row.designation || '',
+        vendor: row['Contractor Agency'] || row.vendor || '',
+        dobAgeSex: row['DOB-Age-Sex'] || row.dobAgeSex || '',
+        bloodGroup: row['Blood Group'] || row.bloodGroup || '',
+        aadharNo: row['Aadhar No'] || row.aadharNo || '',
+        projectLocation: row['Project Location'] || row.projectLocation || '',
+        projectAddress: row['Project Address'] || row.projectAddress || '',
+        issueDate: row['Issue Date'] || row.issueDate || '',
+        validityUpTo: row.Validity || row.validityUpTo || '',
+        eohsInductedOn: row['EOHS Date'] || row.eohsInductedOn || '',
+        active: !['DEACTIVATED', 'INACTIVE', 'FALSE', '0'].includes(activeText),
+        photo: row.Photo || row.photo || generateDefaultAvatarSVG('OW', '#1e3a8a')
+      };
+    }
+
+    // Apps Script ContentService is fetched via JSONP to avoid Android WebView CORS issues.
+    function fetchCloudWorkersJsonp(timeoutMs = 9000) {
+      return new Promise((resolve, reject) => {
+        const cfg = getCloudConfig();
+        if (!cfg.webAppUrl) return reject(new Error('Google Apps Script URL is not configured'));
+        const callbackName = 'oceanWorkersCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const script = document.createElement('script');
+        let finished = false;
+        const cleanup = () => {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+          clearTimeout(timer);
+        };
+        const timer = setTimeout(() => {
+          if (finished) return;
+          finished = true; cleanup(); reject(new Error('Google Sheets worker lookup timed out'));
+        }, timeoutMs);
+        window[callbackName] = (payload) => {
+          if (finished) return;
+          finished = true; cleanup();
+          if (!payload || payload.status !== 'success' || !Array.isArray(payload.workers)) {
+            reject(new Error((payload && payload.message) || 'Could not read workers from Google Sheets'));
+            return;
+          }
+          resolve(payload.workers.map(mapCloudWorker).filter(w => w.idNo));
+        };
+        script.onerror = () => {
+          if (finished) return;
+          finished = true; cleanup(); reject(new Error('Google Apps Script could not be reached'));
+        };
+        const separator = cfg.webAppUrl.includes('?') ? '&' : '?';
+        script.src = cfg.webAppUrl + separator + 'action=workers&callback=' + encodeURIComponent(callbackName) + '&_=' + Date.now();
+        document.head.appendChild(script);
+      });
+    }
+
+    async function processCameraAttendanceScan(rawCode, portal) {
+      const cleanId = extractWorkerIdFromQr(rawCode);
+      const isSec = portal === 'security';
+      let worker = getWorkers().find(w => normalizeWorkerId(w.idNo) === normalizeWorkerId(cleanId));
+      if (!worker) {
+        try {
+          const cloudWorkers = await fetchCloudWorkersJsonp();
+          const localWorkers = getWorkers();
+          const merged = new Map(localWorkers.map(w => [normalizeWorkerId(w.idNo), w]));
+          cloudWorkers.forEach(w => merged.set(normalizeWorkerId(w.idNo), w));
+          setWorkers(Array.from(merged.values()));
+          worker = cloudWorkers.find(w => normalizeWorkerId(w.idNo) === normalizeWorkerId(cleanId));
+          if (worker) refreshAllAdminViews();
+        } catch (err) {
+          console.warn('Cloud worker lookup failed:', err);
+        }
+      }
+      const result = processAttendanceScan(cleanId, isSec ? 'Security Camera QR' : 'Admin Camera QR');
+      if (isSec) renderSecurityScanResult(result);
+      return result;
+    }
 
     function startCameraScanner(portal) {
       const isSec = portal === 'security';
@@ -1724,7 +1845,7 @@
       const existing = isSec ? secQrScanner : admQrScanner;
 
       if (typeof Html5Qrcode === 'undefined') {
-        showToast('QR Camera library still loading. Use Simulator below.', 'warning');
+        showToast('QR Camera library still loading. Refresh the page and allow camera access.', 'warning');
         return;
       }
       if (existing) {
@@ -1734,27 +1855,38 @@
 
       const placeholder = document.getElementById(placeholderId);
       if (placeholder) placeholder.classList.add('hidden');
+      const reader = document.getElementById(readerId);
+      if (reader) reader.classList.add('camera-mobile-frame');
 
-      const scanner = new Html5Qrcode(readerId);
+      const scanner = new Html5Qrcode(readerId, { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
       if (isSec) secQrScanner = scanner;
       else admQrScanner = scanner;
 
+      const qrBoxFunction = (viewfinderWidth, viewfinderHeight) => {
+        const edge = Math.max(180, Math.min(Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.78), 320));
+        return { width: edge, height: edge };
+      };
       scanner.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 210, height: 210 } },
+        { fps: 12, qrbox: qrBoxFunction, aspectRatio: 1.0, disableFlip: false },
         (decodedText) => {
           const now = Date.now();
-          if (now - lastScanTimestamp < 2500) return;
+          if (cameraScanBusy || now - lastScanTimestamp < 2800) return;
           lastScanTimestamp = now;
-          const res = processAttendanceScan(decodedText, isSec ? 'Security Camera QR' : 'Admin Camera QR');
-          if (isSec) renderSecurityScanResult(res);
+          cameraScanBusy = true;
+          processCameraAttendanceScan(decodedText, portal).finally(() => {
+            cameraScanBusy = false;
+          });
         },
         () => {}
-      ).catch(() => {
+      ).then(() => {
+        showToast('Camera ready. Hold the worker QR card steady inside the scan box.', 'success');
+      }).catch((err) => {
+        console.warn('Camera start error:', err);
         if (placeholder) placeholder.classList.remove('hidden');
         if (isSec) secQrScanner = null;
         else admQrScanner = null;
-        showToast('Camera unavailable or permission denied. Use QR Simulator / ID input.', 'warning');
+        showToast('Camera unavailable. Allow camera permission and open this page using HTTPS/Chrome.', 'warning');
       });
     }
 
@@ -2735,6 +2867,17 @@ function doGet(e) {
     var wSheet = ss.getSheetByName("Workers");
     var aSheet = ss.getSheetByName("Attendance_Register");
     var action = (e && e.parameter && e.parameter.action) ? String(e.parameter.action) : "status";
+    var callback = (e && e.parameter && e.parameter.callback) ? String(e.parameter.callback) : "";
+
+    if (action === "workers") {
+      var workers = sheetToObjects_(wSheet);
+      var result = { status: "success", workers: workers, timestampIST: formatISTNow_() };
+      if (callback && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
+        return ContentService.createTextOutput(callback + "(" + JSON.stringify(result) + ");")
+          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+      return jsonResponse_(result);
+    }
 
     if (action === "export") {
       return jsonResponse_({
