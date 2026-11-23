@@ -112,64 +112,6 @@
       border-radius: 9999px;
     }
   </style>
-
-  <!-- Cross-device responsive enhancements: Android phones, tablets, laptops and desktops -->
-  <style id="olipl-responsive-enhancements">
-    html { -webkit-text-size-adjust: 100%; }
-    body { min-width: 320px; overflow-x: hidden; }
-    button, input, select, textarea { max-width: 100%; }
-    button { touch-action: manipulation; }
-    img, video, canvas { max-width: 100%; }
-    #security-view, #admin-view, #login-view { width: 100%; }
-    #security-qr-reader, #admin-qr-reader { width: 100% !important; max-width: 100%; }
-    #security-qr-reader video, #admin-qr-reader video {
-      width: 100% !important; height: auto !important; object-fit: cover !important;
-      border-radius: 0.75rem;
-    }
-    #security-qr-reader canvas, #admin-qr-reader canvas { max-width: 100%; }
-    table { border-collapse: collapse; }
-    .overflow-x-auto { -webkit-overflow-scrolling: touch; }
-    @media (max-width: 640px) {
-      body { font-size: 14px; }
-      header { max-width: 100vw; }
-      #login-view header > div, #security-view header > div { align-items: flex-start; }
-      #login-view main { padding: 12px !important; }
-      #login-view main > div { max-width: 100%; }
-      #security-view main { padding: 12px !important; gap: 12px !important; }
-      #security-view main > div { padding: 14px !important; }
-      #security-view .min-h-\\[250px\\] { min-height: 240px; }
-      #security-qr-reader { min-height: 220px; }
-      #security-view button, #admin-view button { min-height: 42px; }
-      #admin-view main { padding: 12px !important; }
-      #admin-view .admin-nav-btn { white-space: nowrap; }
-      #admin-view table { font-size: 12px; }
-      #admin-view input, #admin-view select, #security-view input, #security-view select {
-        font-size: 16px; /* prevents iOS zoom; also comfortable on Android */
-      }
-      #worker-form { grid-template-columns: minmax(0, 1fr) !important; }
-      #worker-form > * { min-width: 0; }
-      #idcard-preview-stage { overflow-x: auto; justify-content: flex-start; }
-      .id-card-scale-wrap { transform: scale(.78); transform-origin: top left; margin-bottom: -1.25cm; }
-      #print-id-sheet .id-card-scale-wrap { transform: none; margin: 0; }
-    }
-    @media (min-width: 641px) and (max-width: 1024px) {
-      #security-view main, #admin-view main { padding: 16px !important; }
-      #security-view main { gap: 16px !important; }
-      #admin-view .admin-nav-btn { white-space: nowrap; }
-      #worker-form { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-      #idcard-preview-stage { overflow-x: auto; }
-    }
-    @media (min-width: 1025px) {
-      #security-view main, #admin-view main { padding: 24px !important; }
-    }
-    @media (orientation: landscape) and (max-width: 900px) {
-      #security-qr-reader video { max-height: 55vh; }
-    }
-    @media print {
-      #olipl-responsive-enhancements { display: none !important; }
-    }
-  </style>
-
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -1106,10 +1048,10 @@
               <div id="project-sites-pills" class="flex flex-wrap gap-1.5 pt-1"></div>
             </div>
 
-            <!-- Google Apps Script deployment Configuration -->
+            <!-- Google Apps Script Web App URL Configuration -->
             <div class="pt-3 border-t border-slate-200 space-y-3">
-              <label class="block text-xs font-bold text-slate-700">Google Apps Script deployment (Cloud Endpoint)</label>
-              <input type="url" id="gas-webhook-url" readonly placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+              <label class="block text-xs font-bold text-slate-700">Google Apps Script Web App URL (Cloud Endpoint)</label>
+              <input type="url" id="gas-webhook-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono outline-none focus:border-blue-600" />
 
               <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1157,7 +1099,7 @@
        APPLICATION JAVASCRIPT (LOGO SVG, IST CLOCK, VOICE, QR, STORAGE, SYNC)
        ===================================================================== -->
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbwUFPPYUbI3j-UHiGiXdiuA8W3AzU6oUO7Af8nTjYYfarN34GPMx8TIgh4gTzK1l4gGLQ/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzxX1LwrdbCfM9t8Gf9cajUhAzdEdtWuUSwttaP4FEoZnBZtd2t6mgC0QMU45krtur6/exec";
 
     /* -----------------------------------------------------------------------
        1. CUSTOM SVG RECREATION OF OCEAN DELIVERING DREAMS LOGO
@@ -1308,8 +1250,6 @@
 
     let selectedLoginRole = 'admin';
     let currentSessionRole = null;
-    let oceanSessionToken = '';
-    let cloudReady = false;
     let activeScannerMode = 'CLOCK_IN'; // 'CLOCK_IN' | 'CLOCK_OUT'
     let uploadedPhotoDataUrl = '';
     let secQrScanner = null;
@@ -1322,9 +1262,9 @@
       if (!localStorage.getItem(STORAGE_KEYS.CREDS)) {
         localStorage.setItem(STORAGE_KEYS.CREDS, JSON.stringify({
           adminId: 'admin',
-          adminPass: 'ChangeMe123!',
+          adminPass: 'ocean123',
           secId: 'security',
-          secPass: 'ChangeMe123!'
+          secPass: 'sec123'
         }));
       }
 
@@ -1534,54 +1474,40 @@
 
     function fillDemoCredentials() {
       const creds = getCreds();
-      document.getElementById('login-userid').value = selectedLoginRole === 'admin' ? creds.adminId : creds.secId;
-      document.getElementById('login-password').value = '';
-      showToast('User ID filled. Enter your password to continue.', 'info');
-    }
-
-    function gasCall(functionName, ...args) {
-      return new Promise((resolve, reject) => {
-        if (!window.google || !google.script || !google.script.run) {
-          reject(new Error('This page is not connected to Google Apps Script. Open the deployed Web App URL, not the downloaded HTML file.'));
-          return;
-        }
-        google.script.run.withSuccessHandler(resolve).withFailureHandler(err => reject(new Error(err && err.message ? err.message : String(err))))[functionName](...args);
-      });
-    }
-
-    async function pullCloudData() {
-      const data = await gasCall('apiGetData', oceanSessionToken);
-      setWorkers(Array.isArray(data.workers) ? data.workers : []);
-      setAttendance(Array.isArray(data.attendance) ? data.attendance : []);
-      setProjects(Array.isArray(data.projects) ? data.projects : []);
-      cloudReady = true;
-      return data;
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      const uid = document.getElementById('login-userid').value.trim();
-      const pwd = document.getElementById('login-password').value;
-      try {
-        const auth = await gasCall('apiLogin', uid, pwd, selectedLoginRole.toUpperCase());
-        oceanSessionToken = auth.token;
-        currentSessionRole = auth.role;
-        await pullCloudData();
-        speakVoice('Welcome to Ocean Attendance Portal');
-        showToast('Connected to OCEAN cloud. ' + auth.message, 'success');
-        if (currentSessionRole === 'ADMIN') openAdminPortal(); else openSecurityPortal();
-      } catch (err) {
-        speakVoice('Login failed');
-        showToast(err.message || 'Login failed. Check Apps Script deployment and credentials.', 'error');
+      if (selectedLoginRole === 'admin') {
+        document.getElementById('login-userid').value = creds.adminId;
+        document.getElementById('login-password').value = creds.adminPass;
+      } else {
+        document.getElementById('login-userid').value = creds.secId;
+        document.getElementById('login-password').value = creds.secPass;
       }
     }
 
-    async function logout() {
+    function handleLogin(e) {
+      e.preventDefault();
+      const uid = document.getElementById('login-userid').value.trim();
+      const pwd = document.getElementById('login-password').value.trim();
+      const creds = getCreds();
+
+      if (selectedLoginRole === 'admin' && uid === creds.adminId && pwd === creds.adminPass) {
+        currentSessionRole = 'ADMIN';
+        speakVoice('Welcome to Ocean Attendance Portal');
+        showToast('Logged in as Admin. Welcome to Ocean Attendance Portal!', 'success');
+        openAdminPortal();
+      } else if (selectedLoginRole === 'security' && uid === creds.secId && pwd === creds.secPass) {
+        currentSessionRole = 'SECURITY';
+        speakVoice('Welcome to Ocean Attendance Portal');
+        showToast('Security Gate Terminal Active. Welcome to Ocean Attendance Portal!', 'success');
+        openSecurityPortal();
+      } else {
+        speakVoice('Invalid User ID or Password');
+        showToast('Invalid User ID or Password. Please try again.', 'error');
+      }
+    }
+
+    function logout() {
       stopCameraScanner('security');
       stopCameraScanner('admin');
-      try { if (oceanSessionToken) await gasCall('apiLogout', oceanSessionToken); } catch (err) {}
-      oceanSessionToken = '';
-      cloudReady = false;
       currentSessionRole = null;
       document.getElementById('admin-view').classList.add('hidden');
       document.getElementById('security-view').classList.add('hidden');
@@ -2291,10 +2217,7 @@
       refreshAllAdminViews();
     }
 
-    async function deleteWorker(idNo) {
-      if (!confirm('Permanently delete worker ' + idNo + '? Attendance history will remain.')) return;
-      try { await gasCall('apiDeleteWorker', oceanSessionToken, idNo); }
-      catch (err) { showToast(err.message, 'error'); return; }
+    function deleteWorker(idNo) {
       const workers = getWorkers().filter(w => w.idNo !== idNo);
       setWorkers(workers);
       showToast(`Removed worker record ${idNo}.`, 'info');
@@ -2747,101 +2670,254 @@
     /* -----------------------------------------------------------------------
        13. SETTINGS: PASSWORD MANAGEMENT, MULTI-STATE SITES & GOOGLE APPS SCRIPT
        ----------------------------------------------------------------------- */
-    const GOOGLE_APPS_SCRIPT_TEMPLATE = `/** OCEAN Attendance Portal - server-side Google Apps Script backend.
- * Deploy this project as a Web App, Execute as: Me. Run setupPortal() once.
- * The Index.html file is the original OCEAN design with cloud-backed data access.
+    const GOOGLE_APPS_SCRIPT_TEMPLATE = `/**
+ * OCEAN LIFESPACES INDIA PVT LTD - Google Apps Script Cloud Backend (Code.gs)
+ * Enforces accurate Clock-In (arrival) & Clock-Out (shift departure) recording in IST.
+ *
+ * SETUP INSTRUCTIONS:
+ * 1. Open https://script.google.com and create a New Project.
+ * 2. Paste this entire code into Code.gs and save (Ctrl+S / Cmd+S).
+ * 3. Click Deploy -> New deployment -> Select type: Web app.
+ * 4. Set "Execute as: Me" and "Who has access: Anyone", then click Deploy.
+ * 5. Copy the generated Web App URL and paste it in Ocean Attendance Portal -> Tab 5.
  */
-const OCEAN_TZ = 'Asia/Kolkata';
-const OCEAN_HEADERS = {
-  Workers: ['ID No','Pass No','Worker Name','Designation','Contractor Agency','DOB-Age-Sex','Blood Group','Aadhar No (masked)','Project Location','Project Address','Issue Date','Validity','EOHS Date','Emergency Contact','Project Manager','Safety Manager','Photo URL','QR Active','Updated At'],
-  Attendance_Register: ['UID','Date (IST)','ID No','Worker Name','Designation','Contractor Agency','Punch Mode','IN-Time (IST)','OUT-Time (IST)','Total Hrs','Project Location','Overtime','Verified By','Recorded At (IST)'],
-  Users: ['Username','Password Hash','Salt','Role','Active','Updated At'],
-  Projects: ['Project Location','Active']
-};
-const OCEAN_PROP = PropertiesService.getScriptProperties();
-function doGet(){ return HtmlService.createHtmlOutputFromFile('Index').setTitle('OCEAN Attendance Portal').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL).addMetaTag('viewport','width=device-width, initial-scale=1'); }
-function setupPortal(){
-  const ss = db_();
-  Object.keys(OCEAN_HEADERS).forEach(n=>{let sh=ss.getSheetByName(n);if(!sh)sh=ss.insertSheet(n);if(sh.getLastRow()===0){sh.appendRow(OCEAN_HEADERS[n]);sh.setFrozenRows(1);sh.getRange(1,1,1,OCEAN_HEADERS[n].length).setFontWeight('bold').setBackground('#dbeafe');}});
-  let folderId=OCEAN_PROP.getProperty('PHOTO_FOLDER_ID');if(!folderId){folderId=DriveApp.createFolder('OCEAN Attendance Photos').getId();OCEAN_PROP.setProperty('PHOTO_FOLDER_ID',folderId);}
-  const users=rows_('Users');if(!users.some(x=>x.Username==='admin'))addUser_('admin','ChangeMe123!','ADMIN');if(!users.some(x=>x.Username==='security'))addUser_('security','ChangeMe123!','SECURITY');
-  if(rows_('Projects').length===0)['Chennai - Guindy HQ (TN)','Sriperumbudur Industrial Park (TN)','Coimbatore IT SEZ (TN)','Bengaluru Whitefield Data Centre (KA)','Hyderabad HITEC Fitout (TS)'].forEach(p=>ss.getSheetByName('Projects').appendRow([p,true]));
-  ss.getSheetByName('Workers').getRange('K:M').setNumberFormat('@');
-  ss.getSheetByName('Attendance_Register').getRange('B:B').setNumberFormat('@');
-  ss.getSheetByName('Attendance_Register').getRange('H:I').setNumberFormat('@');
-  OCEAN_PROP.setProperty('TZ',OCEAN_TZ);
-  return 'Setup complete. Initial logins: admin / ChangeMe123! and security / ChangeMe123!. Change these immediately.';
-}
-function db_(){const id=OCEAN_PROP.getProperty('DB_ID');if(id)return SpreadsheetApp.openById(id);const active=SpreadsheetApp.getActiveSpreadsheet();if(active){OCEAN_PROP.setProperty('DB_ID',active.getId());return active;}const ss=SpreadsheetApp.create('OCEAN_Attendance_Portal_DB');OCEAN_PROP.setProperty('DB_ID',ss.getId());return ss;}
-function sh_(name){const ss=db_();let s=ss.getSheetByName(name);if(!s){s=ss.insertSheet(name);s.appendRow(OCEAN_HEADERS[name]);s.setFrozenRows(1);}return s;}
-function rows_(name){const v=sh_(name).getDataRange().getValues();if(v.length<2)return [];const h=v[0];return v.slice(1).filter(r=>r.some(x=>x!==''&&x!==null)).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i]);return o;});}
-function hash_(p,s){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s+String(p),Utilities.Charset.UTF_8).map(b=>('0'+((b+256)%256).toString(16)).slice(-2)).join('');}
-function addUser_(u,p,r){const salt=Utilities.getUuid();sh_('Users').appendRow([u,hash_(p,salt),salt,r,true,new Date()]);}
-function apiLogin(username,password,role){const user=rows_('Users').find(x=>String(x.Username).toLowerCase()===String(username).toLowerCase()&&x.Active===true&&x.Role===role);if(!user||hash_(password,user.Salt)!==user['Password Hash'])throw new Error('Invalid user ID or password.');const token=Utilities.getUuid()+Utilities.getUuid();CacheService.getScriptCache().put('ocean:'+token,JSON.stringify({username:user.Username,role:user.Role}),21600);return {token,username:user.Username,role:user.Role,message:'Welcome to OCEAN Attendance Portal'};}
-function session_(token,roles){const raw=CacheService.getScriptCache().get('ocean:'+token);if(!raw)throw new Error('Session expired. Please log in again.');const s=JSON.parse(raw);if(roles.indexOf(s.role)<0)throw new Error('Permission denied.');return s;}
-function apiLogout(token){if(token)CacheService.getScriptCache().remove('ocean:'+token);return true;}
-function apiGetData(token){session_(token,['ADMIN','SECURITY']);return {workers:rows_('Workers').map(workerOut_),attendance:rows_('Attendance_Register').map(attOut_),projects:rows_('Projects').filter(x=>x.Active===true).map(x=>x['Project Location']),timestamp:Utilities.formatDate(new Date(),OCEAN_TZ,'dd-MM-yy HH:mm:ss')};}
-function valueText_(v,pattern){return v instanceof Date?Utilities.formatDate(v,OCEAN_TZ,pattern||'dd-MM-yy'):String(v==null?'':v);}
-function workerOut_(w){return {idNo:String(w['ID No']||''),passNo:String(w['Pass No']||''),name:String(w['Worker Name']||''),designation:String(w.Designation||''),vendor:String(w['Contractor Agency']||''),dobAgeSex:String(w['DOB-Age-Sex']||''),bloodGroup:String(w['Blood Group']||''),aadharNo:String(w['Aadhar No (masked)']||''),projectLocation:String(w['Project Location']||''),projectAddress:String(w['Project Address']||''),issueDate:valueText_(w['Issue Date']),validityUpTo:valueText_(w.Validity),eohsInductedOn:valueText_(w['EOHS Date']),emergencyContact:String(w['Emergency Contact']||''),projectManager:String(w['Project Manager']||''),safetyManager:String(w['Safety Manager']||''),photo:String(w['Photo URL']||''),active:String(w['QR Active']).toUpperCase()!=='DEACTIVATED'};}
-function attOut_(a){return {uid:String(a.UID||''),date:valueText_(a['Date (IST)']),idNo:String(a['ID No']||''),workerName:String(a['Worker Name']||''),designation:String(a.Designation||''),vendor:String(a['Contractor Agency']||''),punchMode:String(a['Punch Mode']||''),inTime:valueText_(a['IN-Time (IST)'],'HH:mm:ss'),outTime:a['OUT-Time (IST)']==='On-Site'?'':valueText_(a['OUT-Time (IST)'],'HH:mm:ss'),totalHrs:String(a['Total Hrs']||'On-Site'),projectLocation:String(a['Project Location']||''),overtime:String(a.Overtime||'00:00:00'),verifiedBy:String(a['Verified By']||'')};}
-function apiUpsertWorker(token,w){session_(token,['ADMIN']);if(!w||!w.idNo||!w.name)throw new Error('Worker ID and name are required.');let photo=w.photo||'';if(photo&&photo.indexOf('data:image/')===0){const m=photo.match(/^data:(image\/[\w.+-]+);base64,(.+)$/);if(m){const folder=DriveApp.getFolderById(OCEAN_PROP.getProperty('PHOTO_FOLDER_ID'));const ext=m[1].split('/')[1].replace('jpeg','jpg');const f=folder.createFile(Utilities.newBlob(Utilities.base64Decode(m[2]),m[1],w.idNo+'.'+ext));f.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW);photo='https://drive.google.com/uc?export=view&id='+f.getId();}}
- const s=sh_('Workers'),v=s.getDataRange().getValues(),id=String(w.idNo).toUpperCase();const row=[w.idNo,w.passNo||'',w.name,w.designation||'',w.vendor||'',w.dobAgeSex||'',w.bloodGroup||'',maskAadhaar_(w.aadharNo||''),w.projectLocation||'',w.projectAddress||'',w.issueDate||'',w.validityUpTo||'',w.eohsInductedOn||'',w.emergencyContact||'',w.projectManager||'',w.safetyManager||'',photo,w.active===false?'DEACTIVATED':'ACTIVE',new Date()];let found=0;for(let i=1;i<v.length;i++)if(String(v[i][0]).toUpperCase()===id){found=i+1;break;}if(found)s.getRange(found,1,1,row.length).setValues([row]);else s.appendRow(row);return {ok:true,photo};}
-function maskAadhaar_(v){const d=String(v).replace(/\D/g,'');return d.length>=4?'XXXX-XXXX-'+d.slice(-4):String(v||'');}
-function apiUpsertAttendance(token,a){
-  const sess=session_(token,['ADMIN','SECURITY']);
-  if(!a||!a.idNo||!a.date)throw new Error('Attendance ID and date required.');
-  const lock=LockService.getScriptLock();lock.waitLock(10000);
+
+var TIMEZONE_IST = "Asia/Kolkata";
+var STANDARD_SHIFT_SECONDS = 28800; // 8 hours
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
   try {
-    const s=sh_('Attendance_Register'),v=s.getDataRange().getValues();
-    const mode=a.punchMode||(a.outTime?'CLOCK_OUT':'CLOCK_IN');
-    const diff=(h)=>{const p=String(h||'0:0:0').split(':').map(Number);return (p[0]||0)*3600+(p[1]||0)*60+(p[2]||0);};
-    let total=a.totalHrs||'On-Site',ot=a.overtime||'00:00:00';
-    if(a.inTime&&a.outTime){const sec=Math.max(0,diff(a.outTime)-diff(a.inTime));total=secToHms_(sec);ot=secToHms_(Math.max(0,sec-28800));}
-    const uid=a.uid||('LOG-'+Utilities.getUuid());
-    const row=[uid,a.date,a.idNo,a.workerName||'',a.designation||'',a.vendor||'',mode,a.inTime||'',a.outTime||'On-Site',total,a.projectLocation||'',ot,sess.username,Utilities.formatDate(new Date(),OCEAN_TZ,'dd-MM-yy HH:mm:ss')];
-    let found=0;for(let i=1;i<v.length;i++){if(String(v[i][0])===String(uid)){found=i+1;break;}}
-    if(found)s.getRange(found,1,1,row.length).setValues([row]);else s.appendRow(row);
-    return {ok:true};
-  } finally {lock.releaseLock();}
+    if (!e || !e.postData || !e.postData.contents) {
+      return jsonResponse_({ status: "error", message: "Empty POST payload" });
+    }
+
+    var payload = JSON.parse(e.postData.contents);
+    var ss = getOrCreateDatabaseSpreadsheet_();
+
+    if (payload.type === "worker" || payload.type === "worker_status") {
+      var wSheet = getOrCreateSheet_(ss, "Workers", [
+        "ID No", "Pass No", "Worker Name", "Designation", "Contractor Agency",
+        "DOB-Age-Sex", "Blood Group", "Aadhar No", "Project Location",
+        "Project Address", "Issue Date", "Validity", "EOHS Date", "QR Active", "Updated At (IST)"
+      ]);
+      upsertWorkerRow_(wSheet, payload.data || {});
+    }
+
+    if (payload.type === "attendance") {
+      var aSheet = getOrCreateSheet_(ss, "Attendance_Register", [
+        "UID", "Date (IST)", "ID No", "Worker Name", "Designation",
+        "Contractor Agency", "Punch Mode", "IN-Time (IST)", "OUT-Time (IST)",
+        "Total Hrs", "Project Location", "Overtime", "Verified By", "Recorded At (IST)"
+      ]);
+      upsertAttendanceRow_(aSheet, payload.data || {});
+    }
+
+    return jsonResponse_({
+      status: "success",
+      type: payload.type || "unknown",
+      timestampIST: formatISTNow_()
+    });
+  } catch (err) {
+    return jsonResponse_({
+      status: "error",
+      message: err && err.toString ? err.toString() : "Unknown error"
+    });
+  } finally {
+    lock.releaseLock();
+  }
 }
-function secToHms_(n){n=Math.max(0,Math.floor(n));return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':');}
-function apiDeleteWorker(token,id){session_(token,['ADMIN']);const s=sh_('Workers'),v=s.getDataRange().getValues();for(let i=1;i<v.length;i++)if(String(v[i][0])===String(id)){s.deleteRow(i+1);return true;}return false;}
-function apiSaveProjects(token,projects){session_(token,['ADMIN']);const s=sh_('Projects');s.clearContents();s.appendRow(OCEAN_HEADERS.Projects);(projects||[]).forEach(p=>{if(String(p).trim())s.appendRow([String(p).trim(),true]);});return true;}
-function apiUpdateCredentials(token,creds){session_(token,['ADMIN']);const list=[{username:creds.adminId,password:creds.adminPass,role:'ADMIN'},{username:creds.secId,password:creds.secPass,role:'SECURITY'}];const s=sh_('Users');list.forEach(u=>{if(!u.username||!u.password)throw new Error('Both user IDs and passwords are required.');if(u.password.length<8)throw new Error('Passwords must be at least 8 characters.');const salt=Utilities.getUuid(),row=[u.username,hash_(u.password,salt),salt,u.role,true,new Date()],v=s.getDataRange().getValues();let found=0;for(let i=1;i<v.length;i++)if(v[i][3]===u.role){found=i+1;break;}if(found)s.getRange(found,1,1,row.length).setValues([row]);else s.appendRow(row);});return true;}
-function apiStatus(){return {status:'online',company:'OCEAN LIFESPACES INDIA PVT LTD',time:Utilities.formatDate(new Date(),OCEAN_TZ,'dd-MM-yy HH:mm:ss IST')};}`;
+
+function doGet(e) {
+  try {
+    var ss = getOrCreateDatabaseSpreadsheet_();
+    var wSheet = ss.getSheetByName("Workers");
+    var aSheet = ss.getSheetByName("Attendance_Register");
+    var action = (e && e.parameter && e.parameter.action) ? String(e.parameter.action) : "status";
+
+    if (action === "export") {
+      return jsonResponse_({
+        status: "success",
+        company: "OCEAN LIFESPACES INDIA PVT LTD",
+        spreadsheetUrl: ss.getUrl(),
+        timestampIST: formatISTNow_(),
+        workers: sheetToObjects_(wSheet),
+        attendance: sheetToObjects_(aSheet)
+      });
+    }
+
+    return jsonResponse_({
+      status: "online",
+      company: "OCEAN LIFESPACES INDIA PVT LTD",
+      spreadsheetUrl: ss.getUrl(),
+      timestampIST: formatISTNow_(),
+      workersCount: wSheet ? Math.max(0, wSheet.getLastRow() - 1) : 0,
+      attendanceCount: aSheet ? Math.max(0, aSheet.getLastRow() - 1) : 0
+    });
+  } catch (err) {
+    return jsonResponse_({
+      status: "error",
+      message: err && err.toString ? err.toString() : "Unknown error"
+    });
+  }
+}
+
+function jsonResponse_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateDatabaseSpreadsheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    var files = DriveApp.getFilesByName("OCEAN_Attendance_Portal_DB");
+    ss = files.hasNext() ? SpreadsheetApp.open(files.next()) : SpreadsheetApp.create("OCEAN_Attendance_Portal_DB");
+  }
+  return ss;
+}
+
+function formatISTNow_() {
+  return Utilities.formatDate(new Date(), TIMEZONE_IST, "dd-MM-yy HH:mm:ss 'IST'");
+}
+
+function getOrCreateSheet_(ss, name, headers) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function sheetToObjects_(sheet) {
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var out = [];
+  for (var r = 1; r < values.length; r++) {
+    var rowObj = {};
+    for (var c = 0; c < headers.length; c++) {
+      rowObj[headers[c]] = values[r][c];
+    }
+    out.push(rowObj);
+  }
+  return out;
+}
+
+function parseHmsToSec_(hms) {
+  if (!hms || String(hms).indexOf(":") === -1) return 0;
+  var parts = String(hms).split(":").map(Number);
+  return ((parts[0] || 0) * 3600) + ((parts[1] || 0) * 60) + (parts[2] || 0);
+}
+
+function secToHms_(sec) {
+  if (sec < 0) sec = 0;
+  var h = String(Math.floor(sec / 3600)).padStart(2, "0");
+  var m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+  var s = String(sec % 60).padStart(2, "0");
+  return h + ":" + m + ":" + s;
+}
+
+function upsertWorkerRow_(sheet, w) {
+  var data = sheet.getDataRange().getValues();
+  var rowValues = [
+    w.idNo || "",
+    w.passNo || "",
+    w.name || "",
+    w.designation || "",
+    w.vendor || "",
+    w.dobAgeSex || "",
+    w.bloodGroup || "",
+    w.aadharNo || "",
+    w.projectLocation || "",
+    w.projectAddress || "",
+    w.issueDate || "",
+    w.validityUpTo || "",
+    w.eohsInductedOn || "",
+    w.active === false ? "DEACTIVATED" : "ACTIVE",
+    formatISTNow_()
+  ];
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toUpperCase() === String(w.idNo || "").toUpperCase()) {
+      sheet.getRange(i + 1, 1, 1, rowValues.length).setValues([rowValues]);
+      return;
+    }
+  }
+  sheet.appendRow(rowValues);
+}
+
+function upsertAttendanceRow_(sheet, a) {
+  var data = sheet.getDataRange().getValues();
+  var mode = a.punchMode || (a.outTime ? "CLOCK_OUT" : "CLOCK_IN");
+  var totalHrs = a.totalHrs || "On-Site";
+  var overtime = a.overtime || "00:00:00";
+
+  if (a.inTime && a.outTime && (!a.totalHrs || a.totalHrs === "On-Site")) {
+    var diffSec = Math.max(0, parseHmsToSec_(a.outTime) - parseHmsToSec_(a.inTime));
+    totalHrs = secToHms_(diffSec);
+    overtime = secToHms_(diffSec > STANDARD_SHIFT_SECONDS ? diffSec - STANDARD_SHIFT_SECONDS : 0);
+  }
+
+  var rowValues = [
+    a.uid || ("LOG-" + Date.now()),
+    a.date || "",
+    a.idNo || "",
+    a.workerName || "",
+    a.designation || "",
+    a.vendor || "",
+    mode,
+    a.inTime || "",
+    a.outTime || "On-Site",
+    totalHrs,
+    a.projectLocation || "",
+    overtime,
+    a.verifiedBy || "Portal",
+    formatISTNow_()
+  ];
+
+  for (var i = 1; i < data.length; i++) {
+    var sameUid = String(data[i][0]) === String(a.uid || "");
+    var sameShift = String(data[i][1]) === String(a.date || "") &&
+                      String(data[i][2]).toUpperCase() === String(a.idNo || "").toUpperCase() &&
+                      (String(data[i][8]) === "On-Site" || String(data[i][8]) === "");
+    if (sameUid || (mode === "CLOCK_OUT" && sameShift)) {
+      sheet.getRange(i + 1, 1, 1, rowValues.length).setValues([rowValues]);
+      return;
+    }
+  }
+  sheet.appendRow(rowValues);
+}`;
 
     function loadSettingsForm() {
       const creds = getCreds();
       document.getElementById('set-admin-id').value = creds.adminId;
-      document.getElementById('set-admin-pass').value = '';
-      document.getElementById('set-admin-pass').placeholder = 'Enter new admin password';
+      document.getElementById('set-admin-pass').value = creds.adminPass;
       document.getElementById('set-sec-id').value = creds.secId;
-      document.getElementById('set-sec-pass').value = '';
-      document.getElementById('set-sec-pass').placeholder = 'Enter new security password';
+      document.getElementById('set-sec-pass').value = creds.secPass;
 
       const cloud = getCloudConfig();
-      document.getElementById('gas-webhook-url').value = 'Connected automatically when deployed as Apps Script Web App';
+      document.getElementById('gas-webhook-url').value = cloud.webAppUrl || DEFAULT_BACKEND_URL;
       document.getElementById('gas-auto-sync').checked = Boolean(cloud.autoSync);
 
       document.getElementById('gas-code-block').textContent = GOOGLE_APPS_SCRIPT_TEMPLATE;
       renderProjectPills();
     }
 
-    async function updateCredentials(e) {
+    function updateCredentials(e) {
       e.preventDefault();
       const updated = {
         adminId: document.getElementById('set-admin-id').value.trim(),
-        adminPass: document.getElementById('set-admin-pass').value,
+        adminPass: document.getElementById('set-admin-pass').value.trim(),
         secId: document.getElementById('set-sec-id').value.trim(),
-        secPass: document.getElementById('set-sec-pass').value
+        secPass: document.getElementById('set-sec-pass').value.trim()
       };
-      try {
-        await gasCall('apiUpdateCredentials', oceanSessionToken, updated);
-        localStorage.setItem(STORAGE_KEYS.CREDS, JSON.stringify({adminId:updated.adminId,secId:updated.secId,adminPass:'',secPass:''}));
-        document.getElementById('set-admin-pass').value = ''; document.getElementById('set-sec-pass').value = '';
-        speakVoice('Admin and Security passwords updated');
-        showToast('Admin & Security accounts updated in the cloud. Sign in again with the new credentials.', 'success');
-      } catch (err) { showToast(err.message, 'error'); }
+      localStorage.setItem(STORAGE_KEYS.CREDS, JSON.stringify(updated));
+      speakVoice('Admin and Security passwords updated');
+      showToast('Admin & Security User IDs and Passwords saved successfully!', 'success');
     }
 
     function renderProjectPills() {
@@ -2864,7 +2940,6 @@ function apiStatus(){return {status:'online',company:'OCEAN LIFESPACES INDIA PVT
       if (!projects.includes(val)) {
         projects.push(val);
         setProjects(projects);
-        gasCall('apiSaveProjects', oceanSessionToken, projects).catch(err => showToast('Cloud project save failed: ' + err.message, 'error'));
         renderProjectPills();
         populateFilterDropdowns();
         showToast(`Added project site: ${val}`, 'success');
@@ -2876,48 +2951,63 @@ function apiStatus(){return {status:'online',company:'OCEAN LIFESPACES INDIA PVT
       const projects = getProjects();
       projects.splice(idx, 1);
       setProjects(projects);
-      gasCall('apiSaveProjects', oceanSessionToken, projects).catch(err => showToast('Cloud project save failed: ' + err.message, 'error'));
       renderProjectPills();
       populateFilterDropdowns();
     }
 
     function saveCloudSettings() {
-      // The portal is hosted inside Apps Script, so the backend URL is automatic.
+      const url = document.getElementById('gas-webhook-url').value.trim();
+      const autoSync = document.getElementById('gas-auto-sync').checked;
+      localStorage.setItem(STORAGE_KEYS.CLOUD, JSON.stringify({ webAppUrl: url, autoSync }));
+
       const badge = document.getElementById('cloud-status-badge');
-      if (badge) {
-        badge.textContent = 'Google Apps Script Connected';
+      if (url && autoSync) {
+        badge.textContent = 'Google Cloud Auto-Sync ON';
         badge.className = 'text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+      } else {
+        badge.textContent = 'Local + Cloud Ready';
       }
-      showToast('Cloud connection is provided by this deployed Apps Script portal. No webhook URL is required.', 'success');
+      showToast('Cloud & Google Apps Script settings saved.', 'success');
     }
 
     function pushToCloudIfEnabled(type, data) {
-      if (!oceanSessionToken || !cloudReady) {
-        showToast('Cloud session is not active. Please log in again.', 'error');
-        return;
-      }
-      const fn = type === 'attendance' ? 'apiUpsertAttendance' : 'apiUpsertWorker';
-      gasCall(fn, oceanSessionToken, data).then(() => {
-        // Server accepted the write; cloud data is now authoritative.
-      }).catch(err => showToast('Cloud save failed: ' + err.message, 'error'));
+      const cfg = getCloudConfig();
+      if (!cfg.autoSync || !cfg.webAppUrl) return;
+
+      fetch(cfg.webAppUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, data })
+      }).catch(err => console.warn('Cloud sync deferred:', err));
     }
 
-    async function syncAllToCloud() {
-      if (!oceanSessionToken || currentSessionRole !== 'ADMIN') {
-        showToast('Please log in as Admin before synchronizing.', 'warning');
+    function syncAllToCloud() {
+      const cfg = getCloudConfig();
+      if (!cfg.webAppUrl) {
+        showToast('Please paste your Google Apps Script Web App URL first.', 'warning');
         return;
       }
-      try {
-        const workers = getWorkers(), logs = getAttendance();
-        for (const w of workers) await gasCall('apiUpsertWorker', oceanSessionToken, w);
-        for (const a of logs) await gasCall('apiUpsertAttendance', oceanSessionToken, a);
-        await pullCloudData();
-        refreshAllAdminViews();
-        showToast(`Cloud sync completed: ${workers.length} workers and ${logs.length} attendance records.`, 'success');
-      } catch (err) { showToast('Cloud sync failed: ' + err.message, 'error'); }
+      const workers = getWorkers();
+      const logs = getAttendance();
+      workers.forEach(w => {
+        fetch(cfg.webAppUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ type: 'worker', data: w })
+        });
+      });
+      logs.forEach(l => {
+        fetch(cfg.webAppUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ type: 'attendance', data: l })
+        });
+      });
+      showToast(`Dispatched ${workers.length} workers & ${logs.length} logs to Google Sheets Cloud!`, 'success');
     }
 
-        function copyAppsScriptCode() {
+    function copyAppsScriptCode() {
       const textarea = document.createElement('textarea');
       textarea.value = GOOGLE_APPS_SCRIPT_TEMPLATE;
       document.body.appendChild(textarea);
@@ -2951,10 +3041,6 @@ function apiStatus(){return {status:'online',company:'OCEAN LIFESPACES INDIA PVT
       setScannerMode('CLOCK_IN');
       updateAllLiveClocks();
       setInterval(updateAllLiveClocks, 1000);
-      setInterval(() => {
-        if (!oceanSessionToken || !cloudReady) return;
-        pullCloudData().then(() => { if (currentSessionRole === 'ADMIN') refreshAllAdminViews(); }).catch(err => console.warn('Background cloud refresh failed:', err));
-      }, 20000);
     });
   </script>
 </body>
