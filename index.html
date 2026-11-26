@@ -1055,7 +1055,7 @@
         class="block w-full h-auto object-contain" style="max-height:${compact ? '82px' : '118px'}" />`;
     }
 
-    
+
     function generateDefaultAvatarSVG(initials, bgHex = '#1e40af') {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="190" viewBox="0 0 160 190">
         <rect width="160" height="190" fill="${bgHex}"/>
@@ -1092,6 +1092,7 @@
       };
     }
 
+    
     function updateAllLiveClocks() {
       const ist = getISTNowParts();
       const timeLabel = `${ist.time} IST`;
