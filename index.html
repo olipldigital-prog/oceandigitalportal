@@ -583,12 +583,6 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Pass Number *</label>
-              <input type="text" id="w-passno" required placeholder="e.g. PASS-TN-089"
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
-            </div>
-
-            <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Worker Full Name *</label>
               <input type="text" id="w-name" required placeholder="e.g. Karthikeyan S"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold outline-none focus:border-blue-600" />
@@ -695,7 +689,7 @@
               <span class="text-xs font-semibold text-slate-500">Toggle QR Status to immediately allow or block gate scanning</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <input type="text" id="worker-search" oninput="renderWorkersDirectory()" placeholder="Search Name, ID No, Pass No, Vendor..."
+              <input type="text" id="worker-search" oninput="renderWorkersDirectory()" placeholder="Search Name, ID No, Vendor..."
                 class="rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-blue-600" />
               <select id="worker-filter-project" onchange="renderWorkersDirectory()" class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-600">
                 <option value="">All Project Locations</option>
@@ -1020,7 +1014,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 class="text-base font-extrabold text-amber-300">Google Apps Script Backend Code (Code.gs)</h3>
-              <p class="text-xs text-slate-400">Copy into script.google.com &rarr; Deploy as Web App (Execute as: Me, Who has access: Anyone) &rarr; Paste URL above.</p>
+              <p class="text-xs text-slate-400">Copy into script.google.com &rarr; Run installDailyAutoBlockTrigger once &rarr; Deploy as Web App (Execute as: Me) &rarr; Paste URL above.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button type="button" onclick="downloadAppsScriptFile()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow">
@@ -1042,7 +1036,7 @@
        APPLICATION JAVASCRIPT (LOGO SVG, IST CLOCK, VOICE, QR, STORAGE, SYNC)
        ===================================================================== -->
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxNKxD6hjYWFP5iXn5lbj3R2oPAT2jj81PbRl3u8omnuv1Z_LvXwh5Ogu8BGzlcotnYhg/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzCrU4f2fPFiCO8Qy7_3-VrDev_OfaPjr2e4TdPzymTitDGF2h1f681aaQmkbUWu4DU/exec";
 
     /* -----------------------------------------------------------------------
        1. CUSTOM SVG RECREATION OF OCEAN DELIVERING DREAMS LOGO
@@ -1720,7 +1714,9 @@
         issueDate: row['Issue Date'] || row.issueDate || '',
         validityUpTo: row.Validity || row.validityUpTo || '',
         eohsInductedOn: row['EOHS Date'] || row.eohsInductedOn || '',
-        active: !['DEACTIVATED', 'INACTIVE', 'FALSE', '0'].includes(activeText),
+        active: !['DEACTIVATED', 'INACTIVE', 'FALSE', '0', 'BLOCKED'].includes(activeText),
+        autoBlockReason: row['Auto Block Reason'] || row.autoBlockReason || '',
+        lastPresentDate: row['Last Present Date (IST)'] || row.lastPresentDate || '',
         photo: row.Photo || row.photo || generateDefaultAvatarSVG('OW', '#1e3a8a')
       };
     }
@@ -1793,9 +1789,13 @@
 
     async function processSecurityCameraPunch(rawCode) {
       const cleanId = extractWorkerIdFromQr(rawCode);
-      if (!cleanId) return null;
+      if (!cleanId) {
+        const message = 'Invalid QR format. Please scan the QR printed on an Ocean worker ID card.';
+        showToast(message, 'error'); renderSecurityScanResult({ error: message });
+        return { error: message };
+      }
       try {
-        const payload = await callBackendJsonp({ action: 'punch', raw: rawCode, mode: activeScannerMode });
+        const payload = await callBackendJsonp({ action: 'punch', raw: cleanId, mode: activeScannerMode });
         if (!payload || payload.status !== 'success' || !payload.result) {
           const message = payload && payload.message ? payload.message : 'Attendance could not be recorded';
           speakVoice(message);
@@ -1993,7 +1993,7 @@
 
           <div>
             <h4 class="text-xl font-extrabold text-slate-900">${worker.name}</h4>
-            <p class="text-xs font-mono font-bold text-blue-800">${worker.idNo} | Pass: ${worker.passNo}</p>
+            <p class="text-xs font-mono font-bold text-blue-800">${worker.idNo}</p>
           </div>
 
           <div class="grid grid-cols-2 gap-2 text-left bg-white p-3 rounded-xl border border-slate-200 text-xs">
@@ -2025,6 +2025,13 @@
       loadSettingsForm();
       refreshAllAdminViews();
       switchAdminTab('register');
+      // Refresh server-authoritative QR status (including automatic 3-day absence blocks).
+      fetchCloudWorkersJsonp().then(cloudWorkers => {
+        const merged = new Map(getWorkers().map(w => [normalizeWorkerId(w.idNo), w]));
+        cloudWorkers.forEach(w => merged.set(normalizeWorkerId(w.idNo), { ...(merged.get(normalizeWorkerId(w.idNo)) || {}), ...w }));
+        setWorkers(Array.from(merged.values()));
+        refreshAllAdminViews();
+      }).catch(err => console.warn('Cloud worker status refresh skipped:', err));
     }
 
     function switchAdminTab(tabKey) {
@@ -2290,7 +2297,6 @@
 
       const workerObj = {
         idNo,
-        passNo: document.getElementById('w-passno').value.trim(),
         name,
         designation: document.getElementById('w-designation').value.trim(),
         vendor: document.getElementById('w-vendor').value.trim(),
@@ -2329,7 +2335,6 @@
 
       document.getElementById('w-edit-mode').value = w.idNo;
       document.getElementById('w-idno').value = w.idNo;
-      document.getElementById('w-passno').value = w.passNo;
       document.getElementById('w-name').value = w.name;
       document.getElementById('w-designation').value = w.designation;
       document.getElementById('w-vendor').value = w.vendor;
@@ -2394,7 +2399,6 @@
         const matchQ = !q ||
           w.name.toLowerCase().includes(q) ||
           w.idNo.toLowerCase().includes(q) ||
-          w.passNo.toLowerCase().includes(q) ||
           w.vendor.toLowerCase().includes(q);
         const matchP = !fProj || w.projectLocation === fProj;
         const matchV = !fVend || w.vendor === fVend;
@@ -2417,7 +2421,6 @@
               <div id="dir-qr-${w.idNo}" class="w-10 h-10 bg-white p-0.5 border border-slate-300 rounded"></div>
               <div>
                 <div class="font-mono font-extrabold text-blue-900">${w.idNo}</div>
-                <div class="text-[11px] font-mono text-slate-500">${w.passNo}</div>
               </div>
             </div>
           </td>
@@ -2429,8 +2432,9 @@
             <button onclick="toggleWorkerQRStatus('${w.idNo}')"
               class="px-3 py-1.5 rounded-full text-xs font-extrabold transition flex items-center gap-1.5 ${w.active ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
               <span class="w-2 h-2 rounded-full ${w.active ? 'bg-emerald-600' : 'bg-rose-600'}"></span>
-              ${w.active ? 'ACTIVE (Click to Block)' : 'DEACTIVATED (Enable)'}
+              ${w.active ? 'ACTIVE (Click to Block)' : (w.autoBlockReason ? 'AUTO-BLOCKED (Admin Enable)' : 'DEACTIVATED (Enable)')}
             </button>
+            ${!w.active && w.autoBlockReason ? `<div class="mt-1 text-[10px] text-rose-700">${w.autoBlockReason}</div>` : ''}
           </td>
           <td class="py-2.5 px-3 text-right whitespace-nowrap space-x-1">
             <button onclick="openWorkerIdCard('${w.idNo}')" class="px-2.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold">
@@ -2450,7 +2454,7 @@
         const el = document.getElementById(`dir-qr-${w.idNo}`);
         if (el && typeof QRCode !== 'undefined') {
           el.innerHTML = '';
-          new QRCode(el, { text: w.idNo, width: 34, height: 34, correctLevel: QRCode.CorrectLevel.L });
+          new QRCode(el, { text: normalizeWorkerId(w.idNo), width: 34, height: 34, correctLevel: QRCode.CorrectLevel.M });
         }
       });
     }
@@ -2490,10 +2494,6 @@
             <div class="border border-[#65a30d] text-[5.8pt] leading-[1.18]">
               <div class="bg-[#84cc16] text-slate-950 font-extrabold px-1.5 py-[0.4mm] border-b border-[#65a30d]">
                 Name of Vendor: <span class="font-bold">${worker.vendor}</span>
-              </div>
-              <div class="grid grid-cols-12 border-b border-[#65a30d] px-1.5 py-[0.25mm]">
-                <span class="col-span-5 font-bold text-[#1e3a8a]">Pass Number :</span>
-                <span class="col-span-7 font-mono font-bold">${worker.passNo}</span>
               </div>
               <div class="grid grid-cols-12 border-b border-[#65a30d] px-1.5 py-[0.25mm]">
                 <span class="col-span-5 font-bold text-[#1e3a8a]">Name :</span>
@@ -2588,7 +2588,7 @@
       const qrBox = document.getElementById(`preview-qr-front-${worker.idNo}`);
       if (qrBox && typeof QRCode !== 'undefined') {
         qrBox.innerHTML = '';
-        new QRCode(qrBox, { text: worker.idNo, width: 44, height: 44, correctLevel: QRCode.CorrectLevel.M });
+        new QRCode(qrBox, { text: normalizeWorkerId(worker.idNo), width: 44, height: 44, correctLevel: QRCode.CorrectLevel.M });
       }
     }
 
@@ -2605,7 +2605,7 @@
       const qrBox = document.getElementById(`print-qr-front-${worker.idNo}`);
       if (qrBox && typeof QRCode !== 'undefined') {
         qrBox.innerHTML = '';
-        new QRCode(qrBox, { text: worker.idNo, width: 44, height: 44, correctLevel: QRCode.CorrectLevel.M });
+        new QRCode(qrBox, { text: normalizeWorkerId(worker.idNo), width: 44, height: 44, correctLevel: QRCode.CorrectLevel.M });
       }
 
       setTimeout(() => {
@@ -2755,7 +2755,7 @@
           <div>
             <div class="text-base font-extrabold text-blue-950">${worker.name} <span class="font-mono text-xs text-blue-700">(${worker.idNo})</span></div>
             <div class="text-xs font-semibold text-slate-600">${worker.designation} • ${worker.vendor}</div>
-            <div class="text-xs text-slate-500 mt-0.5">Site: <strong>${worker.projectLocation}</strong> | Pass: ${worker.passNo}</div>
+            <div class="text-xs text-slate-500 mt-0.5">Site: <strong>${worker.projectLocation}</strong></div>
           </div>
         </div>
         <div class="flex gap-4 text-center">
@@ -2834,7 +2834,8 @@ var STANDARD_SHIFT_SECONDS = 28800;
 var WORKER_HEADERS = [
   'ID No','Pass No','Worker Name','Designation','Contractor Agency',
   'DOB-Age-Sex','Blood Group','Aadhar No','Project Location',
-  'Project Address','Issue Date','Validity','EOHS Date','QR Active','Updated At (IST)'
+  'Project Address','Issue Date','Validity','EOHS Date','QR Active','Updated At (IST)',
+  'Last Present Date (IST)','Auto Block Reason','QR Status Updated At (IST)','QR Reactivated Date (IST)'
 ];
 var ATTENDANCE_HEADERS = [
   'UID','Date (IST)','ID No','Worker Name','Designation','Contractor Agency',
@@ -2851,9 +2852,11 @@ function doGet(e) {
     var result;
 
     if (action === 'workers') {
+      evaluateThreeDayAbsenceBlocks_(ss);
       var ws = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
       result = { status: 'success', workers: getMinimalWorkers_(ws), timestampIST: formatISTNow_() };
     } else if (action === 'punch') {
+      evaluateThreeDayAbsenceBlocks_(ss);
       result = processServerPunch_(ss, p.raw || p.id || '', p.mode || 'CLOCK_IN');
     } else if (action === 'export') {
       result = {
@@ -2995,7 +2998,7 @@ function extractWorkerId_(raw) {
   } catch (ignore) {}
   if (/^https?:\/\//i.test(value)) {
     try {
-      var url = value.match(/[?&](?:idNo|id|workerId|code)=([^&#]+)/i);
+      var url = value.match(/[?&](?:idNo|id|workerId|workerID|employeeId|code|qr)=([^&#]+)/i);
       if (url) value = decodeURIComponent(url[1].replace(/\+/g, ' '));
     } catch (ignore2) {}
   }
@@ -3006,42 +3009,167 @@ function extractWorkerId_(raw) {
   return /^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value) ? value : '';
 }
 
+
+function headerIndex_(headers, wanted) {
+  var aliases = {
+    'id no': ['id no','id number','worker id','employee id','idno','id'],
+    'pass no': ['pass no','pass number','passno'],
+    'worker name': ['worker name','name','employee name'],
+    'designation': ['designation','role'],
+    'contractor agency': ['contractor agency','vendor','contractor'],
+    'project location': ['project location','project','site'],
+    'qr active': ['qr active','qr status','active','status'],
+    'issue date': ['issue date','date of issue'],
+    'last present date (ist)': ['last present date (ist)','last present date'],
+    'auto block reason': ['auto block reason','block reason']
+  };
+  var target = String(wanted).toLowerCase().trim();
+  var choices = aliases[target] || [target];
+  for (var i = 0; i < headers.length; i++) {
+    var h = String(headers[i] || '').toLowerCase().trim();
+    if (choices.indexOf(h) >= 0) return i;
+  }
+  return -1;
+}
+
 function findWorker_(sheet, id) {
   var data = sheet.getDataRange().getValues();
   if (data.length < 2) return null;
   var headers = data[0];
-  var idx = {};
-  headers.forEach(function(h, i) { idx[String(h).trim()] = i; });
+  var idIdx = headerIndex_(headers, 'id no');
+  if (idIdx < 0) throw new Error('Workers sheet has no ID No / Worker ID column. Please check the Workers sheet header.');
   for (var r = 1; r < data.length; r++) {
-    if (normalizeId_(data[r][idx['ID No']]) !== normalizeId_(id)) continue;
-    function cell(name) { return idx[name] === undefined ? '' : data[r][idx[name]]; }
+    if (normalizeId_(data[r][idIdx]) !== normalizeId_(id)) continue;
+    function cell(name) {
+      var idx = headerIndex_(headers, name);
+      return idx < 0 ? '' : data[r][idx];
+    }
+    var activeText = String(cell('qr active') || 'ACTIVE').toUpperCase();
     return {
-      idNo: String(cell('ID No') || '').trim(),
-      passNo: String(cell('Pass No') || ''),
-      name: String(cell('Worker Name') || ''),
-      designation: String(cell('Designation') || ''),
-      vendor: String(cell('Contractor Agency') || ''),
-      projectLocation: String(cell('Project Location') || ''),
-      active: String(cell('QR Active') || 'ACTIVE').toUpperCase() !== 'DEACTIVATED' &&
-        !['INACTIVE','FALSE','0'].includes(String(cell('QR Active') || '').toUpperCase()),
+      idNo: String(cell('id no') || '').trim(),
+      passNo: String(cell('pass no') || ''),
+      name: String(cell('worker name') || ''),
+      designation: String(cell('designation') || ''),
+      vendor: String(cell('contractor agency') || ''),
+      projectLocation: String(cell('project location') || ''),
+      active: !['DEACTIVATED','INACTIVE','FALSE','0','BLOCKED'].includes(activeText),
+      autoBlockReason: String(cell('auto block reason') || ''),
+      lastPresentDate: String(cell('last present date (ist)') || ''),
       photo: ''
     };
   }
   return null;
 }
 
+function parseISTDateValue_(value) {
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    return new Date(Utilities.formatDate(value, TIMEZONE_IST, 'yyyy-MM-dd') + 'T00:00:00+05:30');
+  }
+  var s = String(value || '').trim();
+  var m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2}|\d{4})$/);
+  if (m) {
+    var y = Number(m[3]); if (y < 100) y += 2000;
+    return new Date(y, Number(m[2]) - 1, Number(m[1]));
+  }
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return null;
+}
+
+function evaluateThreeDayAbsenceBlocks_(ss) {
+  var ws = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+  var as = getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS);
+  var workers = ws.getDataRange().getValues();
+  if (workers.length < 2) return 0;
+  var wh = workers[0];
+  var idCol = headerIndex_(wh, 'id no');
+  var activeCol = headerIndex_(wh, 'qr active');
+  var issueCol = headerIndex_(wh, 'issue date');
+  var lastCol = headerIndex_(wh, 'last present date (ist)');
+  var reasonCol = headerIndex_(wh, 'auto block reason');
+  var updatedCol = headerIndex_(wh, 'qr status updated at (ist)');
+  var reactivatedCol = wh.indexOf('QR Reactivated Date (IST)');
+  if ([idCol, activeCol].some(function(x) { return x < 0; })) return 0;
+
+  var attendance = as.getDataRange().getValues();
+  var ah = attendance.length ? attendance[0] : [];
+  var aId = headerIndex_(ah, 'id no');
+  var aDate = headerIndex_(ah, 'date (ist)');
+  // Attendance headers can be legacy labels; use positional fallback for this portal's standard schema.
+  if (aId < 0) aId = ah.indexOf('ID No');
+  if (aDate < 0) aDate = ah.indexOf('Date (IST)');
+  var latest = {};
+  if (aId >= 0 && aDate >= 0) {
+    for (var r = 1; r < attendance.length; r++) {
+      var wid = normalizeId_(attendance[r][aId]);
+      var dt = parseISTDateValue_(attendance[r][aDate]);
+      if (wid && dt && (!latest[wid] || dt.getTime() > latest[wid].getTime())) latest[wid] = dt;
+    }
+  }
+
+  var todayText = Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yy');
+  var today = parseISTDateValue_(todayText);
+  var changed = 0;
+  for (var i = 1; i < workers.length; i++) {
+    var id = normalizeId_(workers[i][idCol]);
+    if (!id) continue;
+    var active = String(workers[i][activeCol] || 'ACTIVE').toUpperCase();
+    if (['DEACTIVATED','INACTIVE','FALSE','0','BLOCKED'].indexOf(active) >= 0) continue;
+    var last = latest[id] || parseISTDateValue_(issueCol >= 0 ? workers[i][issueCol] : '');
+    var reactivated = reactivatedCol >= 0 ? parseISTDateValue_(workers[i][reactivatedCol]) : null;
+    if (reactivated && (!last || reactivated.getTime() > last.getTime())) last = reactivated;
+    if (!last) continue;
+    var daysAbsent = Math.floor((today.getTime() - last.getTime()) / 86400000);
+    if (daysAbsent >= 4) {
+      var rowNo = i + 1;
+      ws.getRange(rowNo, activeCol + 1).setValue('DEACTIVATED');
+      if (lastCol >= 0) ws.getRange(rowNo, lastCol + 1).setValue(Utilities.formatDate(last, TIMEZONE_IST, 'dd-MM-yy'));
+      if (reasonCol >= 0) ws.getRange(rowNo, reasonCol + 1).setValue('AUTO_BLOCKED: 3 consecutive calendar days absent');
+      if (updatedCol >= 0) ws.getRange(rowNo, updatedCol + 1).setValue(formatISTNow_());
+      changed++;
+    } else if (lastCol >= 0 && latest[id]) {
+      ws.getRange(i + 1, lastCol + 1).setValue(Utilities.formatDate(last, TIMEZONE_IST, 'dd-MM-yy'));
+    }
+  }
+  return changed;
+}
+
+function runDailyThreeDayAbsenceCheck() {
+  var ss = getOrCreateDatabaseSpreadsheet_();
+  evaluateThreeDayAbsenceBlocks_(ss);
+}
+
+function installDailyAutoBlockTrigger() {
+  var triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(function(t) {
+    if (t.getHandlerFunction() === 'runDailyThreeDayAbsenceCheck') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('runDailyThreeDayAbsenceCheck').timeBased().everyDays(1).atHour(1).create();
+  runDailyThreeDayAbsenceCheck();
+  return 'Daily QR auto-block trigger installed.';
+}
+
 function getMinimalWorkers_(sheet) {
   var data = sheet.getDataRange().getValues();
   if (data.length < 2) return [];
   var h = data[0];
-  var idx = {}; h.forEach(function(x, i) { idx[String(x).trim()] = i; });
-  return data.slice(1).filter(function(r) { return r.some(function(v) { return v !== '' && v !== null; }); }).map(function(r) {
-    function c(k) { return idx[k] === undefined ? '' : r[idx[k]]; }
-    return { 'ID No': String(c('ID No') || ''), 'Pass No': String(c('Pass No') || ''),
-      'Worker Name': String(c('Worker Name') || ''), Designation: String(c('Designation') || ''),
-      'Contractor Agency': String(c('Contractor Agency') || ''),
-      'Project Location': String(c('Project Location') || ''),
-      'QR Active': String(c('QR Active') || 'ACTIVE') };
+  function idx(name) { return headerIndex_(h, name); }
+  function value(row, name) { var n = idx(name); return n < 0 ? '' : row[n]; }
+  return data.slice(1).filter(function(r) {
+    return r.some(function(v) { return v !== '' && v !== null; });
+  }).map(function(r) {
+    return {
+      'ID No': String(value(r, 'id no') || ''),
+      'Pass No': String(value(r, 'pass no') || ''),
+      'Worker Name': String(value(r, 'worker name') || ''),
+      'Designation': String(value(r, 'designation') || ''),
+      'Contractor Agency': String(value(r, 'contractor agency') || ''),
+      'Project Location': String(value(r, 'project location') || ''),
+      'QR Active': String(value(r, 'qr active') || 'ACTIVE'),
+      'Last Present Date (IST)': String(value(r, 'last present date (ist)') || ''),
+      'Auto Block Reason': String(value(r, 'auto block reason') || ''),
+      'QR Reactivated Date (IST)': String(value(r, 'QR Reactivated Date (IST)') || '')
+    };
   });
 }
 
@@ -3076,14 +3204,21 @@ function getOrCreateSheet_(ss, name, headers) {
   } else if (sheet.getLastRow() === 0) {
     sheet.appendRow(headers); sheet.setFrozenRows(1);
   }
+  var existingHeaders = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
+  headers.forEach(function(requiredHeader) {
+    if (headerIndex_(existingHeaders, requiredHeader) < 0 && existingHeaders.indexOf(requiredHeader) < 0) {
+      sheet.getRange(1, sheet.getLastColumn() + 1).setValue(requiredHeader);
+      existingHeaders.push(requiredHeader);
+    }
+  });
   return sheet;
 }
 function upsertWorkerRow_(sheet, w) {
   if (!w || !w.idNo) throw new Error('Worker ID is required.');
   var data = sheet.getDataRange().getValues();
   var headers = data[0].map(function(h) { return String(h).trim(); });
-  var idCol = headers.indexOf('ID No');
-  if (idCol < 0) throw new Error('Workers sheet is missing the ID No column.');
+  var idCol = headerIndex_(headers, 'id no');
+  if (idCol < 0) throw new Error('Workers sheet is missing the ID No / Worker ID column.');
   var existingRow = 0;
   for (var i = 1; i < data.length; i++) {
     if (normalizeId_(data[i][idCol]) === normalizeId_(w.idNo)) { existingRow = i + 1; break; }
@@ -3099,9 +3234,22 @@ function upsertWorkerRow_(sheet, w) {
     'Issue Date': w.issueDate || '', 'Validity': w.validityUpTo || '',
     'EOHS Date': w.eohsInductedOn || '', 'Photo URL': w.photo || '',
     'QR Active': w.active === false ? 'DEACTIVATED' : 'ACTIVE',
+    'Auto Block Reason': w.active === false ? '' : '',
+    'QR Status Updated At (IST)': formatISTNow_(),
+    'QR Reactivated Date (IST)': w.active === false ? '' : Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yy'),
     'Updated At': formatISTNow_(), 'Updated At (IST)': formatISTNow_()
   };
-  headers.forEach(function(h, col) { if (Object.prototype.hasOwnProperty.call(values, h)) row[col] = values[h]; });
+  Object.keys(values).forEach(function(key) {
+    var col = headerIndex_(headers, key);
+    if (col >= 0) row[col] = values[key];
+    else { var exact = headers.indexOf(key); if (exact >= 0) row[exact] = values[key]; }
+  });
+  if (w.active !== false) {
+    var autoReasonCol = headers.indexOf('Auto Block Reason');
+    if (autoReasonCol >= 0) row[autoReasonCol] = '';
+    var lastPresentCol = headers.indexOf('Last Present Date (IST)');
+    if (lastPresentCol >= 0 && !row[lastPresentCol]) row[lastPresentCol] = '';
+  }
   if (existingRow) sheet.getRange(existingRow, 1, 1, headers.length).setValues([row]);
   else sheet.appendRow(row);
 }
