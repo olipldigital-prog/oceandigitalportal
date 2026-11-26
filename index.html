@@ -1055,6 +1055,7 @@
         class="block w-full h-auto object-contain" style="max-height:${compact ? '82px' : '118px'}" />`;
     }
 
+    
     function generateDefaultAvatarSVG(initials, bgHex = '#1e40af') {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="190" viewBox="0 0 160 190">
         <rect width="160" height="190" fill="${bgHex}"/>
@@ -1064,7 +1065,7 @@
       </svg>`;
       return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
     }
-    
+
 
     /* -----------------------------------------------------------------------
        2. IST LIVE DATE & 24-HR TIME UTILITIES (DD-MM-YY & HH:MM:SS IST)
