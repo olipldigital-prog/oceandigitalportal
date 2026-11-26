@@ -688,6 +688,11 @@
               <h3 class="font-extrabold text-base text-blue-950">Registered Workers & QR-Code Activation Control</h3>
               <span class="text-xs font-semibold text-slate-500">Toggle QR Status to immediately allow or block gate scanning</span>
             </div>
+            <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950 leading-relaxed">
+              <strong>Automatic inactivity rule:</strong> If a worker has no attendance for 3 consecutive calendar days, the system automatically deactivates the QR ID. The daily check runs around 1:00 AM IST after those 3 full missed days. The QR will be rejected at the gate until an Admin reactivates it.
+              <br><strong>Admin reactivation procedure:</strong> Open this Worker Directory, search the worker by ID/name, confirm the worker is approved to return, then click the red <strong>AUTO-BLOCKED (Admin Enable)</strong> status button once. Confirm it changes to <strong>ACTIVE</strong>. The admin action syncs the status to the Google Sheets database; ask the worker to scan again.
+              <br><strong>QR scan troubleshooting:</strong> If the portal says “Unknown QR / ID Code”, confirm the exact ID No printed on the card exists in the Google Sheets <strong>Workers</strong> tab. Register/sync the worker or use <strong>Settings → Sync Now</strong>. Reprint the card if its QR does not encode the same ID No.
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <input type="text" id="worker-search" oninput="renderWorkersDirectory()" placeholder="Search Name, ID No, Vendor..."
                 class="rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-blue-600" />
@@ -1682,20 +1687,24 @@
       try {
         const obj = JSON.parse(value);
         if (obj && typeof obj === 'object') {
-          value = obj.idNo || obj.id || obj.workerId || obj.workerID || obj.code || obj.qr || value;
+          value = obj.idNo || obj.id_no || obj.id || obj.workerId || obj.workerID ||
+            obj.worker_id || obj.employeeId || obj.employee_id || obj.code || obj.qr || obj.cardId || value;
         }
       } catch (_) {}
       try {
         if (/^https?:\/\//i.test(value)) {
           const u = new URL(value);
-          value = u.searchParams.get('idNo') || u.searchParams.get('id') || u.searchParams.get('workerId') || u.searchParams.get('code') || value;
+          value = u.searchParams.get('idNo') || u.searchParams.get('id_no') ||
+            u.searchParams.get('id') || u.searchParams.get('workerId') ||
+            u.searchParams.get('worker_id') || u.searchParams.get('employeeId') ||
+            u.searchParams.get('code') || u.searchParams.get('qr') || value;
         }
       } catch (_) {}
       value = String(value).trim();
-      // Accept labels such as "ID NO: TEST-1122" while retaining the actual key.
-      const labeled = value.match(/(?:ID\s*NO|WORKER\s*ID|EMPLOYEE\s*ID|CODE)\s*[:=#-]\s*([A-Z0-9][A-Z0-9_-]*)/i);
+      // Accept both "ID NO: TEST-1254" and "ID NO TEST-1254".
+      const labeled = value.match(/(?:ID\s*NO|WORKER\s*ID|EMPLOYEE\s*ID|CODE)\s*(?:[:=#-]\s*|\s+)([A-Z0-9][A-Z0-9_-]*)/i);
       if (labeled) value = labeled[1];
-      return normalizeWorkerId(value);
+      return normalizeWorkerId(value).replace(/[\s\u200B-\u200D\uFEFF]+/g, '');
     }
 
     function mapCloudWorker(row) {
@@ -2994,18 +3003,19 @@ function extractWorkerId_(raw) {
   if (!value) return '';
   try {
     var obj = JSON.parse(value);
-    if (obj && typeof obj === 'object') value = obj.idNo || obj.id || obj.workerId || obj.workerID || obj.code || obj.qr || value;
+    if (obj && typeof obj === 'object') value = obj.idNo || obj.id_no || obj.id ||
+      obj.workerId || obj.workerID || obj.worker_id || obj.employeeId ||
+      obj.employee_id || obj.code || obj.qr || obj.cardId || value;
   } catch (ignore) {}
   if (/^https?:\/\//i.test(value)) {
     try {
-      var url = value.match(/[?&](?:idNo|id|workerId|workerID|employeeId|code|qr)=([^&#]+)/i);
+      var url = value.match(/[?&](?:idNo|id_no|id|workerId|workerID|worker_id|employeeId|employee_id|code|qr)=([^&#]+)/i);
       if (url) value = decodeURIComponent(url[1].replace(/\+/g, ' '));
     } catch (ignore2) {}
   }
-  var labeled = value.match(/(?:ID\s*NO|WORKER\s*ID|EMPLOYEE\s*ID|CODE)\s*[:=#-]\s*([A-Z0-9][A-Z0-9_-]*)/i);
+  var labeled = value.match(/(?:ID\s*NO|WORKER\s*ID|EMPLOYEE\s*ID|CODE)\s*(?:[:=#-]\s*|\s+)([A-Z0-9][A-Z0-9_-]*)/i);
   if (labeled) value = labeled[1];
   value = value.replace(/[\s\u200B-\u200D\uFEFF]+/g, '').toUpperCase();
-  // Avoid accidentally treating arbitrary QR URLs or long text as a worker number.
   return /^[A-Z0-9][A-Z0-9_-]{1,39}$/.test(value) ? value : '';
 }
 
@@ -3120,6 +3130,7 @@ function evaluateThreeDayAbsenceBlocks_(ss) {
     if (reactivated && (!last || reactivated.getTime() > last.getTime())) last = reactivated;
     if (!last) continue;
     var daysAbsent = Math.floor((today.getTime() - last.getTime()) / 86400000);
+    // Daily trigger runs around 01:00 IST; >=4 means 3 full calendar dates were missed.
     if (daysAbsent >= 4) {
       var rowNo = i + 1;
       ws.getRange(rowNo, activeCol + 1).setValue('DEACTIVATED');
@@ -3225,6 +3236,14 @@ function upsertWorkerRow_(sheet, w) {
   }
   // Start from the existing row so legacy columns (photo, managers, masked Aadhaar) remain intact.
   var row = existingRow ? data[existingRow - 1].slice() : headers.map(function() { return ''; });
+  var activeColBefore = headerIndex_(headers, 'qr active');
+  var wasInactive = existingRow && activeColBefore >= 0 &&
+    ['DEACTIVATED','INACTIVE','FALSE','0','BLOCKED'].indexOf(String(row[activeColBefore] || '').toUpperCase()) >= 0;
+  var reactivatedNow = w.active !== false && !!wasInactive;
+  var oldReactDateCol = headers.indexOf('QR Reactivated Date (IST)');
+  var oldReactDate = oldReactDateCol >= 0 ? row[oldReactDateCol] : '';
+  var oldReasonCol = headerIndex_(headers, 'auto block reason');
+  var oldReason = oldReasonCol >= 0 ? row[oldReasonCol] : '';
   var values = {
     'ID No': w.idNo, 'Pass No': w.passNo || '', 'Worker Name': w.name || '',
     'Designation': w.designation || '', 'Contractor Agency': w.vendor || '',
@@ -3234,9 +3253,9 @@ function upsertWorkerRow_(sheet, w) {
     'Issue Date': w.issueDate || '', 'Validity': w.validityUpTo || '',
     'EOHS Date': w.eohsInductedOn || '', 'Photo URL': w.photo || '',
     'QR Active': w.active === false ? 'DEACTIVATED' : 'ACTIVE',
-    'Auto Block Reason': w.active === false ? '' : '',
+    'Auto Block Reason': w.active === false ? '' : (reactivatedNow ? '' : oldReason),
     'QR Status Updated At (IST)': formatISTNow_(),
-    'QR Reactivated Date (IST)': w.active === false ? '' : Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yy'),
+    'QR Reactivated Date (IST)': reactivatedNow ? Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yy') : oldReactDate,
     'Updated At': formatISTNow_(), 'Updated At (IST)': formatISTNow_()
   };
   Object.keys(values).forEach(function(key) {
@@ -3376,7 +3395,15 @@ function errorText_(err) { return err && err.message ? err.message : String(err 
 
     function pushToCloudIfEnabled(type, data) {
       const cfg = getCloudConfig();
-      if (!cfg.autoSync || !cfg.webAppUrl) return;
+      // Worker creation/status is essential to gate scanning, so always sync it.
+      // The checkbox controls optional bulk/attendance syncing only.
+      const mustSyncForGate = type === 'worker' || type === 'worker_status';
+      if (!cfg.webAppUrl || (!cfg.autoSync && !mustSyncForGate)) {
+        if (mustSyncForGate && !cfg.webAppUrl) {
+          showToast('Worker saved on this device only. Configure the Google Apps Script URL and run Sync Now before gate scanning.', 'warning');
+        }
+        return;
+      }
 
       fetch(cfg.webAppUrl, {
         method: 'POST',
