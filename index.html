@@ -1042,7 +1042,7 @@
        APPLICATION JAVASCRIPT (LOGO SVG, IST CLOCK, VOICE, QR, STORAGE, SYNC)
        ===================================================================== -->
   <script>
-    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzCrU4f2fPFiCO8Qy7_3-VrDev_OfaPjr2e4TdPzymTitDGF2h1f681aaQmkbUWu4DU/exec";
+    const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxtSlg-1hs9rXu0C3HlW7pexwix94U18_N3EOmWPkpZgVoMyoyfjDl8ipIMEulepV4I/exec";
 
     /* -----------------------------------------------------------------------
        1. CUSTOM SVG RECREATION OF OCEAN DELIVERING DREAMS LOGO
@@ -1092,7 +1092,7 @@
       };
     }
 
-    
+
     function updateAllLiveClocks() {
       const ist = getISTNowParts();
       const timeLabel = `${ist.time} IST`;
@@ -1176,6 +1176,7 @@
           secPass: 'sec123'
         }));
       }
+
 
       if (!localStorage.getItem(STORAGE_KEYS.PROJECTS)) {
         localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([
@@ -1301,6 +1302,7 @@
         localStorage.setItem(STORAGE_KEYS.WORKERS, JSON.stringify(sampleWorkers));
       }
 
+      
       if (!localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) {
         const sampleLogs = [
           {
