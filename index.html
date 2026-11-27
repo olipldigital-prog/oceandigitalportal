@@ -1188,6 +1188,7 @@
         }));
       }
 
+      
       // One-time local reset for this fresh deployment: no demo workers or attendance.
       if (localStorage.getItem('ocean_portal_fresh_data_version') !== FRESH_DATA_VERSION) {
         localStorage.setItem(STORAGE_KEYS.WORKERS, JSON.stringify([]));
