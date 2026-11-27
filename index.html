@@ -151,7 +151,7 @@
           </div>
         </div>
 
-        <!-- Live IST Clock Widget (DD-MM-YY | HH:MM:SS IST) -->
+        <!-- Live IST Clock Widget (DD-MM-YYYY | HH:MM:SS IST) -->
         <div class="bg-slate-900 text-white px-4 py-2 rounded-xl border border-blue-500/40 shadow-inner flex items-center gap-3">
           <div class="flex items-center gap-1.5">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -159,7 +159,7 @@
           </div>
           <div class="text-right">
             <div id="login-clock-time" class="text-lg sm:text-xl font-mono font-extrabold tracking-wider text-amber-300 leading-none">00:00:00 IST</div>
-            <div id="login-clock-date" class="text-xs font-mono font-semibold text-blue-200 mt-0.5">DD-MM-YY</div>
+            <div id="login-clock-date" class="text-xs font-mono font-semibold text-blue-200 mt-0.5">DD-MM-YYYY</div>
           </div>
         </div>
       </div>
@@ -302,7 +302,7 @@
           <!-- Live IST Clock -->
           <div class="bg-slate-900 text-white px-3.5 py-1.5 rounded-xl border border-blue-500/30 text-right">
             <div id="admin-clock-time" class="text-sm sm:text-base font-mono font-extrabold text-amber-300 leading-none">00:00:00 IST</div>
-            <div id="admin-clock-date" class="text-[11px] font-mono text-blue-200 mt-0.5">DD-MM-YY</div>
+            <div id="admin-clock-date" class="text-[11px] font-mono text-blue-200 mt-0.5">DD-MM-YYYY</div>
           </div>
 
           <button onclick="logout()" class="px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow transition">
@@ -392,7 +392,7 @@
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
               <span class="text-xs font-bold text-slate-500 uppercase">Today Present</span>
               <div id="kpi-today-present" class="text-2xl sm:text-3xl font-extrabold text-blue-700 mt-1">0</div>
-              <span id="kpi-today-date" class="text-[11px] text-slate-500 font-mono mt-1">DD-MM-YY</span>
+              <span id="kpi-today-date" class="text-[11px] text-slate-500 font-mono mt-1">DD-MM-YYYY</span>
             </div>
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
               <span class="text-xs font-bold text-slate-500 uppercase">Currently On-Site</span>
@@ -484,8 +484,8 @@
                 class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-blue-600" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Filter by Date (DD-MM-YY)</label>
-              <input type="text" id="reg-filter-date" oninput="renderAttendanceRegister()" placeholder="e.g. 19-11-26 or All"
+              <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Filter by Date (DD-MM-YYYY)</label>
+              <input type="text" id="reg-filter-date" oninput="renderAttendanceRegister()" placeholder="e.g. 19:11: 2026 or All"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
             <div>
@@ -603,7 +603,7 @@
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">DOB - Age - Sex *</label>
-              <input type="text" id="w-dob" required placeholder="e.g. 14-05-1994 / 32 / Male"
+              <input type="text" id="w-dob" required placeholder="e.g. 14:05: 1994 / 32 / Male"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-600" />
             </div>
 
@@ -639,20 +639,20 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Date of Issue (DD-MM-YY)</label>
-              <input type="text" id="w-issue-date" placeholder="19-11-26"
+              <label class="block text-xs font-bold text-slate-700 mb-1">Date of Issue (DD-MM-YYYY)</label>
+              <input type="text" id="w-issue-date" placeholder="27:11: 2026"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Validity Up To (DD-MM-YY)</label>
-              <input type="text" id="w-validity" placeholder="18-11-27"
+              <label class="block text-xs font-bold text-slate-700 mb-1">Validity Up To (DD-MM-YYYY)</label>
+              <input type="text" id="w-validity" placeholder="26:11: 2027"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">EOHS Inducted On (DD-MM-YY)</label>
-              <input type="text" id="w-eohs" placeholder="19-11-26"
+              <label class="block text-xs font-bold text-slate-700 mb-1">EOHS Inducted On (DD-MM-YYYY)</label>
+              <input type="text" id="w-eohs" placeholder="27:11: 2026"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
 
@@ -789,8 +789,8 @@
           <div id="rep-view-daily" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Select Date (DD-MM-YY)</label>
-                <input type="text" id="daily-rep-date" oninput="renderDailyReport()" placeholder="DD-MM-YY"
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Select Date (DD-MM-YYYY)</label>
+                <input type="text" id="daily-rep-date" oninput="renderDailyReport()" placeholder="DD-MM-YYYY"
                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono bg-white" />
               </div>
               <div>
@@ -838,8 +838,8 @@
           <div id="rep-view-monthly" class="hidden space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Month-Year Filter (MM-YY)</label>
-                <input type="text" id="monthly-rep-month" oninput="renderMonthlyReport()" placeholder="e.g. 11-26"
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Month-Year Filter (MM: YYYY)</label>
+                <input type="text" id="monthly-rep-month" oninput="renderMonthlyReport()" placeholder="e.g. 11: 2026"
                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono bg-white" />
               </div>
               <div>
@@ -889,8 +889,8 @@
                 <select id="indiv-rep-worker" onchange="renderIndividualReport()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold bg-white"></select>
               </div>
               <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Filter Month (MM-YY) or Date</label>
-                <input type="text" id="indiv-rep-period" oninput="renderIndividualReport()" placeholder="e.g. 11-26 or 19-11-26"
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Filter Month (MM: YYYY) or Date</label>
+                <input type="text" id="indiv-rep-period" oninput="renderIndividualReport()" placeholder="e.g. 11: 2026 or 19:11: 2026"
                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono bg-white" />
               </div>
               <div>
@@ -908,7 +908,7 @@
                 <thead>
                   <tr class="bg-blue-950 text-white text-[11px] uppercase">
                     <th class="py-2.5 px-3">S.No</th>
-                    <th class="py-2.5 px-3">Date (DD-MM-YY)</th>
+                    <th class="py-2.5 px-3">Date (DD-MM-YYYY)</th>
                     <th class="py-2.5 px-3">Project Location</th>
                     <th class="py-2.5 px-3">IN-Time (IST)</th>
                     <th class="py-2.5 px-3">OUT-Time (IST)</th>
@@ -1067,8 +1067,9 @@
     }
 
 
+    
     /* -----------------------------------------------------------------------
-       2. IST LIVE DATE & 24-HR TIME UTILITIES (DD-MM-YY & HH:MM:SS IST)
+       2. IST LIVE DATE & 24-HR TIME UTILITIES (DD-MM-YYYY & HH:MM:SS IST)
        ----------------------------------------------------------------------- */
     function getISTNowParts() {
       const now = new Date();
@@ -1076,18 +1077,19 @@
         timeZone: 'Asia/Kolkata',
         day: '2-digit',
         month: '2-digit',
-        year: '2-digit',
+        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         hour12: false
       });
       const [datePart, timePart] = istString.split(', ');
-      const formattedDate = datePart.replace(/\//g, '-'); // DD-MM-YY
+      const dateParts = datePart.split('/');
+      const formattedDate = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`; // DD-MM-YYYY
       return {
         date: formattedDate,
         time: timePart, // HH:MM:SS (24-hr)
-        monthYear: formattedDate.slice(3), // MM-YY
+        monthYear: `${dateParts[1]}-${dateParts[2]}`, // MM-YYYY
         epochMs: now.getTime()
       };
     }
@@ -1167,189 +1169,33 @@
 
     function initializeDefaultData() {
       const ist = getISTNowParts();
+      const FRESH_DATA_VERSION = '2026-11-27-fresh-db-v1';
 
       if (!localStorage.getItem(STORAGE_KEYS.CREDS)) {
         localStorage.setItem(STORAGE_KEYS.CREDS, JSON.stringify({
-          adminId: 'admin',
-          adminPass: 'ocean123',
-          secId: 'security',
-          secPass: 'sec123'
+          adminId: 'admin', adminPass: 'ocean123', secId: 'security', secPass: 'sec123'
         }));
       }
-
-
       if (!localStorage.getItem(STORAGE_KEYS.PROJECTS)) {
         localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([
-          'Chennai - Guindy HQ (TN)',
-          'Sriperumbudur Industrial Park (TN)',
-          'Coimbatore IT SEZ (TN)',
-          'Bengaluru Whitefield Data Centre (KA)',
-          'Hyderabad HITEC Fitout (TS)'
+          'Kochi - EY Global Delivery Services (Kerala)'
         ]));
       }
-
       const existingCloud = JSON.parse(localStorage.getItem(STORAGE_KEYS.CLOUD) || 'null');
       if (!existingCloud || !existingCloud.webAppUrl) {
         localStorage.setItem(STORAGE_KEYS.CLOUD, JSON.stringify({
-          webAppUrl: DEFAULT_BACKEND_URL,
-          autoSync: true
+          webAppUrl: DEFAULT_BACKEND_URL, autoSync: true
         }));
       }
 
-      if (!localStorage.getItem(STORAGE_KEYS.WORKERS)) {
-        const sampleWorkers = [
-          {
-            idNo: 'OLIPL-1001',
-            passNo: 'PASS-TN-101',
-            name: 'Senthil Kumar R',
-            designation: 'Senior Civil Supervisor',
-            vendor: 'Sri Murugan Infra Tech',
-            dobAgeSex: '12-04-1988 / 38 / Male',
-            bloodGroup: 'O+ve',
-            aadharNo: '4829-7712-9014',
-            projectLocation: 'Chennai - Guindy HQ (TN)',
-            projectAddress: 'Ocean One, MF-1, Industrial Estate, Guindy, Chennai - 600032',
-            issueDate: '01-11-26',
-            validityUpTo: '31-10-27',
-            eohsInductedOn: '01-11-26',
-            emergencyContact: '+91 98401 22334',
-            projectManager: 'Er. R. Venkatesh',
-            safetyManager: 'Mr. S. Prakash',
-            active: true,
-            photo: generateDefaultAvatarSVG('SK', '#1e3a8a')
-          },
-          {
-            idNo: 'OLIPL-1002',
-            passNo: 'PASS-TN-102',
-            name: 'Aravindhan M',
-            designation: 'Electrical & MEP Technician',
-            vendor: 'Kaveri Electro Engineering',
-            dobAgeSex: '23-08-1993 / 33 / Male',
-            bloodGroup: 'B+ve',
-            aadharNo: '6190-3341-8821',
-            projectLocation: 'Sriperumbudur Industrial Park (TN)',
-            projectAddress: 'Plot B-14, SIPCOT Phase II, Sriperumbudur, Kanchipuram - 602105',
-            issueDate: '03-11-26',
-            validityUpTo: '02-11-27',
-            eohsInductedOn: '03-11-26',
-            emergencyContact: '+91 94442 55667',
-            projectManager: 'Er. K. Balaji',
-            safetyManager: 'Mr. D. Karthik',
-            active: true,
-            photo: generateDefaultAvatarSVG('AM', '#0f766e')
-          },
-          {
-            idNo: 'OLIPL-1003',
-            passNo: 'PASS-TN-103',
-            name: 'Priya Dharshini V',
-            designation: 'EHS Safety Steward',
-            vendor: 'Ocean Direct Payroll',
-            dobAgeSex: '09-02-1996 / 30 / Female',
-            bloodGroup: 'A+ve',
-            aadharNo: '7741-9023-1154',
-            projectLocation: 'Coimbatore IT SEZ (TN)',
-            projectAddress: 'TIDEL Park Annex, Peelamedu, Coimbatore - 641014',
-            issueDate: '05-11-26',
-            validityUpTo: '04-11-27',
-            eohsInductedOn: '05-11-26',
-            emergencyContact: '+91 97890 44112',
-            projectManager: 'Er. M. Sridhar',
-            safetyManager: 'Ms. L. Anitha',
-            active: true,
-            photo: generateDefaultAvatarSVG('PD', '#4338ca')
-          },
-          {
-            idNo: 'OLIPL-1004',
-            passNo: 'PASS-KA-201',
-            name: 'Ramesh Babu K',
-            designation: 'HVAC & Ducting Foreman',
-            vendor: 'Southern Aircon Systems',
-            dobAgeSex: '17-11-1990 / 36 / Male',
-            bloodGroup: 'AB+ve',
-            aadharNo: '5512-6490-3378',
-            projectLocation: 'Bengaluru Whitefield Data Centre (KA)',
-            projectAddress: 'EPIP Zone, Whitefield, Bengaluru, Karnataka - 560066',
-            issueDate: '07-11-26',
-            validityUpTo: '06-11-27',
-            eohsInductedOn: '07-11-26',
-            emergencyContact: '+91 99001 77889',
-            projectManager: 'Er. N. Raghavan',
-            safetyManager: 'Mr. P. Suresh',
-            active: true,
-            photo: generateDefaultAvatarSVG('RB', '#b45309')
-          },
-          {
-            idNo: 'OLIPL-1005',
-            passNo: 'PASS-TS-301',
-            name: 'Mohammed Irfan',
-            designation: 'Interior Fitout Carpenter',
-            vendor: 'Deccan Turnkey Interiors',
-            dobAgeSex: '30-06-1995 / 31 / Male',
-            bloodGroup: 'O-ve',
-            aadharNo: '8823-1045-6690',
-            projectLocation: 'Hyderabad HITEC Fitout (TS)',
-            projectAddress: 'Madhapur, HITEC City, Hyderabad, Telangana - 500081',
-            issueDate: '10-11-26',
-            validityUpTo: '09-11-27',
-            eohsInductedOn: '10-11-26',
-            emergencyContact: '+91 98490 66554',
-            projectManager: 'Er. V. Prasad',
-            safetyManager: 'Mr. A. Rahman',
-            active: false,
-            photo: generateDefaultAvatarSVG('MI', '#9f1239')
-          }
-        ];
-        localStorage.setItem(STORAGE_KEYS.WORKERS, JSON.stringify(sampleWorkers));
+      // One-time local reset for this fresh deployment: no demo workers or attendance.
+      if (localStorage.getItem('ocean_portal_fresh_data_version') !== FRESH_DATA_VERSION) {
+        localStorage.setItem(STORAGE_KEYS.WORKERS, JSON.stringify([]));
+        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify([]));
+        localStorage.setItem('ocean_portal_fresh_data_version', FRESH_DATA_VERSION);
       }
-
-
-      if (!localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) {
-        const sampleLogs = [
-          {
-            uid: 'LOG-1',
-            date: ist.date,
-            idNo: 'OLIPL-1001',
-            workerName: 'Senthil Kumar R',
-            designation: 'Senior Civil Supervisor',
-            vendor: 'Sri Murugan Infra Tech',
-            inTime: '08:30:15',
-            outTime: '18:05:40',
-            totalHrs: '09:35:25',
-            projectLocation: 'Chennai - Guindy HQ (TN)',
-            overtime: '01:35:25',
-            verifiedBy: 'Security Gate QR'
-          },
-          {
-            uid: 'LOG-2',
-            date: ist.date,
-            idNo: 'OLIPL-1002',
-            workerName: 'Aravindhan M',
-            designation: 'Electrical & MEP Technician',
-            vendor: 'Kaveri Electro Engineering',
-            inTime: '08:45:00',
-            outTime: '',
-            totalHrs: 'On-Site',
-            projectLocation: 'Sriperumbudur Industrial Park (TN)',
-            overtime: '00:00:00',
-            verifiedBy: 'Security Gate QR'
-          },
-          {
-            uid: 'LOG-3',
-            date: ist.date,
-            idNo: 'OLIPL-1003',
-            workerName: 'Priya Dharshini V',
-            designation: 'EHS Safety Steward',
-            vendor: 'Ocean Direct Payroll',
-            inTime: '09:00:12',
-            outTime: '',
-            totalHrs: 'On-Site',
-            projectLocation: 'Coimbatore IT SEZ (TN)',
-            overtime: '00:00:00',
-            verifiedBy: 'Admin Console'
-          }
-        ];
-        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(sampleLogs));
-      }
+      if (!localStorage.getItem(STORAGE_KEYS.WORKERS)) localStorage.setItem(STORAGE_KEYS.WORKERS, JSON.stringify([]));
+      if (!localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify([]));
     }
 
     function getCreds() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.CREDS)); }
@@ -2834,7 +2680,20 @@ function doGet(e) {
     var callback = String(p.callback || '');
     var result;
 
-    if (action === 'workers') {
+    if (action === 'diagnostics') {
+      var diagnosticSheet = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+      var diagnosticData = diagnosticSheet.getDataRange().getValues();
+      result = {
+        status: 'success',
+        spreadsheetName: ss.getName(),
+        spreadsheetId: ss.getId(),
+        spreadsheetUrl: ss.getUrl(),
+        workersSheetFound: !!ss.getSheetByName('Workers'),
+        workersCount: Math.max(0, diagnosticData.length - 1),
+        workerHeaders: diagnosticData.length ? diagnosticData[0] : [],
+        timestampIST: formatISTNow_()
+      };
+    } else if (action === 'workers') {
       evaluateThreeDayAbsenceBlocks_(ss);
       var ws = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
       result = { status: 'success', workers: getMinimalWorkers_(ws), timestampIST: formatISTNow_() };
@@ -2905,16 +2764,20 @@ function processServerPunch_(ss, rawQr, mode) {
 
     // Use one server-side Date object for the authoritative date, time and audit stamp.
     var now = new Date();
-    var today = Utilities.formatDate(now, TIMEZONE_IST, 'dd-MM-yy');
+    var today = Utilities.formatDate(now, TIMEZONE_IST, 'dd-MM-yyyy');
     var time = Utilities.formatDate(now, TIMEZONE_IST, 'HH:mm:ss');
-    var recordedAt = Utilities.formatDate(now, TIMEZONE_IST, "dd-MM-yy HH:mm:ss 'IST'");
+    var recordedAt = Utilities.formatDate(now, TIMEZONE_IST, "dd-MM-yyyy HH:mm:ss 'IST'");
     var values = attendanceSheet.getDataRange().getValues();
     var openRow = 0;
 
     for (var i = 1; i < values.length; i++) {
-      var rowDate = values[i][1] instanceof Date
-        ? Utilities.formatDate(values[i][1], TIMEZONE_IST, 'dd-MM-yy')
-        : String(values[i][1] || '').trim();
+      var rowDateValue = values[i][1];
+      var rowDate = rowDateValue instanceof Date
+        ? Utilities.formatDate(rowDateValue, TIMEZONE_IST, 'dd-MM-yyyy')
+        : (function(v) {
+            var parsed = parseISTDateValue_(v);
+            return parsed ? Utilities.formatDate(parsed, TIMEZONE_IST, 'dd-MM-yyyy') : String(v || '').trim();
+          })(rowDateValue);
       var sameWorker = normalizeId_(values[i][2]) === normalizeId_(id);
       var out = String(values[i][8] || '').trim();
       if (sameWorker && rowDate === today && (!out || out === 'On-Site')) {
@@ -3007,10 +2870,12 @@ function headerIndex_(headers, wanted) {
     'last present date (ist)': ['last present date (ist)','last present date'],
     'auto block reason': ['auto block reason','block reason']
   };
+  function key(v) { return String(v || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
   var target = String(wanted).toLowerCase().trim();
-  var choices = aliases[target] || [target];
+  var choices = (aliases[target] || [target]).map(key);
+  choices.push(key(target));
   for (var i = 0; i < headers.length; i++) {
-    var h = String(headers[i] || '').toLowerCase().trim();
+    var h = key(headers[i]);
     if (choices.indexOf(h) >= 0) return i;
   }
   return -1;
@@ -3050,7 +2915,7 @@ function parseISTDateValue_(value) {
     return new Date(Utilities.formatDate(value, TIMEZONE_IST, 'yyyy-MM-dd') + 'T00:00:00+05:30');
   }
   var s = String(value || '').trim();
-  var m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2}|\d{4})$/);
+  var m = s.match(/^(\d{1,2})[-:](\d{1,2})[-:]\s*(\d{2}|\d{4})$/);
   if (m) {
     var y = Number(m[3]); if (y < 100) y += 2000;
     return new Date(y, Number(m[2]) - 1, Number(m[1]));
@@ -3091,7 +2956,7 @@ function evaluateThreeDayAbsenceBlocks_(ss) {
     }
   }
 
-  var todayText = Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yy');
+  var todayText = Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yyyy');
   var today = parseISTDateValue_(todayText);
   var changed = 0;
   for (var i = 1; i < workers.length; i++) {
@@ -3108,12 +2973,12 @@ function evaluateThreeDayAbsenceBlocks_(ss) {
     if (daysAbsent >= 4) {
       var rowNo = i + 1;
       ws.getRange(rowNo, activeCol + 1).setValue('DEACTIVATED');
-      if (lastCol >= 0) ws.getRange(rowNo, lastCol + 1).setValue(Utilities.formatDate(last, TIMEZONE_IST, 'dd-MM-yy'));
+      if (lastCol >= 0) ws.getRange(rowNo, lastCol + 1).setValue(Utilities.formatDate(last, TIMEZONE_IST, 'dd-MM-yyyy'));
       if (reasonCol >= 0) ws.getRange(rowNo, reasonCol + 1).setValue('AUTO_BLOCKED: 3 consecutive calendar days absent');
       if (updatedCol >= 0) ws.getRange(rowNo, updatedCol + 1).setValue(formatISTNow_());
       changed++;
     } else if (lastCol >= 0 && latest[id]) {
-      ws.getRange(i + 1, lastCol + 1).setValue(Utilities.formatDate(last, TIMEZONE_IST, 'dd-MM-yy'));
+      ws.getRange(i + 1, lastCol + 1).setValue(Utilities.formatDate(last, TIMEZONE_IST, 'dd-MM-yyyy'));
     }
   }
   return changed;
@@ -3168,12 +3033,31 @@ function response_(obj, callback) {
 function jsonResponse_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
+/**
+ * Run once in a standalone Apps Script project if it is not bound to the
+ * correct Google Sheet. Pass the spreadsheet ID from its URL (between /d/ and /edit).
+ */
+function setDatabaseSpreadsheetId(spreadsheetId) {
+  var id = String(spreadsheetId || '').trim();
+  if (!id) throw new Error('Please provide the Google Spreadsheet ID.');
+  var ss = SpreadsheetApp.openById(id);
+  PropertiesService.getScriptProperties().setProperty('DB_ID', ss.getId());
+  getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+  getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS);
+  Logger.log('OCEAN database connected: ' + ss.getName() + ' | ' + ss.getUrl());
+  return ss.getUrl();
+}
+
 function getOrCreateDatabaseSpreadsheet_() {
-  // Reuse the spreadsheet ID already saved by the earlier OCEAN Apps Script backend.
+  // A container-bound script must use its bound spreadsheet before any stale saved ID.
+  var active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) {
+    PropertiesService.getScriptProperties().setProperty('DB_ID', active.getId());
+    return active;
+  }
+  // Standalone script: use the explicitly configured database ID.
   var savedId = PropertiesService.getScriptProperties().getProperty('DB_ID');
   if (savedId) return SpreadsheetApp.openById(savedId);
-  var active = SpreadsheetApp.getActiveSpreadsheet();
-  if (active) { PropertiesService.getScriptProperties().setProperty('DB_ID', active.getId()); return active; }
   var files = DriveApp.getFilesByName('OCEAN_Attendance_Portal_DB');
   var ss = files.hasNext() ? SpreadsheetApp.open(files.next()) : SpreadsheetApp.create('OCEAN_Attendance_Portal_DB');
   PropertiesService.getScriptProperties().setProperty('DB_ID', ss.getId());
@@ -3229,7 +3113,7 @@ function upsertWorkerRow_(sheet, w) {
     'QR Active': w.active === false ? 'DEACTIVATED' : 'ACTIVE',
     'Auto Block Reason': w.active === false ? '' : (reactivatedNow ? '' : oldReason),
     'QR Status Updated At (IST)': formatISTNow_(),
-    'QR Reactivated Date (IST)': reactivatedNow ? Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yy') : oldReactDate,
+    'QR Reactivated Date (IST)': reactivatedNow ? Utilities.formatDate(new Date(), TIMEZONE_IST, 'dd-MM-yyyy') : oldReactDate,
     'Updated At': formatISTNow_(), 'Updated At (IST)': formatISTNow_()
   };
   Object.keys(values).forEach(function(key) {
@@ -3285,7 +3169,7 @@ function normalizeSheetTime_(v) {
   return s;
 }
 function maskAadhaar_(value) { var digits = String(value || '').replace(/\D/g, ''); return digits.length >= 4 ? 'XXXX-XXXX-' + digits.slice(-4) : String(value || ''); }
-function formatISTNow_() { return Utilities.formatDate(new Date(), TIMEZONE_IST, "dd-MM-yy HH:mm:ss 'IST'"); }
+function formatISTNow_() { return Utilities.formatDate(new Date(), TIMEZONE_IST, "dd-MM-yyyy HH:mm:ss 'IST'"); }
 function errorText_(err) { return err && err.message ? err.message : String(err || 'Unknown error'); }
 `;
 
@@ -3382,12 +3266,12 @@ function errorText_(err) { return err && err.message ? err.message : String(err 
       fetch(cfg.webAppUrl, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ type, data })
       }).catch(err => console.warn('Cloud sync deferred:', err));
     }
 
-    function syncAllToCloud() {
+    async function syncAllToCloud() {
       const cfg = getCloudConfig();
       if (!cfg.webAppUrl) {
         showToast('Please paste your Google Apps Script Web App URL first.', 'warning');
@@ -3395,21 +3279,30 @@ function errorText_(err) { return err && err.message ? err.message : String(err 
       }
       const workers = getWorkers();
       const logs = getAttendance();
-      workers.forEach(w => {
-        fetch(cfg.webAppUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ type: 'worker', data: w })
-        });
-      });
-      logs.forEach(l => {
-        fetch(cfg.webAppUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ type: 'attendance', data: l })
-        });
-      });
-      showToast(`Dispatched ${workers.length} workers & ${logs.length} logs to Google Sheets Cloud!`, 'success');
+      try {
+        // Send one request at a time to avoid concurrent sheet writes.
+        // text/plain is CORS-safelisted and Apps Script still parses the JSON body.
+        for (const w of workers) {
+          await fetch(cfg.webAppUrl, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ type: 'worker', data: w })
+          });
+        }
+        for (const l of logs) {
+          await fetch(cfg.webAppUrl, {
+            method: 'POST', mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ type: 'attendance', data: l })
+          });
+        }
+        // JSONP read-back verifies the worker list is visible to the scanner endpoint.
+        const cloudWorkers = await fetchCloudWorkersJsonp(15000);
+        showToast(`Cloud sync check complete: ${cloudWorkers.length} workers are readable by QR scanner.`, 'success');
+      } catch (err) {
+        console.error('Cloud sync failed:', err);
+        showToast(`Cloud sync/read-back failed: ${err.message || err}`, 'error');
+      }
     }
 
     function copyAppsScriptCode() {
