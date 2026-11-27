@@ -640,19 +640,19 @@
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Date of Issue (DD-MM-YYYY)</label>
-              <input type="text" id="w-issue-date" placeholder="27:11: 2026"
+              <input type="text" id="w-issue-date" placeholder="DD-MM-YYYY"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Validity Up To (DD-MM-YYYY)</label>
-              <input type="text" id="w-validity" placeholder="26:11: 2027"
+              <input type="text" id="w-validity" placeholder="DD-MM-YYYY"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">EOHS Inducted On (DD-MM-YYYY)</label>
-              <input type="text" id="w-eohs" placeholder="27:11: 2026"
+              <input type="text" id="w-eohs" placeholder="DD-MM-YYYY"
                 class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono outline-none focus:border-blue-600" />
             </div>
 
@@ -1169,7 +1169,7 @@
 
     function initializeDefaultData() {
       const ist = getISTNowParts();
-      const FRESH_DATA_VERSION = '2026-11-27-fresh-db-v1';
+      const FRESH_DATA_VERSION = '2026-11-27-cors-fixed-fresh-v2';
 
       if (!localStorage.getItem(STORAGE_KEYS.CREDS)) {
         localStorage.setItem(STORAGE_KEYS.CREDS, JSON.stringify({
@@ -2114,8 +2114,30 @@
       document.getElementById('w-eohs').value = ist.date;
     }
 
+    function isValidDDMMYYYY(value) {
+      const s = String(value || '').trim();
+      const m = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+      if (!m) return false;
+      const day = Number(m[1]), month = Number(m[2]), year = Number(m[3]);
+      const d = new Date(year, month - 1, day);
+      return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day;
+    }
+
     function saveWorker(e) {
       e.preventDefault();
+      const dateFields = [
+        ['w-issue-date', 'Date of Issue'],
+        ['w-validity', 'Validity Up To'],
+        ['w-eohs', 'EOHS Inducted On']
+      ];
+      for (const [fieldId, label] of dateFields) {
+        const value = document.getElementById(fieldId).value.trim();
+        if (value && !isValidDDMMYYYY(value)) {
+          showToast(`${label} must use DD-MM-YYYY (example: 27-11-2026).`, 'error');
+          document.getElementById(fieldId).focus();
+          return;
+        }
+      }
       const idNo = document.getElementById('w-idno').value.trim().toUpperCase();
       const editKey = document.getElementById('w-edit-mode').value;
       const name = document.getElementById('w-name').value.trim();
@@ -2135,7 +2157,7 @@
         projectLocation: document.getElementById('w-project').value,
         projectAddress: document.getElementById('w-project-addr').value.trim(),
         issueDate: document.getElementById('w-issue-date').value.trim() || getISTNowParts().date,
-        validityUpTo: document.getElementById('w-validity').value.trim() || '31-12-27',
+        validityUpTo: document.getElementById('w-validity').value.trim() || '31-12-2027',
         eohsInductedOn: document.getElementById('w-eohs').value.trim() || getISTNowParts().date,
         emergencyContact: document.getElementById('w-emergency').value.trim() || '+91 44 2250 1100',
         projectManager: document.getElementById('w-pm').value.trim() || 'Er. R. Venkatesh',
@@ -2728,8 +2750,13 @@ function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
-    if (!e || !e.postData || !e.postData.contents) throw new Error('Empty POST payload');
-    var payload = JSON.parse(e.postData.contents);
+    // The portal submits through a hidden cross-origin form/iframe so the
+    // browser does not block Apps Script's redirect with a CORS fetch error.
+    // Accept the JSON in a form field as well as a raw JSON POST body.
+    var rawPayload = (e && e.parameter && e.parameter.payload) ||
+      (e && e.postData && e.postData.contents) || '';
+    if (!rawPayload) throw new Error('Empty POST payload');
+    var payload = JSON.parse(rawPayload);
     var ss = getOrCreateDatabaseSpreadsheet_();
     if (payload.type === 'worker' || payload.type === 'worker_status') {
       upsertWorkerRow_(getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS), payload.data || {});
@@ -3048,6 +3075,44 @@ function setDatabaseSpreadsheetId(spreadsheetId) {
   return ss.getUrl();
 }
 
+/**
+ * DESTRUCTIVE ONE-TIME RESET: removes all worker registrations and attendance
+ * history while preserving the two sheet tabs, header rows, formatting and
+ * other spreadsheet tabs. Run manually from the Apps Script editor only after
+ * confirming the selected database spreadsheet is the intended one.
+ */
+function resetWorkerAndAttendanceData() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var ss = getOrCreateDatabaseSpreadsheet_();
+    var workers = getOrCreateSheet_(ss, 'Workers', WORKER_HEADERS);
+    var attendance = getOrCreateSheet_(ss, 'Attendance_Register', ATTENDANCE_HEADERS);
+    [workers, attendance].forEach(function(sheet) {
+      var lastRow = sheet.getLastRow();
+      var lastCol = sheet.getLastColumn();
+      if (lastRow > 1 && lastCol > 0) {
+        sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+      }
+      sheet.setFrozenRows(1);
+    });
+    SpreadsheetApp.flush();
+    var result = {
+      status: 'success',
+      message: 'Worker registrations and attendance history cleared. Headers and formatting preserved.',
+      spreadsheetName: ss.getName(),
+      spreadsheetUrl: ss.getUrl(),
+      workersCount: Math.max(0, workers.getLastRow() - 1),
+      attendanceCount: Math.max(0, attendance.getLastRow() - 1),
+      resetAtIST: formatISTNow_()
+    };
+    Logger.log(JSON.stringify(result));
+    return result;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function getOrCreateDatabaseSpreadsheet_() {
   // A container-bound script must use its bound spreadsheet before any stale saved ID.
   var active = SpreadsheetApp.getActiveSpreadsheet();
@@ -3170,8 +3235,7 @@ function normalizeSheetTime_(v) {
 }
 function maskAadhaar_(value) { var digits = String(value || '').replace(/\D/g, ''); return digits.length >= 4 ? 'XXXX-XXXX-' + digits.slice(-4) : String(value || ''); }
 function formatISTNow_() { return Utilities.formatDate(new Date(), TIMEZONE_IST, "dd-MM-yyyy HH:mm:ss 'IST'"); }
-function errorText_(err) { return err && err.message ? err.message : String(err || 'Unknown error'); }
-`;
+function errorText_(err) { return err && err.message ? err.message : String(err || 'Unknown error'); }`;
 
     function loadSettingsForm() {
       const creds = getCreds();
@@ -3251,24 +3315,69 @@ function errorText_(err) { return err && err.message ? err.message : String(err 
       showToast('Cloud & Google Apps Script settings saved.', 'success');
     }
 
+    // Cross-origin HTML form POST works with Apps Script's ContentService
+    // redirect without requiring browser CORS permission. The response is
+    // intentionally not read from the iframe; JSONP read-back verifies writes.
+    function postToAppsScriptForm(webAppUrl, payload, timeoutMs = 25000) {
+      return new Promise((resolve, reject) => {
+        const frameName = 'ocean_gas_post_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const iframe = document.createElement('iframe');
+        iframe.name = frameName;
+        iframe.title = 'Google Apps Script background submission';
+        iframe.style.display = 'none';
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = webAppUrl;
+        form.target = frameName;
+        form.enctype = 'application/x-www-form-urlencoded';
+        form.acceptCharset = 'UTF-8';
+        const field = document.createElement('input');
+        field.type = 'hidden';
+        field.name = 'payload';
+        field.value = JSON.stringify(payload);
+        form.appendChild(field);
+
+        let initialLoad = true;
+        let settled = false;
+        const timer = setTimeout(() => finish(new Error('Google Apps Script submission timed out. Check Web App deployment access.')), timeoutMs);
+        function finish(error) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          iframe.remove();
+          form.remove();
+          if (error) reject(error); else resolve({ submitted: true });
+        }
+        iframe.addEventListener('load', () => {
+          if (initialLoad) {
+            initialLoad = false;
+            try { form.submit(); }
+            catch (err) { finish(err); }
+          } else {
+            finish(null);
+          }
+        });
+        iframe.addEventListener('error', () => finish(new Error('Could not open the Google Apps Script submission frame.')));
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        iframe.src = 'about:blank';
+      });
+    }
+
     function pushToCloudIfEnabled(type, data) {
       const cfg = getCloudConfig();
-      // Worker creation/status is essential to gate scanning, so always sync it.
-      // The checkbox controls optional bulk/attendance syncing only.
       const mustSyncForGate = type === 'worker' || type === 'worker_status';
       if (!cfg.webAppUrl || (!cfg.autoSync && !mustSyncForGate)) {
         if (mustSyncForGate && !cfg.webAppUrl) {
-          showToast('Worker saved on this device only. Configure the Google Apps Script URL and run Sync Now before gate scanning.', 'warning');
+          showToast('Worker saved on this device only. Configure the Google Apps Script URL before gate scanning.', 'warning');
         }
         return;
       }
-
-      fetch(cfg.webAppUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ type, data })
-      }).catch(err => console.warn('Cloud sync deferred:', err));
+      postToAppsScriptForm(cfg.webAppUrl, { type, data })
+        .catch(err => {
+          console.error('Cloud write failed:', err);
+          showToast(`Google Sheets write failed: ${err.message || err}`, 'error');
+        });
     }
 
     async function syncAllToCloud() {
@@ -3277,31 +3386,25 @@ function errorText_(err) { return err && err.message ? err.message : String(err 
         showToast('Please paste your Google Apps Script Web App URL first.', 'warning');
         return;
       }
+      if (!confirm('Sync Now uploads every worker and attendance record currently stored in this browser to Google Sheets. If you want a completely fresh database, cancel and reset the database first. Continue?')) return;
       const workers = getWorkers();
       const logs = getAttendance();
       try {
-        // Send one request at a time to avoid concurrent sheet writes.
-        // text/plain is CORS-safelisted and Apps Script still parses the JSON body.
         for (const w of workers) {
-          await fetch(cfg.webAppUrl, {
-            method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ type: 'worker', data: w })
-          });
+          await postToAppsScriptForm(cfg.webAppUrl, { type: 'worker', data: w });
         }
         for (const l of logs) {
-          await fetch(cfg.webAppUrl, {
-            method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ type: 'attendance', data: l })
-          });
+          await postToAppsScriptForm(cfg.webAppUrl, { type: 'attendance', data: l });
         }
-        // JSONP read-back verifies the worker list is visible to the scanner endpoint.
         const cloudWorkers = await fetchCloudWorkersJsonp(15000);
-        showToast(`Cloud sync check complete: ${cloudWorkers.length} workers are readable by QR scanner.`, 'success');
+        const status = await callBackendJsonp({ action: 'status' }, 15000);
+        if (!status || status.status !== 'online') {
+          throw new Error((status && status.message) || 'Cloud write submitted, but status read-back failed.');
+        }
+        showToast(`Cloud connection verified. Workers readable: ${cloudWorkers.length}; cloud attendance rows: ${status.attendanceCount}.`, 'success');
       } catch (err) {
         console.error('Cloud sync failed:', err);
-        showToast(`Cloud sync/read-back failed: ${err.message || err}`, 'error');
+        showToast(`Cloud sync failed: ${err.message || err}`, 'error');
       }
     }
 
@@ -3325,6 +3428,7 @@ function errorText_(err) { return err && err.message ? err.message : String(err 
       URL.revokeObjectURL(url);
       showToast('Downloaded Code.gs Google Apps Script file!', 'success');
     }
+
 
     /* -----------------------------------------------------------------------
        14. BOOTSTRAP ON WINDOW LOAD
